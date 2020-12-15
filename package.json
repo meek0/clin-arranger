@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "cross-env NODE_ENV=development nodemon — exec babel-node ./src/index.js"
+    "dev": "cross-env NODE_ENV=development nodemon --exec babel-node ./src/index.js"
   },
   "repository": {
     "type": "git",
