@@ -1,0 +1,40 @@
+{
+  "name": "cqdg-arranger",
+  "version": "1.0.0",
+  "description": "GraphQL API",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "cross-env NODE_ENV=development nodemon — exec babel-node ./src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ferlab-Ste-Justine/cqdg-arranger.git"
+  },
+  "author": "Patrice Laplante",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Ferlab-Ste-Justine/cqdg-arranger/issues"
+  },
+  "homepage": "https://github.com/Ferlab-Ste-Justine/cqdg-arranger#readme",
+  "dependencies": {
+    "@arranger/server": "^2.9.0",
+    "@babel/core": "^7.12.10",
+    "@babel/node": "^7.12.10",
+    "@babel/preset-env": "^7.12.10",
+    "@babel/runtime": "^7.12.5",
+    "core-js": "^3.8.1",
+    "cross-env": "^7.0.3",
+    "dotenv-safe": "^8.2.0",
+    "express": "^4.17.1",
+    "passport": "^0.4.1",
+    "passport-http-bearer": "^1.0.1",
+    "regenerator-runtime": "^0.13.7",
+    "winston": "^3.3.3"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.12.10",
+    "@babel/plugin-transform-runtime": "^7.12.10",
+    "nodemon": "^2.0.6"
+  }
+}
