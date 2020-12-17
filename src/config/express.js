@@ -3,6 +3,7 @@ const { logsRequestInterceptor, authClientId, authRealm, authServerUrl, sessionS
 const logger = require('./logger');
 const bodyParser = require('body-parser');
 const Keycloak = require('keycloak-connect');
+const cors = require('cors')
 const session = require('express-session');
 const statistics = require('../controllers/statistics');
 
@@ -16,6 +17,7 @@ const memoryStore = new session.MemoryStore();
 const app = express();
 
 app.use(bodyParser.json());
+app.use(cors());
 
 app.use(session({
   secret: sessionSecret,
