@@ -2,7 +2,7 @@ const winston = require('winston');
 
 const logger = winston.createLogger({
   level: 'info',
-  format: winston.format.json(),
+  format: winston.format.prettyPrint({depth: 5, colorize: false}),
   defaultMeta: { service: 'cqdg-arranger' },
   transports: [
     //
@@ -20,7 +20,7 @@ const logger = winston.createLogger({
 //
 if (process.env.NODE_ENV !== 'production') {
   logger.add(new winston.transports.Console({
-    format: winston.format.simple(),
+    format: winston.format.prettyPrint({depth: 5, colorize: true}),
   }));
 }
 
