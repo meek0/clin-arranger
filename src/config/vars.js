@@ -17,4 +17,5 @@ module.exports = {
   sessionSecret: process.env.SESSION_SECRET,
   serviceAccountClientId: process.env.SERVICE_ACCOUNT_CLIENT_ID,
   serviceAccountClientSecret: process.env.SERVICE_ACCOUNT_CLIENT_SECRET,
+  secure: 'false' === process.env.SECURE ? false : true,
 };

@@ -1,5 +1,5 @@
 const express = require('express');
-const { logsRequestInterceptor, authClientId, authRealm, authServerUrl, sessionSecret } = require('./vars');
+const { logsRequestInterceptor, authClientId, authRealm, authServerUrl, sessionSecret, secure } = require('./vars');
 const logger = require('./logger');
 const bodyParser = require('body-parser');
 const Keycloak = require('keycloak-connect');
@@ -26,20 +26,6 @@ app.use(session({
   store: memoryStore
 }));
 
-// Initialize Keycloak middleware
-const keycloakConfig = {
-  clientId: authClientId,
-  bearerOnly: true,
-  serverUrl: authServerUrl,
-  realm: authRealm,
-};
-const keycloakOptions = {
-  store: memoryStore
-};
-
-const keycloak = new Keycloak(keycloakOptions, keycloakConfig);
-app.use(keycloak.middleware());
-
 // Request Logging Interceptor
 if(logsRequestInterceptor === 'true') {
   app.use(function(req, res, next){
@@ -48,12 +34,29 @@ if(logsRequestInterceptor === 'true') {
   });
 }
 
+if(true === secure){
+  // Initialize Keycloak middleware
+  const keycloakConfig = {
+    clientId: authClientId,
+    bearerOnly: true,
+    serverUrl: authServerUrl,
+    realm: authRealm,
+  };
+  const keycloakOptions = {
+    store: memoryStore
+  };
+
+  const keycloak = new Keycloak(keycloakOptions, keycloakConfig);
+  app.use(keycloak.middleware());
+
+  app.use('/cqdg/graphql', keycloak.protect(), function (req, res, next){
+    const token = req.kauth.grant.access_token.content;
+    const permissions = token.authorization ? token.authorization.permissions : undefined;
+    next();
+  });
+}
+
 // Routes
 app.get('/stats', statistics);
-app.use('/cqdg/graphql', keycloak.protect(), function (req, res, next){
-  const token = req.kauth.grant.access_token.content;
-  const permissions = token.authorization ? token.authorization.permissions : undefined;
-  next();
-});
 
 module.exports = app;
