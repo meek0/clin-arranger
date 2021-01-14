@@ -21,3 +21,5 @@ __generated__
 .idea
 *.iml
 .vscode/chrome
+
+docker/esdata
