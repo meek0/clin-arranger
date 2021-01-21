@@ -24,7 +24,7 @@ const fetchAuthToken = async () => {
     .post(url, qs.stringify(data), config)
     .then((response) => response.data.access_token)
     .catch((err) => {
-      logger.error(`Error authenticating with Keycloak: ${err.message}`);
+      throw new Error(`Error authenticating with Keycloak: ${err.message}`);
     });
 };
 
