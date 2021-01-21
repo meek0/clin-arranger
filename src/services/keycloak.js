@@ -2,6 +2,7 @@ const { serviceAccountClientId, serviceAccountClientSecret, authServerUrl, authR
 const axios = require('axios');
 const qs = require('querystring')
 const jwt = require('jsonwebtoken');
+const logger = require('../config/logger')
 
 let token;
 let expiry;
@@ -23,7 +24,7 @@ const fetchAuthToken = async () => {
     .post(url, qs.stringify(data), config)
     .then((response) => response.data.access_token)
     .catch((err) => {
-      throw new Error(`Error authenticating with Keycloak: ${err.message}`);
+      logger.error(`Error authenticating with Keycloak: ${err.message}`);
     });
 };
 
