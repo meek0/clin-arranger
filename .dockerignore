@@ -1,0 +1,16 @@
+.vscode
+.github
+node_modules
+test
+*.iml
+*.log
+.editorconfig
+.env.example
+.gitignore
+.travis.yml
+appveyor.yml
+icon.png
+LICENSE
+README.md
+dist
+docker
