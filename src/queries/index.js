@@ -4,12 +4,46 @@ const homepageCharts = async () => {
   const gqlQuery = `
     query{
       viewer{
-        File {
-          aggregations{
-            data_type{
-              buckets{
+        Study {
+          hits {
+            total
+          }
+          aggregations {
+            domain {
+              buckets {
                 doc_count
                 key
+              }
+            }
+          }
+        }
+        File {
+          hits {
+            total
+          }
+          aggregations {
+            file_size {
+              stats {
+                sum
+              }
+            }
+          }
+        }
+        Donor {
+          hits {
+            total
+          }
+          aggregations {
+            diagnoses__icd_category_keyword {
+              buckets {
+                key
+                doc_count
+              }
+            }
+            phenotypes__hpo_category_keyword {
+              buckets {
+                key
+                doc_count
               }
             }
           }
