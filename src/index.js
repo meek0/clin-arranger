@@ -1,3 +1,6 @@
+import "core-js/stable";
+import "regenerator-runtime/runtime";
+
 import Arranger from '@arranger/server';
 const { port, env } = require('./config/vars');
 const logger = require('./config/logger');
