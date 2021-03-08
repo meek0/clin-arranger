@@ -1,13 +1,13 @@
 import "core-js/stable";
 import "regenerator-runtime/runtime";
 
-import Arranger from '@arranger/server';
-const { port, env } = require('./config/vars');
-const logger = require('./config/logger');
-const app = require('./config/express');
+import Arranger from "@arranger/server";
+const { port, env } = require("./config/vars");
+const logger = require("./config/logger");
+const app = require("./config/express");
 
 Arranger({
-  esHost: "http://localhost:9200",
+  esHost: process.env.ES_HOST,
   // Maybe the following could come in handy later on...
   /*getServerSideFilter: () => ({
     op: 'not',
@@ -21,10 +21,12 @@ Arranger({
       },
     ]
   })*/
-}).then(router => {
+}).then((router) => {
   app.use(router);
-  app.listen(port, () => logger.info(`CQDG-Arranger server started on port ${port} (${env})`));
-})
+  app.listen(port, () =>
+    logger.info(`CQDG-Arranger server started on port ${port} (${env})`)
+  );
+});
 
 module.exports = app;
 
