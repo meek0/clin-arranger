@@ -1,8 +1,13 @@
-const { serviceAccountClientId, serviceAccountClientSecret, authServerUrl, authRealm } = require('../config/vars');
-const axios = require('axios');
-const qs = require('querystring')
-const jwt = require('jsonwebtoken');
-const logger = require('../config/logger')
+const {
+  serviceAccountClientId,
+  serviceAccountClientSecret,
+  authServerUrl,
+  authRealm,
+} = require("../config/vars");
+const axios = require("axios");
+const qs = require("querystring");
+const jwt = require("jsonwebtoken");
+const logger = require("../config/logger");
 
 let token;
 let expiry;
@@ -10,15 +15,15 @@ let expiry;
 const fetchAuthToken = async () => {
   const url = `${authServerUrl}/realms/${authRealm}/protocol/openid-connect/token`;
   const data = {
-    grant_type: 'client_credentials',
+    grant_type: "client_credentials",
     client_id: serviceAccountClientId,
-    client_secret: serviceAccountClientSecret
-  }
+    client_secret: serviceAccountClientSecret,
+  };
   const config = {
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    }
-  }
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+  };
 
   return await axios
     .post(url, qs.stringify(data), config)
