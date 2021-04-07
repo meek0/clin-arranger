@@ -16,7 +16,7 @@ const memoryStore = new session.MemoryStore();
 
 const app = express();
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit: '4MB'}));
 app.use(cors());
 
 app.use(session({
