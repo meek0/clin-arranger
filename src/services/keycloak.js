@@ -45,4 +45,46 @@ const getToken = async () => {
   return token;
 };
 
-module.exports = getToken;
+const getPermissions = async (token) => {
+  const formData = qs.stringify({
+    audience: serviceAccountClientId,
+    grant_type: "urn:ietf:params:oauth:grant-type:uma-ticket",
+    response_mode: "permissions",
+  });
+
+  return await axios
+    .post(
+      `${authServerUrl}/realms/${authRealm}/protocol/openid-connect/token`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
+    )
+    .then((response) => response.data)
+    .catch((err) => undefined);
+};
+
+/*
+ * permissions: the list of permissions returned by the getPermissions(accessToken) method above
+ * resource: the name of id of the resource as defined in the Authorization section of the corresponding Keycloak client (env.SERVICE_ACCOUNT_CLIENT_ID).
+ * */
+const isPermissionGranted = (permissions, resource) => {
+  if (permissions && permissions.length > 0) {
+    for (let j = 0; j < permissions.length; j++) {
+      let permission = permissions[j];
+      if (permission.rsid === resource || permission.rsname === resource) {
+        if (permission.scopes && permission.scopes.length > 0) {
+          if (permission.scopes.includes("view")) {
+            return true;
+          }
+        }
+      }
+    }
+  }
+  return false;
+};
+
+module.exports = { getToken, getPermissions, isPermissionGranted };
