@@ -78,7 +78,7 @@ if (true === secure) {
 
   app.get("/files/:fileId", testPermissions);
 
-  // Using the keycloak.enforcer, we cannot dynamically pass the resource dynamically
+  // Using the keycloak.enforcer, we cannot dynamically pass the resource
   /*app.get(
     "/files/:fileId",
     keycloak.enforcer(["FI000004:view"], {
