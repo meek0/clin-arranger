@@ -4,7 +4,7 @@ if [ ! -d "$DATA_DIRECTORY" ]; then
 fi
 
 #if ES not already running
-if [ -z `docker container ls | grep -e cqdg-arranger_elasticsearch` ]; then
+if [ -z `docker-compose ps -q elasticsearch` ] || [ -z `docker ps -q --no-trunc | grep $(docker-compose ps -q elasticsearch)` ]; then
     docker-compose -p cqdg-arranger up -d --remove-orphans;
     
     i=15

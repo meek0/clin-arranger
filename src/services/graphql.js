@@ -1,6 +1,6 @@
 const axios = require("axios");
 const { port } = require("../config/vars");
-const getToken = require("./keycloak");
+const { getToken } = require("./keycloak");
 const logger = require("../config/logger");
 
 const graphql = async (query, variables = {}) => {
