@@ -65,13 +65,17 @@ if (true === secure) {
 
   //--------------------------------- Permission Proof of Concept
   const testPermissions = async (req, res, next) => {
-    const permissions = await getPermissions(
-      req.kauth.grant.access_token.token
-    );
+    try{
+      const permissions = await getPermissions(
+          req.kauth.grant.access_token.token
+      );
 
-    if (isPermissionGranted(permissions, req.params.fileId)) {
-      res.status(200).json({ access: "granted" });
-    } else {
+      if (isPermissionGranted(permissions, req.params.fileId)) {
+        res.status(200).json({ access: "granted" });
+      } else {
+        return keycloak.accessDenied(req, res, next);
+      }
+    }catch(err){
       return keycloak.accessDenied(req, res, next);
     }
   };
