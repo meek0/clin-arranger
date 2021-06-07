@@ -1,4 +1,4 @@
-FROM node:14.4.0-alpine
+FROM node:14.17.0-alpine
 
 ADD . /code
 WORKDIR /code
@@ -7,7 +7,6 @@ RUN npm run build
 
 RUN rm -rf node_modules
 RUN npm install --only=prod
-
 
 EXPOSE 5050
 
