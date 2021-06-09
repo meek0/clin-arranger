@@ -6,7 +6,9 @@
   "scripts": {
     "start": "(cd ./docker; ./launch.sh); cross-env NODE_ENV=development nodemon --exec babel-node ./src/index.js",
     "start-nodocker": "cross-env NODE_ENV=development nodemon --exec babel-node ./src/index.js",
-    "build": "babel ./src -d dist"
+    "stop": "(cd ./docker; ./teardown.sh);",
+    "build": "babel ./src -d dist",
+    "prod": "node dist/index.js"
   },
   "repository": {
     "type": "git",
