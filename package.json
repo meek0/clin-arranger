@@ -4,8 +4,8 @@
   "description": "GraphQL API",
   "main": "src/index.js",
   "scripts": {
-    "start": "(cd ./docker; ./launch.sh); cross-env NODE_ENV=development nodemon --exec babel-node ./src/index.js",
-    "start-nodocker": "cross-env NODE_ENV=development nodemon --exec babel-node ./src/index.js",
+    "start": "(cd ./docker; ./launch.sh); npm run start-nodocker",
+    "start-nodocker": "cross-env NODE_ENV=development nodemon -w .env --exec babel-node ./src/index.js",
     "stop": "(cd ./docker; ./teardown.sh);",
     "build": "babel ./src -d dist",
     "prod": "node dist/index.js"
