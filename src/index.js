@@ -2,9 +2,9 @@ import "core-js/stable";
 import "regenerator-runtime/runtime";
 
 import Arranger from "@arranger/server";
-const { port, env } = require("./config/vars");
-const logger = require("./config/logger");
-const app = require("./config/express");
+import { port, env } from "./config/vars";
+import logger from "./config/logger";
+import app from "./config/express";
 
 Arranger({
   esHost: process.env.ES_HOST,
@@ -27,7 +27,3 @@ Arranger({
     logger.info(`CQDG-Arranger server started on port ${port} (${env})`)
   );
 });
-
-module.exports = app;
-
-//netstat -ano -p tcp | grep 5050

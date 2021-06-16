@@ -1,6 +1,6 @@
-const graphql = require('../services/graphql')
+import graphql from '../services/graphql';
 
-const homepageCharts = async () => {
+export const homepageCharts = async () => {
   const gqlQuery = `
     query{
       viewer{
@@ -34,16 +34,16 @@ const homepageCharts = async () => {
             total
           }
           aggregations {
-            diagnoses__icd_category_keyword {
+            diagnoses__tagged_icd__main_category {
               buckets {
-                key
                 doc_count
+                key
               }
             }
-            phenotypes__hpo_category_keyword {
+            observed_phenotype_tagged__main_category {
               buckets {
-                key
                 doc_count
+                key
               }
             }
           }
@@ -58,6 +58,46 @@ const homepageCharts = async () => {
   return data;
 }
 
-module.exports = {
-  homepageCharts
+export const studyDataByStudyId = async (id, token) => {
+  const gqlQuery = `
+    query getRequestAccessData($studyFilters: JSON){
+      viewer{
+        Study {
+          hits(filters: $studyFilters) {
+            edges {
+              node {
+                access_authority
+                name
+                data_access_codes {
+                  access_limitations
+                  access_requirements
+                }
+                files {
+                  hits {
+                    edges {
+                      node {
+                        internal_file_id
+                        data_type
+                        experimental_strategy
+                        file_format
+                        file_size
+                        submitter_donor_id  
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  `;
+  const studyFilters = {op: 'and', content: [
+    {content: {field: 'internal_study_id', value: [id]}, op: 'in'}
+  ]}
+  const response = await graphql(gqlQuery, {studyFilters}, token);
+  const data = response.data || {};
+
+  return data;
 }

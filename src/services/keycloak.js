@@ -1,13 +1,12 @@
-const {
+import {
   serviceAccountClientId,
   serviceAccountClientSecret,
   authServerUrl,
   authRealm,
-} = require("../config/vars");
-const axios = require("axios");
-const qs = require("querystring");
-const jwt = require("jsonwebtoken");
-const logger = require("../config/logger");
+} from "../config/vars";
+import axios from "axios";
+import qs from "querystring";
+import jwt from "jsonwebtoken";
 
 let token;
 let expiry;
@@ -37,7 +36,7 @@ const isTokenExpired = () => {
   return !expiry || Date.now() > expiry;
 };
 
-const getToken = async () => {
+export const getToken = async () => {
   if (!token || isTokenExpired()) {
     token = await fetchAuthToken();
     expiry = jwt.decode(token).exp * 1000;
@@ -45,7 +44,7 @@ const getToken = async () => {
   return token;
 };
 
-const getPermissions = async (token) => {
+export const getPermissions = async (token) => {
   const formData = qs.stringify({
     audience: serviceAccountClientId,
     grant_type: "urn:ietf:params:oauth:grant-type:uma-ticket",
@@ -71,7 +70,7 @@ const getPermissions = async (token) => {
  * permissions: the list of permissions returned by the getPermissions(accessToken) method above
  * resource: the name of id of the resource as defined in the Authorization section of the corresponding Keycloak client (env.SERVICE_ACCOUNT_CLIENT_ID).
  * */
-const isPermissionGranted = (permissions, resource) => {
+export const isPermissionGranted = (permissions, resource) => {
   if (permissions && permissions.length > 0) {
     for (let j = 0; j < permissions.length; j++) {
       let permission = permissions[j];
@@ -86,5 +85,3 @@ const isPermissionGranted = (permissions, resource) => {
   }
   return false;
 };
-
-module.exports = { getToken, getPermissions, isPermissionGranted };
