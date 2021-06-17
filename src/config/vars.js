@@ -1,5 +1,3 @@
-const path = require("path");
-
 // import .env variables
 require("dotenv-safe").config({
   allowEmptyValues: false,

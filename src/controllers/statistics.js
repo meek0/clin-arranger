@@ -1,7 +1,7 @@
-const { homepageCharts } = require('../queries');
+import { homepageCharts } from '../queries';
 
 const statistics = async (req, res, next) => {
   res.status(200).json(await homepageCharts());
 }
 
-module.exports = statistics;
+export default statistics;

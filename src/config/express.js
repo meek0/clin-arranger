@@ -1,19 +1,21 @@
-const express = require("express");
-const {
+import express from "express";
+import {
   logsRequestInterceptor,
   authClientId,
   authRealm,
   authServerUrl,
   sessionSecret,
   secure,
-} = require("./vars");
-const logger = require("./logger");
-const bodyParser = require("body-parser");
-const Keycloak = require("keycloak-connect");
-const cors = require("cors");
-const session = require("express-session");
-const statistics = require("../controllers/statistics");
-const { getPermissions, isPermissionGranted } = require("../services/keycloak");
+} from "./vars";
+import logger from "./logger";
+import bodyParser from "body-parser";
+import Keycloak from "keycloak-connect";
+import cors from "cors";
+import session from "express-session";
+import statistics from "../controllers/statistics";
+import requestAccessByStudyId from "../controllers/requestAccess";
+import downloadManifestByStudyId from "../controllers/downloadManifest";
+import { getPermissions, isPermissionGranted } from "../services/keycloak";
 
 /**
  * N.B.: The memory store is not scalable and the documentation states that there is a memory leak.
@@ -38,7 +40,7 @@ app.use(
 
 // Request Logging Interceptor
 if (logsRequestInterceptor === "true") {
-  app.use(function (req, res, next) {
+  app.use((req, res, next) => {
     logger.info("REQ: ", req.body);
     next();
   });
@@ -58,10 +60,15 @@ if (true === secure) {
 
   const keycloak = new Keycloak(keycloakOptions, keycloakConfig);
   app.use(keycloak.middleware());
-
-  app.use("/cqdg/graphql", keycloak.protect(), function (req, res, next) {
+  app.all('/request/*', keycloak.protect(), (req, res, next) => {
+    req.userToken = req.kauth.grant.access_token.token;
     next();
   });
+
+  app.use("/cqdg/graphql", keycloak.protect(), (req, res, next) => {
+    next();
+  });
+
 
   //--------------------------------- Permission Proof of Concept
   const testPermissions = async (req, res, next) => {
@@ -81,6 +88,8 @@ if (true === secure) {
   };
 
   app.get("/files/:fileId", testPermissions);
+  app.get('/request/access/:studyId', requestAccessByStudyId);
+  app.get('/request/manifest/:studyId', downloadManifestByStudyId);
 
   // Using the keycloak.enforcer, we cannot dynamically pass the resource
   /*app.get(
@@ -98,4 +107,4 @@ if (true === secure) {
 // Routes
 app.get("/stats", statistics);
 
-module.exports = app;
+export default app;

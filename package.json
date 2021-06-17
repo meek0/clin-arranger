@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "(cd ./docker; ./launch.sh); npm run start-nodocker",
-    "start-nodocker": "cross-env NODE_ENV=development nodemon -w .env --exec babel-node ./src/index.js",
+    "start-nodocker": "cross-env NODE_ENV=development nodemon -w .env -w src --exec babel-node ./src/index.js",
     "stop": "(cd ./docker; ./teardown.sh);",
     "build": "babel ./src -d dist",
     "prod": "node dist/index.js"
@@ -23,6 +23,7 @@
   "dependencies": {
     "@arranger/server": "^2.9.0",
     "@babel/runtime": "^7.12.5",
+    "adm-zip": "^0.5.5",
     "axios": "^0.21.1",
     "body-parser": "^1.19.0",
     "core-js": "^3.8.1",
@@ -31,8 +32,10 @@
     "dotenv-safe": "^8.2.0",
     "express": "^4.17.1",
     "express-session": "^1.17.1",
+    "filesize": "^6.3.0",
     "jsonwebtoken": "^8.5.1",
     "keycloak-connect": "11.0.3",
+    "papaparse": "^5.3.1",
     "regenerator-runtime": "^0.13.7",
     "winston": "^3.3.3"
   },

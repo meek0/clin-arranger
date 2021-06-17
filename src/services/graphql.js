@@ -3,9 +3,9 @@ const { port } = require("../config/vars");
 const { getToken } = require("./keycloak");
 const logger = require("../config/logger");
 
-const graphql = async (query, variables = {}) => {
+const graphql = async (query, variables = {}, userToken = null) => {
   const url = `http://localhost:${port}/cqdg/graphql`;
-  const token = await getToken();
+  const token = userToken || await getToken();
   const Authorization = `Bearer ${token}`;
   const config = { headers: { Authorization } };
 
