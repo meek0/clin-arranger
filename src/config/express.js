@@ -65,7 +65,7 @@ if (true === secure) {
     next();
   });
 
-  app.use("/cqdg/graphql", keycloak.protect(), (req, res, next) => {
+  app.use("/clin/graphql", keycloak.protect(), (req, res, next) => {
     next();
   });
 
@@ -95,7 +95,7 @@ if (true === secure) {
   /*app.get(
     "/files/:fileId",
     keycloak.enforcer(["FI000004:view"], {
-      resource_server_id: "cqdg-system",
+      resource_server_id: "clin-system",
       response_mode: "permissions",
     }),
     function (req, res) {

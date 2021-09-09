@@ -8,7 +8,7 @@ on:
 jobs:
   publish:
     name: Publish Image
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - name: Push the image on the docker registry
@@ -16,7 +16,7 @@ jobs:
         with:
           username: ${{ secrets.FERLAB_DOCKER_HUB_USER }}
           password: ${{ secrets.FERLAB_DOCKER_HUB_TOKEN }}
-          image: ferlabcrsj/cqdg-arranger
+          image: ferlabcrsj/clin-arranger
           tag_source: sha
           location: .
           dockerfile: Dockerfile

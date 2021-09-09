@@ -3,7 +3,7 @@ import winston from 'winston';
 const logger = winston.createLogger({
   level: 'info',
   format: winston.format.prettyPrint({depth: 5, colorize: false}),
-  defaultMeta: { service: 'cqdg-arranger' },
+  defaultMeta: { service: 'clin-arranger' },
   transports: [
     //
     // - Write all logs with level `error` and below to `error.log`

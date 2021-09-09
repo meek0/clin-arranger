@@ -1,1 +1,1 @@
-docker-compose -p cqdg-arranger down
+docker-compose -p clin-arranger down

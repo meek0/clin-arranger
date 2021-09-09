@@ -1,5 +1,5 @@
 {
-  "name": "cqdg-arranger",
+  "name": "clin-arranger",
   "version": "1.0.0",
   "description": "GraphQL API",
   "main": "src/index.js",
@@ -12,14 +12,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Ferlab-Ste-Justine/cqdg-arranger.git"
+    "url": "git+https://github.com/Ferlab-Ste-Justine/clin-arranger.git"
   },
-  "author": "Patrice Laplante",
+  "author": "Centre de recherche Ste-Justine",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Ferlab-Ste-Justine/cqdg-arranger/issues"
+    "url": "https://github.com/Ferlab-Ste-Justine/clin-arranger/issues"
   },
-  "homepage": "https://github.com/Ferlab-Ste-Justine/cqdg-arranger#readme",
+  "homepage": "https://github.com/Ferlab-Ste-Justine/clin-arranger#readme",
   "dependencies": {
     "@arranger/server": "^2.9.0",
     "@babel/runtime": "^7.12.5",
@@ -40,11 +40,11 @@
     "winston": "^3.3.3"
   },
   "devDependencies": {
+    "@babel/cli": "^7.12.10",
     "@babel/core": "^7.12.10",
     "@babel/node": "^7.12.10",
-    "@babel/preset-env": "^7.12.10",
-    "@babel/cli": "^7.12.10",
     "@babel/plugin-transform-runtime": "^7.12.10",
+    "@babel/preset-env": "^7.12.10",
     "nodemon": "^2.0.6"
   }
 }
