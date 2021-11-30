@@ -63,6 +63,16 @@ if (true === secure) {
 
   const keycloak = new Keycloak(keycloakOptions, keycloakConfig);
   app.use(keycloak.middleware());
+
+  // Variant and Gene Suggestions
+  app.get("/genesFeature/suggestions/:prefix", keycloak.protect(), (req, res) =>
+    genomicFeatureSuggestions(req, res, SUGGESTIONS_TYPES.GENE)
+  );
+
+  app.get("/variantsFeature/suggestions/:prefix", keycloak.protect(), (req, res) =>
+    genomicFeatureSuggestions(req, res, SUGGESTIONS_TYPES.VARIANT)
+  );
+
   app.all("/request/*", keycloak.protect(), (req, res, next) => {
     req.userToken = req.kauth.grant.access_token.token;
     next();
@@ -104,15 +114,6 @@ if (true === secure) {
       res.status(200).json({ status: "granted" });
     }
   );*/
-
-  // Variant and Gene Suggestions
-  app.get("/genesFeature/suggestions/:prefix", keycloak.protect(), (req, res) =>
-    genomicFeatureSuggestions(req, res, SUGGESTIONS_TYPES.GENE)
-  );
-
-  app.get("/variantsFeature/suggestions/:prefix", keycloak.protect(), (req, res) =>
-    genomicFeatureSuggestions(req, res, SUGGESTIONS_TYPES.VARIANT)
-  );
 }
 
 // Routes
