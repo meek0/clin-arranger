@@ -23,6 +23,7 @@
   "dependencies": {
     "@arranger/server": "^2.9.0",
     "@babel/runtime": "^7.12.5",
+    "@elastic/elasticsearch": "^7.15.0",
     "adm-zip": "^0.5.5",
     "axios": "^0.21.1",
     "body-parser": "^1.19.0",
