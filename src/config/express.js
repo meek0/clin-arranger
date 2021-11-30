@@ -16,6 +16,9 @@ import statistics from "../controllers/statistics";
 import requestAccessByStudyId from "../controllers/requestAccess";
 import downloadManifestByStudyId from "../controllers/downloadManifest";
 import { getPermissions, isPermissionGranted } from "../services/keycloak";
+import genomicFeatureSuggestions, {
+  SUGGESTIONS_TYPES,
+} from "../controllers/genomicFeatureSuggestions";
 
 /**
  * N.B.: The memory store is not scalable and the documentation states that there is a memory leak.
@@ -60,7 +63,7 @@ if (true === secure) {
 
   const keycloak = new Keycloak(keycloakOptions, keycloakConfig);
   app.use(keycloak.middleware());
-  app.all('/request/*', keycloak.protect(), (req, res, next) => {
+  app.all("/request/*", keycloak.protect(), (req, res, next) => {
     req.userToken = req.kauth.grant.access_token.token;
     next();
   });
@@ -69,12 +72,11 @@ if (true === secure) {
     next();
   });
 
-
   //--------------------------------- Permission Proof of Concept
   const testPermissions = async (req, res, next) => {
-    try{
+    try {
       const permissions = await getPermissions(
-          req.kauth.grant.access_token.token
+        req.kauth.grant.access_token.token
       );
 
       if (isPermissionGranted(permissions, req.params.fileId)) {
@@ -82,14 +84,14 @@ if (true === secure) {
       } else {
         return keycloak.accessDenied(req, res, next);
       }
-    }catch(err){
+    } catch (err) {
       return keycloak.accessDenied(req, res, next);
     }
   };
 
   app.get("/files/:fileId", testPermissions);
-  app.get('/request/access/:studyId', requestAccessByStudyId);
-  app.get('/request/manifest/:studyId', downloadManifestByStudyId);
+  app.get("/request/access/:studyId", requestAccessByStudyId);
+  app.get("/request/manifest/:studyId", downloadManifestByStudyId);
 
   // Using the keycloak.enforcer, we cannot dynamically pass the resource
   /*app.get(
@@ -102,6 +104,15 @@ if (true === secure) {
       res.status(200).json({ status: "granted" });
     }
   );*/
+
+  // Variant and Gene Suggestions
+  app.get("/genesFeature/suggestions/:prefix", (req, res) =>
+    genomicFeatureSuggestions(req, res, SUGGESTIONS_TYPES.GENE)
+  );
+
+  app.get("/variantsFeature/suggestions/:prefix", (req, res) =>
+    genomicFeatureSuggestions(req, res, SUGGESTIONS_TYPES.VARIANT)
+  );
 }
 
 // Routes
