@@ -57,21 +57,13 @@ if (true === secure) {
     serverUrl: authServerUrl,
     realm: authRealm,
   };
+
   const keycloakOptions = {
     store: memoryStore,
   };
 
   const keycloak = new Keycloak(keycloakOptions, keycloakConfig);
   app.use(keycloak.middleware());
-
-  // Variant and Gene Suggestions
-  app.get("/genesFeature/suggestions/:prefix", keycloak.protect(), (req, res) =>
-    genomicFeatureSuggestions(req, res, SUGGESTIONS_TYPES.GENE)
-  );
-
-  app.get("/variantsFeature/suggestions/:prefix", keycloak.protect(), (req, res) =>
-    genomicFeatureSuggestions(req, res, SUGGESTIONS_TYPES.VARIANT)
-  );
 
   app.all("/request/*", keycloak.protect(), (req, res, next) => {
     req.userToken = req.kauth.grant.access_token.token;
@@ -103,6 +95,15 @@ if (true === secure) {
   app.get("/request/access/:studyId", requestAccessByStudyId);
   app.get("/request/manifest/:studyId", downloadManifestByStudyId);
 
+  // Variant and Gene Suggestions
+  app.get("/request/genesFeature/suggestions/:prefix", (req, res) =>
+    genomicFeatureSuggestions(req, res, SUGGESTIONS_TYPES.GENE)
+  );
+
+  app.get("/request/variantsFeature/suggestions/:prefix", (req, res) =>
+    genomicFeatureSuggestions(req, res, SUGGESTIONS_TYPES.VARIANT)
+  );
+  
   // Using the keycloak.enforcer, we cannot dynamically pass the resource
   /*app.get(
     "/files/:fileId",
