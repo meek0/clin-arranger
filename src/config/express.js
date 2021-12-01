@@ -96,11 +96,11 @@ if (true === secure) {
   app.get("/request/manifest/:studyId", downloadManifestByStudyId);
 
   // Variant and Gene Suggestions
-  app.get("/request/genesFeature/suggestions/:prefix", (req, res) =>
+  app.get("/genesFeature/suggestions/:prefix", (req, res) =>
     genomicFeatureSuggestions(req, res, SUGGESTIONS_TYPES.GENE)
   );
 
-  app.get("/request/variantsFeature/suggestions/:prefix", (req, res) =>
+  app.get("/variantsFeature/suggestions/:prefix", (req, res) =>
     genomicFeatureSuggestions(req, res, SUGGESTIONS_TYPES.VARIANT)
   );
   
