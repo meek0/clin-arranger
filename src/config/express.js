@@ -70,7 +70,7 @@ if (true === secure) {
     genomicFeatureSuggestions(req, res, SUGGESTIONS_TYPES.GENE)
   );
 
-  app.get("/variantsFeature/suggestions/:prefix", (req, res) =>
+  app.get("/variantsFeature/suggestions/:prefix", keycloak.protect(), (req, res) =>
     genomicFeatureSuggestions(req, res, SUGGESTIONS_TYPES.VARIANT)
   );
 
