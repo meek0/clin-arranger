@@ -65,8 +65,6 @@ if (true === secure) {
   const keycloak = new Keycloak(keycloakOptions, keycloakConfig);
   app.use(keycloak.middleware());
 
-  app.get("/lol", (req, res) => res.sendStatus(200));
-
   // Variant and Gene Suggestions
   app.get("/genesFeature/suggestions/:prefix", keycloak.protect(), (req, res) =>
     genomicFeatureSuggestions(req, res, SUGGESTIONS_TYPES.GENE)
