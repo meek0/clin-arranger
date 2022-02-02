@@ -1,16 +1,18 @@
-import "core-js/stable";
 import "regenerator-runtime/runtime";
 
-import Arranger from "@arranger/server";
+import ArrangerServer from "@arranger/server";
 import { port, env } from "./config/vars";
 import logger from "./config/logger";
 import app from "./config/express";
 
-Arranger({
+const arrangerRoutes = await ArrangerServer.default({
   esHost: process.env.ES_HOST,
-}).then((router) => {
-  app.use(router);
-  app.listen(port, () =>
+  esUser: process.env.ES_USER,
+  esPass: process.env.ES_PASS
+})
+
+app.use(arrangerRoutes);
+
+app.listen(port, () =>
     logger.info(`Clin-Arranger server started on port ${port} (${env})`)
-  );
-});
+);

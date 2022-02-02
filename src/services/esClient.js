@@ -4,9 +4,9 @@ import { esHost, esUser, esPass } from "../config/vars";
 class EsInstance {
   constructor() {
     if (!this.instance) {
-      var configs = { node: esHost };
+      let configs = { node: esHost };
       if (esUser && esPass) {
-        configs["auth"] = {
+        configs.auth = {
           password: esPass,
           username: esUser,
         };

@@ -1,14 +1,14 @@
 {
   "name": "clin-arranger",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "GraphQL API",
+  "type": "module",
   "main": "src/index.js",
   "scripts": {
-    "start": "(cd ./docker; ./launch.sh); npm run start-nodocker",
-    "start-nodocker": "cross-env NODE_ENV=development nodemon -w .env -w src --exec babel-node ./src/index.js",
-    "stop": "(cd ./docker; ./teardown.sh);",
-    "build": "babel ./src -d dist",
-    "prod": "node dist/index.js"
+    "start": "cross-env NODE_ENV=development nodemon -w .env -w src --exec node --experimental-modules=node --es-module-specifier-resolution=node ./src/index.js",
+    "start-with-dockers": "(cd ./docker; ./launch.sh); npm run start",
+    "stop-dockers": "(cd ./docker; ./teardown.sh);",
+    "prod": "cross-env NODE_ENV=production node --experimental-modules=node --es-module-specifier-resolution=node ./src/index.js"
   },
   "repository": {
     "type": "git",
@@ -21,31 +21,18 @@
   },
   "homepage": "https://github.com/Ferlab-Ste-Justine/clin-arranger#readme",
   "dependencies": {
-    "@arranger/server": "^2.9.0",
-    "@babel/runtime": "^7.12.5",
+    "@arranger/server": "^2.16.1",
     "@elastic/elasticsearch": "^7.15.0",
-    "adm-zip": "^0.5.5",
-    "axios": "^0.21.1",
     "body-parser": "^1.19.0",
-    "core-js": "^3.8.1",
     "cors": "^2.8.5",
     "cross-env": "^7.0.3",
     "dotenv-safe": "^8.2.0",
     "express": "^4.17.1",
-    "express-session": "^1.17.1",
-    "filesize": "^6.3.0",
-    "jsonwebtoken": "^8.5.1",
-    "keycloak-connect": "11.0.3",
-    "papaparse": "^5.3.1",
+    "keycloak-connect": "16.1.1",
     "regenerator-runtime": "^0.13.7",
     "winston": "^3.3.3"
   },
   "devDependencies": {
-    "@babel/cli": "^7.12.10",
-    "@babel/core": "^7.12.10",
-    "@babel/node": "^7.12.10",
-    "@babel/plugin-transform-runtime": "^7.12.10",
-    "@babel/preset-env": "^7.12.10",
-    "nodemon": "^2.0.6"
+    "nodemon": "^2.0.15"
   }
 }
