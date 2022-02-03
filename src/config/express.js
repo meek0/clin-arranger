@@ -37,8 +37,9 @@ app.get("/variantsFeature/suggestions/:prefix", keycloak.protect(), (req, res) =
     genomicFeatureSuggestions(req, res, SUGGESTIONS_TYPES.VARIANT)
 );
 
-app.all("*", keycloak.protect(), (req, res, next) => {
+//FIXME to reactivate once clin-ui token management is fixed
+/*app.all("*", keycloak.protect(), (req, res, next) => {
     next()
-});
+});*/
 
 export default app;
