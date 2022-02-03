@@ -4,6 +4,9 @@
   "description": "GraphQL API",
   "type": "module",
   "main": "src/index.js",
+  "engines": {
+    "node": ">=16.x"
+  },
   "scripts": {
     "start": "cross-env NODE_ENV=development nodemon -w .env -w src --exec node --experimental-modules=node --es-module-specifier-resolution=node ./src/index.js",
     "start-with-dockers": "(cd ./docker; ./launch.sh); npm run start",
@@ -21,7 +24,7 @@
   },
   "homepage": "https://github.com/Ferlab-Ste-Justine/clin-arranger#readme",
   "dependencies": {
-    "@arranger/server": "^2.16.1",
+    "@arranger/server": "^2.16.2",
     "@elastic/elasticsearch": "^7.15.0",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
