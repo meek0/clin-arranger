@@ -18,7 +18,7 @@ const rsNamesRequiringPermission = {
 };
 
 const fieldRequiresVerification = (fieldName) =>
-    rsNamesRequiringPermission.fromGql.includes(fieldName);
+  rsNamesRequiringPermission.fromGql.includes(fieldName);
 
 /**
  * Forbid mutation
@@ -54,7 +54,7 @@ const findVarNameOfFiltersArg = (argumentsOfField) =>
  *  Adding a "sqon" to the variables object will have no effects. So, we forbid that kind of query.
  *
  *  Another scenario is when multiple filters are used:
- *   query B($x: JSON, $y: JSON) { Prescriptions { hits(filters: $x) {...} aggregations(filters: $y) {...}} }
+ *   query B($x: JSON, $y: JSON) { Prescriptions { hits(filters: $x) {...} } Patients { hits(filters: $y) {...} }
  *  For the sake of simplicity, we therefore forbid to use multiple "sqon" filters.
  * */
 const containsMultipleFilters = (s) => s.size > 1;
@@ -92,19 +92,26 @@ export default (req, res, next) => {
             verificationState.permissionsFailed = true;
             return BREAK;
           }
-          verificationState.addSecurityTags = true;
-        }
-        if (["hits", "aggregations"].includes(fieldName)) {
-          const filtersVarName = findVarNameOfFiltersArg(field.arguments);
-          const hasNoFiltersArgument = !filtersVarName;
-          if (hasNoFiltersArgument) {
-            verificationState.permissionsFailed = true;
-            return BREAK;
-          }
-          verificationState.filtersVariableNames.add(filtersVarName);
-          if (containsMultipleFilters(verificationState.filtersVariableNames)) {
-            verificationState.permissionsFailed = true;
-            return BREAK;
+
+          // Take the closest hitsNode if it exists from node of interest (ex: Patients).
+          const hitsNode = field.selectionSet?.selections?.find(
+            (s) => s?.name?.value === "hits"
+          );
+          if (hitsNode) {
+            const filtersVarName = findVarNameOfFiltersArg(hitsNode.arguments);
+            const hasNoFiltersArgument = !filtersVarName;
+            if (hasNoFiltersArgument) {
+              verificationState.permissionsFailed = true;
+              return BREAK;
+            }
+            verificationState.addSecurityTags = true;
+            verificationState.filtersVariableNames.add(filtersVarName);
+            if (
+              containsMultipleFilters(verificationState.filtersVariableNames)
+            ) {
+              verificationState.permissionsFailed = true;
+              return BREAK;
+            }
           }
         }
       },

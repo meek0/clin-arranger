@@ -5,7 +5,7 @@ ds.config({
   example: "./.env.example",
 });
 
-export const isProd = process.env.NODE_ENV === "production";
+const isProd = process.env.NODE_ENV === "production";
 
 export const env = process.env.NODE_ENV,
   port = process.env.PORT || 5050,

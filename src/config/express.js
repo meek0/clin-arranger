@@ -3,7 +3,6 @@ import {
   authClientId,
   authRealm,
   authServerUrl,
-  isProd,
   logsRequestInterceptor,
   useSecurity,
 } from "./vars";
