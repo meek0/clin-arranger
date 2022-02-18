@@ -8,7 +8,7 @@ import app from "./config/express";
 const arrangerRoutes = await ArrangerServer.default({
   esHost: process.env.ES_HOST,
   esUser: process.env.ES_USER,
-  esPass: process.env.ES_PASS
+  esPass: process.env.ES_PASS,
 })
 
 app.use(arrangerRoutes);

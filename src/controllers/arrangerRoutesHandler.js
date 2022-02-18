@@ -1,12 +1,12 @@
 import { POST, GET, sendNotFound } from "../httpUtils.js";
 
-const regexArrangerProjectId = /^clin_(?:\d{4}_\d{1,2}_\d{1,2}_v\d{1,3}|staging)$/;
+const regexArrangerProjectId = /^(?:clin*|admin)/;
 
 const indexOfProjectId = 1;
 const indexOfAction = 2;
 const maxNOfPathSegments = 3;
 
-const pathIsAllowed = (path) => {
+export const pathIsAllowed = (path) => {
   const split = path.split("/");
   return (
     split.length === maxNOfPathSegments &&

@@ -11,7 +11,8 @@
     "start": "cross-env NODE_ENV=development nodemon -w .env -w src --exec node --experimental-modules=node --es-module-specifier-resolution=node ./src/index.js",
     "start-with-dockers": "(cd ./docker; ./launch.sh); npm run start",
     "stop-dockers": "(cd ./docker; ./teardown.sh);",
-    "prod": "cross-env NODE_ENV=production node --experimental-modules=node --es-module-specifier-resolution=node ./src/index.js"
+    "prod": "cross-env NODE_ENV=production node --experimental-modules=node --es-module-specifier-resolution=node ./src/index.js",
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -39,6 +40,8 @@
   },
   "devDependencies": {
     "nodemon": "^2.0.15",
-    "prettier": "^2.5.1"
+    "prettier": "^2.5.1",
+    "chai": "^4.3.6",
+    "mocha": "^9.2.0"
   }
 }

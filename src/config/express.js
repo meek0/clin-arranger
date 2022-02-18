@@ -3,7 +3,9 @@ import {
   authClientId,
   authRealm,
   authServerUrl,
+  isProd,
   logsRequestInterceptor,
+  useSecurity,
 } from "./vars";
 import logger from "./logger";
 import bodyParser from "body-parser";
@@ -15,6 +17,8 @@ import genomicFeatureSuggestions, {
 
 import arrangerGqlSecurityHandler from "../controllers/arrangerGqlSecurityHandler.js";
 import arrangerRoutesHandler from "../controllers/arrangerRoutesHandler.js";
+import { sendForbidden } from "../httpUtils.js";
+
 const app = express();
 
 app.use(bodyParser.json({ limit: "4MB" }));
@@ -38,6 +42,8 @@ const keycloak = new Keycloak(
   }
 );
 
+keycloak.accessDenied = (_, res) => sendForbidden(res);
+
 app.use(keycloak.middleware());
 
 app.get("/genesFeature/suggestions/:prefix", keycloak.protect(), (req, res) =>
@@ -50,11 +56,16 @@ app.get(
   (req, res) => genomicFeatureSuggestions(req, res, SUGGESTIONS_TYPES.VARIANT)
 );
 
-//Only forward graphql and ping routes to arranger server
-app.all("*", arrangerRoutesHandler, keycloak.protect());
+if (useSecurity) {
+  //Only forward
+  // 1) HTTP POST and GET methods
+  // 2) /<project-id>/graphql and /<project-id>/ping routes
+  // to arranger server
+  //note: do not keycloak protect GET routes above since
+  // we want to be able to easily ping arranger and have a graphql playground
+  app.all("*", arrangerRoutesHandler);
 
-app.get("*", keycloak.protect());
-
-app.post("*", arrangerGqlSecurityHandler, keycloak.protect());
+  app.post("*", keycloak.protect(), arrangerGqlSecurityHandler);
+}
 
 export default app;
