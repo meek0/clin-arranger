@@ -3,7 +3,7 @@ import "regenerator-runtime/runtime";
 import ArrangerServer from "@arranger/server";
 import { port, env } from "./config/vars";
 import logger from "./config/logger";
-import app from "./config/express";
+import app from "./app.js";
 
 const arrangerRoutes = await ArrangerServer.default({
   esHost: process.env.ES_HOST,

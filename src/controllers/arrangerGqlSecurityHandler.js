@@ -6,6 +6,7 @@ import {
   extractSecurityTags,
   translateRsNameToGqlType,
 } from "../permissionsUtils.js";
+import { rsPatient, rsServiceRequest } from "../config/vars.js";
 
 const translationRsNameToGqlType = {
   ServiceRequest: "Prescriptions",
@@ -13,7 +14,7 @@ const translationRsNameToGqlType = {
 };
 
 const rsNamesRequiringPermission = {
-  fromToken: ["ServiceRequest", "Patient"],
+  fromToken: [rsServiceRequest, rsPatient],
   fromGql: ["Prescriptions", "Patients"],
 };
 

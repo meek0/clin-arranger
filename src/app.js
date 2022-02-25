@@ -5,19 +5,20 @@ import {
   authServerUrl,
   logsRequestInterceptor,
   useSecurity,
-} from "./vars";
-import logger from "./logger";
+} from "./config/vars.js";
+import logger from "./config/logger.js";
 import bodyParser from "body-parser";
 import Keycloak from "keycloak-connect";
 import cors from "cors";
-import genomicFeatureSuggestions, {
+import genomicSuggestionsHandler, {
   SUGGESTIONS_TYPES,
-} from "../controllers/genomicFeatureSuggestions";
+} from "./controllers/genomicSuggestionsHandler.js";
 
-import arrangerGqlSecurityHandler from "../controllers/arrangerGqlSecurityHandler.js";
-import arrangerRoutesHandler from "../controllers/arrangerRoutesHandler.js";
-import { sendForbidden } from "../httpUtils.js";
-
+import arrangerGqlSecurityHandler from "./controllers/arrangerGqlSecurityHandler.js";
+import arrangerRoutesHandler from "./controllers/arrangerRoutesHandler.js";
+import pTranscriptionReportHandler from "./controllers/transcriptionReportHandler.js";
+import { sendForbidden } from "./httpUtils.js";
+import patientSecurityHandler from "./controllers/patientSecurityHandler.js";
 const app = express();
 
 app.use(bodyParser.json({ limit: "4MB" }));
@@ -45,14 +46,21 @@ keycloak.accessDenied = (_, res) => sendForbidden(res);
 
 app.use(keycloak.middleware());
 
+app.post(
+  "/report/patient/transcription",
+  keycloak.protect(),
+  patientSecurityHandler,
+  pTranscriptionReportHandler
+);
+
 app.get("/genesFeature/suggestions/:prefix", keycloak.protect(), (req, res) =>
-  genomicFeatureSuggestions(req, res, SUGGESTIONS_TYPES.GENE)
+  genomicSuggestionsHandler(req, res, SUGGESTIONS_TYPES.GENE)
 );
 
 app.get(
   "/variantsFeature/suggestions/:prefix",
   keycloak.protect(),
-  (req, res) => genomicFeatureSuggestions(req, res, SUGGESTIONS_TYPES.VARIANT)
+  (req, res) => genomicSuggestionsHandler(req, res, SUGGESTIONS_TYPES.VARIANT)
 );
 
 if (useSecurity) {

@@ -32,3 +32,11 @@ export const translateRsNameToGqlType = (rsnames, mRsnameToGqlType) =>
  */
 export const extractSecurityTags = (parsedToken) =>
   parsedToken.fhir_organization_id || [];
+
+/**
+ * Check if x and y have at least one security tag in common
+ * @param {string[]} yTags
+ * @param {string[]} xTags
+ */
+export const haveNonEmptyTagsIntersection = (yTags, xTags) =>
+  yTags.some((yt) => xTags.includes(yt));
