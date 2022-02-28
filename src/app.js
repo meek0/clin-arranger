@@ -46,7 +46,7 @@ keycloak.accessDenied = (_, res) => sendForbidden(res);
 
 app.use(keycloak.middleware());
 
-app.post(
+app.get(
   "/report/patient/transcription",
   keycloak.protect(),
   patientSecurityHandler,
