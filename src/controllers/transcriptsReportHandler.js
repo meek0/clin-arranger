@@ -26,13 +26,13 @@ const validateVariantInput = (vId) =>
 
 // !Assumes req passed through patientSecurityHandler!
 export default async (req, res) => {
-  const variantId = req.query.variantId;
+  const variantId = req.params.variantId;
   const inputIsInvalid = !validateVariantInput(variantId);
   if (inputIsInvalid) {
     return sendBadRequest(res);
   }
 
-  const patientId = req.query.patientId;
+  const patientId = req.params.patientId;
 
   const client = EsInstance.getInstance();
 

@@ -16,7 +16,7 @@ import genomicSuggestionsHandler, {
 
 import arrangerGqlSecurityHandler from "./controllers/arrangerGqlSecurityHandler.js";
 import arrangerRoutesHandler from "./controllers/arrangerRoutesHandler.js";
-import pTranscriptionReportHandler from "./controllers/transcriptionReportHandler.js";
+import transcriptsReportHandler from "./controllers/transcriptsReportHandler.js";
 import { sendForbidden } from "./httpUtils.js";
 import patientSecurityHandler from "./controllers/patientSecurityHandler.js";
 const app = express();
@@ -47,10 +47,10 @@ keycloak.accessDenied = (_, res) => sendForbidden(res);
 app.use(keycloak.middleware());
 
 app.get(
-  "/report/patient/transcription",
+  "/report/transcripts/:patientId/:variantId",
   keycloak.protect(),
   patientSecurityHandler,
-  pTranscriptionReportHandler
+  transcriptsReportHandler
 );
 
 app.get("/genesFeature/suggestions/:prefix", keycloak.protect(), (req, res) =>

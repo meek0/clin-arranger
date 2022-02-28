@@ -22,7 +22,7 @@ const extractPatientSecurityTags = (esResponse) =>
   esResponse?.body?.hits?.hits?.[0]?._source?.securityTags || [];
 
 export default async (req, res, next) => {
-  const patientId = req.query.patientId;
+  const patientId = req.params.patientId;
   const inputsAreInvalid = !validatePatientInput(patientId);
   if (inputsAreInvalid) {
     return sendBadRequest();
