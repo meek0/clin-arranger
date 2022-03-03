@@ -25,7 +25,7 @@ export default async (req, res, next) => {
   const patientId = req.params.patientId;
   const inputsAreInvalid = !validatePatientInput(patientId);
   if (inputsAreInvalid) {
-    return sendBadRequest();
+    return sendBadRequest(res);
   }
 
   const decodedToken = jwt_decode(req.headers.authorization);
