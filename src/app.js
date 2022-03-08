@@ -49,6 +49,9 @@ app.use(keycloak.middleware());
 app.get(
   "/report/transcripts/:patientId/:variantId",
   keycloak.protect(),
+  cors({
+    exposedHeaders: ["Content-Disposition"],
+  }),
   patientSecurityHandler,
   transcriptsReportHandler
 );
