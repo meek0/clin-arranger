@@ -15,19 +15,29 @@ const getOrElse = (rawValue, defaultValue) => rawValue || defaultValue;
 const composeIfPossible = (strs = [], separator = "/") =>
   strs.filter((s) => !!s).join(separator);
 
+const mZygosity = {
+  HOM: "Homozygote",
+  HET: "Heterozygote",
+};
+
+const translateZygosityIfNeeded = (z) =>
+  ["HOM", "HET"].includes(z) ? mZygosity[z] : z;
+
 export const makeRows = (data) => {
   const donor = data.donor || {};
   return (data.consequences || []).map((consequence, index) => {
     const geneSymbol = consequence.symbol;
     const gene = data.genes.find((g) => g.symbol === geneSymbol);
+    const exonRatio = composeIfPossible([
+      consequence.exon?.rank,
+      consequence.exon?.total,
+    ]);
     return {
       index,
       genomeBuild: [
-        donor.genome_build,
         data.hgvsg,
         data.rsnumber,
         `Gène: ${geneSymbol}`,
-        consequence.ensembl_transcript_id,
         composeIfPossible([
           consequence.biotype,
           consequence.consequences?.join(" , "),
@@ -36,15 +46,17 @@ export const makeRows = (data) => {
           consequence.refseq_mrna_id,
           consequence.ensembl_transcript_id,
         ]),
-        consequence.hgvsg,
-        consequence.aa_change,
-        composeIfPossible([consequence.exon?.rank, consequence.exon?.total]),
+        consequence.hgvsc,
+        consequence.hgvsp,
+        exonRatio ? `Exon: ${exonRatio}` : "",
       ]
         .filter((e) => !!e)
         .join("\n"),
       status: [
-        donor.zygosity,
-        `(${getOrElse(donor.transmission, "unknown_parents_genotype")})`,
+        `${translateZygosityIfNeeded(donor.zygosity)} (${getOrElse(
+          donor.transmission,
+          "unknown_parents_genotype"
+        )})`,
         `Couverture de la variation ${composeIfPossible([
           donor.ad_alt,
           donor.ad_total,
@@ -53,7 +65,7 @@ export const makeRows = (data) => {
       fA: data.external_frequencies?.gnomad_genomes_2_1_1?.af?.toExponential(2),
       pSilico: mSilico[consequence.predictions?.sift_pred] || "0",
       clinVar: data.clinvar
-        ? `${data.clinvar.clinvar_sig},(ClinVar variation ID: ${data.clinvar.clinvar_id})`
+        ? `${data.clinvar.clin_sig}, (ClinVar variation ID: ${data.clinvar.clinvar_id})`
         : "0",
       omim: gene?.omim?.length
         ? gene.omim

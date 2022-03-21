@@ -3,14 +3,20 @@ import { indexNameVariants } from "../config/vars.js";
 import { makeReport } from "../reports/patientTranscription.js";
 import { sendBadRequest } from "../httpUtils.js";
 
+const joinWithPadding = (l) =>
+  l.reduce((xs, x) => xs + `${x}`.padStart(2, '0'), '');
+
 const filenameDateSuffix = (date) => {
-  const prefixes = [date.getFullYear(), date.getMonth(), date.getDay()].reduce(
-    (xs, x) => xs + `${x}`.padStart(2, "0"),
-    ""
-  );
-  const suffixes = [date.getHours(), date.getMinutes(), date.getSeconds()].join(
-    ""
-  );
+  const prefixes = joinWithPadding([
+    date.getFullYear(),
+    date.getMonth() + 1,
+    date.getDate(),
+  ]);
+  const suffixes = joinWithPadding([
+    date.getHours(),
+    date.getMinutes(),
+    date.getSeconds(),
+  ]);
   return `${prefixes}T${suffixes}`;
 };
 
