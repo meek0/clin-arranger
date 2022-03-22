@@ -8,16 +8,16 @@ const joinWithPadding = (l) =>
 
 const filenameDateSuffix = (date) => {
   const prefixes = joinWithPadding([
-    date.getFullYear(),
-    date.getMonth() + 1,
-    date.getDate(),
+    date.getUTCFullYear(),
+    date.getUTCMonth() + 1,
+    date.getUTCDate(),
   ]);
   const suffixes = joinWithPadding([
-    date.getHours(),
-    date.getMinutes(),
-    date.getSeconds(),
+    date.getUTCHours(),
+    date.getUTCMinutes(),
+    date.getUTCSeconds(),
   ]);
-  return `${prefixes}T${suffixes}`;
+  return `${prefixes}T${suffixes}Z`;
 };
 
 const extractData = (hits) => hits?.hits?.[0]?._source || {};

@@ -62,8 +62,8 @@ export const makeRows = (data) => {
           donor.ad_total,
         ])}`,
       ].join("\n"),
-      fA: data.external_frequencies?.gnomad_genomes_2_1_1?.af?.toExponential(2),
-      pSilico: mSilico[consequence.predictions?.sift_pred] || "0",
+      fA: data?.external_frequencies?.gnomad_exomes_2_1_1?.af ?? 0,
+      pSilico: mSilico[consequence.predictions?.sift_pred] ?? 0,
       clinVar: data.clinvar
         ? `${data.clinvar.clin_sig}, (ClinVar variation ID: ${data.clinvar.clinvar_id})`
         : "0",
