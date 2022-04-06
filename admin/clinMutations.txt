@@ -98,6 +98,36 @@ mutation updateVariantMappingTypeOfClinVarSig(
   }
 }
 
+mutation updateVariantMappingTypeOfClinVarConditions(
+  $projectId: String!
+  $clinVarCond: ExtendedFieldMappingInput!
+) {
+  updateExtendedMapping(
+    projectId: $projectId
+    graphqlField: "Variants"
+    field: "clinvar.conditions"
+    extendedFieldMappingInput: $clinVarCond
+  ) {
+    field
+    isArray
+  }
+}
+
+mutation updateVariantMappingTypeOfClinVarInheritance(
+  $projectId: String!
+  $clinVarInh: ExtendedFieldMappingInput!
+) {
+  updateExtendedMapping(
+    projectId: $projectId
+    graphqlField: "Variants"
+    field: "clinvar.inheritance"
+    extendedFieldMappingInput: $clinVarInh
+  ) {
+    field
+    isArray
+  }
+}
+
 mutation updateVariantMappingTypeOfDMotherCalls(
   $projectId: String!
   $dMotherCalls: ExtendedFieldMappingInput!
@@ -502,6 +532,28 @@ mutation updateVariantMappingTypeOfVariantsVarsomePublication(
                 "displayValues" : { },
                 "rangeStep" : 1
   },
+  "clinVarCond":   {
+                  "type" : "keyword",
+                  "displayName" : "Clinvar Conditions",
+                  "active" : false,
+                  "isArray" : true,
+                  "primaryKey" : false,
+                  "quickSearchEnabled" : false,
+                  "unit" : null,
+                  "displayValues" : { },
+                  "rangeStep" : 1
+    },
+    "clinVarInh":   {
+                    "type" : "keyword",
+                    "displayName" : "Clinvar Inheritance",
+                    "active" : false,
+                    "isArray" : true,
+                    "primaryKey" : false,
+                    "quickSearchEnabled" : false,
+                    "unit" : null,
+                    "displayValues" : { },
+                    "rangeStep" : 1
+      },
 "dMotherCalls":     {
                 "type" : "long",
                 "displayName" : "Donors Mother Calls",
