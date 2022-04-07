@@ -43,7 +43,7 @@ export const makeRows = (data) => {
           consequence.consequences?.join(" , "),
         ]),
         composeIfPossible([
-          consequence.refseq_mrna_id,
+          consequence.refseq_mrna_id?.join(" , "),
           consequence.ensembl_transcript_id,
         ]),
         consequence.hgvsc,
