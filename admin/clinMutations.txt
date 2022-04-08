@@ -308,6 +308,20 @@ mutation updateVariantMappingTypeOfVariantsVarsomeAcmgClassificationUserExplain(
   }
 }
 
+mutation updateVariantMappingTypeOfRefSeq(
+  $projectId: String!
+  $refSeq: ExtendedFieldMappingInput!
+) {
+  updateExtendedMapping(
+    projectId: $projectId
+    graphqlField: "Variants"
+    "field": "consequences.refseq_mrna_id"
+    extendedFieldMappingInput: $refSeq
+  ) {
+    field
+    isArray
+  }
+}
 #===== Patients
 mutation updatePatientsMappingTypeOfPMrn(
   $projectId: String!
@@ -575,5 +589,16 @@ mutation updateVariantMappingTypeOfVariantsVarsomePublication(
                 "unit" : null,
                 "displayValues" : { },
                 "rangeStep" : 1
+              }
+"refSeq":  {
+               "type": "id",
+               "displayName": "Consequences Refseq Mrna Id",
+               "active": false,
+               "isArray": true,
+               "primaryKey": false,
+               "quickSearchEnabled": false,
+               "unit": null,
+               "displayValues": {},
+               "rangeStep": 1
               }
 }
