@@ -315,7 +315,7 @@ mutation updateVariantMappingTypeOfRefSeq(
   updateExtendedMapping(
     projectId: $projectId
     graphqlField: "Variants"
-    "field": "consequences.refseq_mrna_id"
+    field: "consequences.refseq_mrna_id"
     extendedFieldMappingInput: $refSeq
   ) {
     field
