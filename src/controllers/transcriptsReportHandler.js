@@ -2,25 +2,10 @@ import EsInstance from "../services/esClient.js";
 import { indexNameVariants } from "../config/vars.js";
 import { makeReport } from "../reports/patientTranscription.js";
 import { sendBadRequest } from "../httpUtils.js";
-
-const joinWithPadding = (l) =>
-  l.reduce((xs, x) => xs + `${x}`.padStart(2, '0'), '');
-
-const filenameDateSuffix = (date) => {
-  const prefixes = joinWithPadding([
-    date.getUTCFullYear(),
-    date.getUTCMonth() + 1,
-    date.getUTCDate(),
-  ]);
-  const suffixes = joinWithPadding([
-    date.getUTCHours(),
-    date.getUTCMinutes(),
-    date.getUTCSeconds(),
-  ]);
-  return `${prefixes}T${suffixes}Z`;
-};
-
-const extractData = (hits) => hits?.hits?.[0]?._source || {};
+import {
+  makeFilenameDatePart,
+  setSpreadSheetHeaders,
+} from "../reports/reportUtils.js";
 
 // Just a rough validation - the param should only be used by ES.
 const illegalCharacters = [..."[!@#$%^&=[{|;'”|,/?]+"];
@@ -75,7 +60,7 @@ export default async (req, res) => {
     },
   });
 
-  const data = extractData(response?.body?.hits);
+  const data = response?.body?.hits?.hits?.[0]?._source || [];
   const donor = data.donors?.find((d) => d.patient_id === patientId) || {};
 
   const [workbook, sheet] = makeReport({ ...data, donor });
@@ -84,20 +69,16 @@ export default async (req, res) => {
     patientId,
     donor.service_request_id,
     data.rsnumber,
-    filenameDateSuffix(new Date()),
+    makeFilenameDatePart(new Date()),
   ]
     .filter((e) => !!e)
     .join("_")}.xlsx`;
 
-  res.setHeader(
-    "Content-Type",
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-  );
-  res.setHeader("Content-Disposition", `attachment; filename=${fileName}`);
+  const enhancedRes = setSpreadSheetHeaders(res, fileName);
 
-  await workbook.xlsx.write(res);
+  await workbook.xlsx.write(enhancedRes);
 
-  res.end();
+  enhancedRes.end();
 
   workbook.removeWorksheetEx(sheet);
 };

@@ -19,6 +19,7 @@ import arrangerRoutesHandler from "./controllers/arrangerRoutesHandler.js";
 import transcriptsReportHandler from "./controllers/transcriptsReportHandler.js";
 import { sendForbidden } from "./httpUtils.js";
 import patientSecurityHandler from "./controllers/patientSecurityHandler.js";
+import nanuqSequencingExportHandler from "./controllers/nanuqSequencingExportHandler.js";
 const app = express();
 
 app.use(bodyParser.json({ limit: "4MB" }));
@@ -45,6 +46,15 @@ const keycloak = new Keycloak(
 keycloak.accessDenied = (_, res) => sendForbidden(res);
 
 app.use(keycloak.middleware());
+
+app.get(
+  "/report/nanuq/sequencing/",
+  keycloak.protect(),
+  cors({
+    exposedHeaders: ["Content-Disposition"],
+  }),
+  nanuqSequencingExportHandler
+);
 
 app.get(
   "/report/transcripts/:patientId/:variantId",

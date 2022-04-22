@@ -1,8 +1,8 @@
-import ExcelJS from "exceljs";
+import { isHeader } from "./reportUtils.js";
+import Report from "./index.js";
 
 const HEADER_ROW_HEIGHT_PX = 25;
 const ROW_HEIGHT_PX = 150;
-const ROW_NUMBER_OF_HEADER = 1;
 const CELL_NUMBER_OF_ALL_FREQ = 3;
 
 const mSilico = {
@@ -23,7 +23,17 @@ const mZygosity = {
 const translateZygosityIfNeeded = (z) =>
   ["HOM", "HET"].includes(z) ? mZygosity[z] : z;
 
-export const makeRows = (data) => {
+/**
+ * @param {{
+ * donor,
+ * consequences,
+ * genes: Object[],
+ * external_frequencies: Object[],
+ * hgvsg: string,
+ * rsnumber: string
+ * }} data - variant
+ */
+const makeRows = (data) => {
   const donor = data.donor || {};
   return (data.consequences || []).map((consequence, index) => {
     const geneSymbol = consequence.symbol;
@@ -82,15 +92,10 @@ export const makeRows = (data) => {
   });
 };
 
-export const makeReport = (dataSource) => {
-  const dataRows = makeRows(dataSource);
-
-  const workbook = new ExcelJS.Workbook();
-
-  const sheet = workbook.addWorksheet("Sheet1");
-  sheet.columns = [
+export const makeReport = (data) => {
+  const columns = [
     {
-      header: `Génome Référence (${dataSource.donor.genome_build})`,
+      header: `Génome Référence (${data.donor.genome_build})`,
       key: "genomeBuild",
       width: 40,
     },
@@ -103,28 +108,20 @@ export const makeReport = (dataSource) => {
     { header: "Numéro requête Clin", key: "serviceRequestId", width: 24 },
     { header: "Numéro échantillon", key: "sampleId", width: 24 },
   ];
-  sheet.addRows(dataRows);
-  sheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
-    const isHeaderRow = rowNumber === ROW_NUMBER_OF_HEADER;
 
-    row.height = isHeaderRow ? HEADER_ROW_HEIGHT_PX : ROW_HEIGHT_PX;
-
-    row.eachCell({ includeEmpty: true }, (cell, cellNumber) => {
+  const rows = makeRows(data);
+  return new Report(columns, rows)
+    .eachRowExtra((row, rowNumber) => {
+      const isHeaderRow = isHeader(rowNumber);
+      row.height = isHeaderRow ? HEADER_ROW_HEIGHT_PX : ROW_HEIGHT_PX;
+    })
+    .eachCellExtra((cell, cellNumber, isHeaderRow) => {
       const isCCellExceptHeader =
         !isHeaderRow && cellNumber === CELL_NUMBER_OF_ALL_FREQ;
-      cell.style = { font: { bold: isHeaderRow, size: 12, name: "Calibri" } };
       cell.alignment = {
-        vertical: "bottom",
+        ...cell.alignment,
         horizontal: isCCellExceptHeader ? "right" : "left",
-        wrapText: true,
       };
-      cell.border = {
-        top: { style: "thin" },
-        left: { style: "thin" },
-        bottom: { style: "thin" },
-        right: { style: "thin" },
-      };
-    });
-  });
-  return [workbook, sheet];
+    })
+    .build();
 };

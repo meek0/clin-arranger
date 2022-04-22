@@ -24,7 +24,8 @@ export const env = process.env.NODE_ENV,
   esPass = process.env.ES_PASS,
   useSecurity = process.env.USE_SECURITY !== "false",
   indexNamePatients = process.env.PATIENTS_INDEX_NAME,
-  indexNameVariants = process.env.VARIANTS_INDEX_NAME;
+  indexNameVariants = process.env.VARIANTS_INDEX_NAME,
+  indexNamePrescriptions = process.env.PRESCRIPTION_INDEX_NAME;
 
 export const rsPatient = "Patient"
 export const rsServiceRequest = "ServiceRequest"
