@@ -11,15 +11,20 @@ import {
   makeFilenameDatePart,
   setSpreadSheetHeaders,
 } from "../reports/reportUtils.js";
-import {sendBadRequest} from "../httpUtils.js";
+import { sendBadRequest } from "../httpUtils.js";
 
 /**
- * @param {{ securityTags: string[] }[]} srs - service requests
+ * @param {{ securityTags: string[], patientInfo: { securityTags: string[] } }[]} srs - service requests
  * @param {string[]} userSecurityTags - user security tags from token
  */
 const keepAllowedSRs = (srs, userSecurityTags) =>
-  srs.filter((sr) =>
-    haveNonEmptyTagsIntersection(userSecurityTags, sr.securityTags)
+  srs.filter(
+    (sr) =>
+      haveNonEmptyTagsIntersection(userSecurityTags, sr.securityTags) &&
+      haveNonEmptyTagsIntersection(
+        userSecurityTags,
+        sr.patientInfo.securityTags
+      )
   );
 
 export default async (req, res) => {
@@ -46,7 +51,8 @@ export default async (req, res) => {
     jwt_decode
   )(req.headers.authorization);
 
-  const srs = response?.body?.hits?.hits?.map((hit) => ({ ...hit._source })) || [];
+  const srs =
+    response?.body?.hits?.hits?.map((hit) => ({ ...hit._source })) || [];
 
   const srsFiltered = keepAllowedSRs(srs, userSecurityTags);
 
