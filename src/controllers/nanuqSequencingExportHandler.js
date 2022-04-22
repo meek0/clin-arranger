@@ -29,7 +29,8 @@ const keepAllowedSRs = (srs, userSecurityTags) =>
 
 export default async (req, res) => {
   const selectedSrIds = req.query.srIds;
-  if (!selectedSrIds?.length) {
+  const nOfSrIds = selectedSrIds?.length ?? 0;
+  if (nOfSrIds === 0) {
     return sendBadRequest(res);
   }
 
@@ -43,6 +44,7 @@ export default async (req, res) => {
           cid: selectedSrIds,
         },
       },
+      size: nOfSrIds,
     },
   });
 
@@ -50,21 +52,13 @@ export default async (req, res) => {
     extractSecurityTags,
     jwt_decode
   )(req.headers.authorization);
-
   const srs =
     response?.body?.hits?.hits?.map((hit) => ({ ...hit._source })) || [];
-
   const srsFiltered = keepAllowedSRs(srs, userSecurityTags);
-
-  const [workbook, sheet] = makeReport(srsFiltered);
-
   const fileName = `clin_nanuq_${makeFilenameDatePart(new Date())}.xlsx`;
-
   const enhancedRes = setSpreadSheetHeaders(res, fileName);
-
+  const [workbook, sheet] = makeReport(srsFiltered);
   await workbook.xlsx.write(enhancedRes);
-
   enhancedRes.end();
-
   workbook.removeWorksheetEx(sheet);
 };

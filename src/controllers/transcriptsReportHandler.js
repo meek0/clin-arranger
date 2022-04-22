@@ -62,9 +62,7 @@ export default async (req, res) => {
 
   const data = response?.body?.hits?.hits?.[0]?._source || [];
   const donor = data.donors?.find((d) => d.patient_id === patientId) || {};
-
   const [workbook, sheet] = makeReport({ ...data, donor });
-
   const fileName = `${[
     patientId,
     donor.service_request_id,
@@ -73,12 +71,8 @@ export default async (req, res) => {
   ]
     .filter((e) => !!e)
     .join("_")}.xlsx`;
-
   const enhancedRes = setSpreadSheetHeaders(res, fileName);
-
   await workbook.xlsx.write(enhancedRes);
-
   enhancedRes.end();
-
   workbook.removeWorksheetEx(sheet);
 };
