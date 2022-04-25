@@ -10,7 +10,7 @@ const makeRows = (data) =>
     lastName: sr.patientInfo?.lastName,
     gender: sr.patientInfo?.gender,
     birthDate: sr.patientInfo?.birthDate,
-    institution: sr.patientInfo?.cid,
+    institution: patientInfo?.organization?.cid,
     mrn: sr.mrn,
     cId: sr.cid,
     ramq: sr.patientInfo?.ramq,
