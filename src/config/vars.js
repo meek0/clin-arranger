@@ -29,3 +29,5 @@ export const env = process.env.NODE_ENV,
 
 export const rsPatient = "Patient"
 export const rsServiceRequest = "ServiceRequest"
+export const prescriptions = "Prescriptions";
+export const patients = "Patients";

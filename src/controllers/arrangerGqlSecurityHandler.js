@@ -1,25 +1,18 @@
-import { BREAK, parse, visit } from "graphql";
+import { parse } from "graphql";
 import { sendForbidden } from "../httpUtils";
 import jwt_decode from "jwt-decode";
 import {
+  arrangerQueryVisitor,
   extractReadPermissions,
   extractSecurityTags,
   translateRsNameToGqlType,
 } from "../permissionsUtils.js";
-import { rsPatient, rsServiceRequest } from "../config/vars.js";
+import { rsPatient, rsServiceRequest, prescriptions } from "../config/vars.js";
 
 const translationRsNameToGqlType = {
-  ServiceRequest: "Prescriptions",
+  ServiceRequest: prescriptions,
   Patient: "Patients",
 };
-
-const rsNamesRequiringPermission = {
-  fromToken: [rsServiceRequest, rsPatient],
-  fromGql: ["Prescriptions", "Patients"],
-};
-
-const fieldRequiresVerification = (fieldName) =>
-  rsNamesRequiringPermission.fromGql.includes(fieldName);
 
 /**
  * Forbid mutation
@@ -30,119 +23,68 @@ const fieldRequiresVerification = (fieldName) =>
 const containsAtLeastOneMutationOperation = (ast) =>
   ast.definitions.some((d) => d.operation === "mutation");
 
-/**
- * Find the variable name of the "filters" argument of the "hits" field.
- * @params {Object[]} args - arguments of graphql Field
- * @params {Object} args.name
- * @params {string} args.name.value
- * @description By convention, the name of the variable of the "filters" argument is "sqon". However, nothing
- * can prevent someone to use another name. Therefore, we find the name of the variable dynamically.
- *  Example:
- *   query A($sqon: JSON) { Prescriptions { hits(filters: $sqon){...} } }
- *  is equivalent to
- *   query A($foo: JSON) { Prescriptions { hits(filters: $foo){...} } }
- * */
-const findVarNameOfFiltersArg = (argumentsOfField) =>
-  argumentsOfField.find((arg) => arg.name.value === "filters")?.value?.name
-    ?.value || null;
-
-/**
- * Verify that only one "sqon" (or filters arg value) is used in a query
- * @params {Set} s - set empty or containing the name of the variable of the filters argument
- * @description It is possible to query documents without passing any filters. It can show potentially all documents
- *  Example:
- *   query A { Prescriptions { hits {...} } }
- *  Adding a "sqon" to the variables object will have no effects. So, we forbid that kind of query.
- *
- *  Another scenario is when multiple filters are used:
- *   query B($x: JSON, $y: JSON) { Prescriptions { hits(filters: $x) {...} } Patients { hits(filters: $y) {...} }
- *  For the sake of simplicity, we therefore forbid to use multiple "sqon" filters.
- * */
-const containsMultipleFilters = (s) => s.size > 1;
-
 export default (req, res, next) => {
   const decodedToken = jwt_decode(req.headers.authorization);
 
   const ast = parse(req.body?.query);
-
   if (containsAtLeastOneMutationOperation(ast)) {
     return sendForbidden(res);
   }
 
-  const rsReadPermissions = extractReadPermissions(
-    decodedToken,
-    rsNamesRequiringPermission.fromToken
-  );
+  const rsReadPermissions = extractReadPermissions(decodedToken, [
+    rsServiceRequest,
+    rsPatient,
+  ]);
   const gqlReadPermissions = translateRsNameToGqlType(
     rsReadPermissions,
     translationRsNameToGqlType
   );
 
-  const verificationState = {
+  const initialValidationState = {
+    gqlReadPermissions,
     permissionsFailed: false,
     addSecurityTags: false,
     filtersVariableNames: new Set(),
+    hasPrescriptions: false,
   };
-
-  visit(ast, {
-    Field: {
-      leave(field) {
-        const fieldName = field.name.value;
-        if (fieldRequiresVerification(fieldName)) {
-          if (!gqlReadPermissions.includes(fieldName)) {
-            verificationState.permissionsFailed = true;
-            return BREAK;
-          }
-
-          // Take the closest hitsNode if it exists from node of interest (ex: Patients).
-          const hitsNode = field.selectionSet?.selections?.find(
-            (s) => s?.name?.value === "hits"
-          );
-          if (hitsNode) {
-            const filtersVarName = findVarNameOfFiltersArg(hitsNode.arguments);
-            const hasNoFiltersArgument = !filtersVarName;
-            if (hasNoFiltersArgument) {
-              verificationState.permissionsFailed = true;
-              return BREAK;
-            }
-            verificationState.addSecurityTags = true;
-            verificationState.filtersVariableNames.add(filtersVarName);
-            if (
-              containsMultipleFilters(verificationState.filtersVariableNames)
-            ) {
-              verificationState.permissionsFailed = true;
-              return BREAK;
-            }
-          }
-        }
-      },
-    },
-  });
-
-  if (verificationState.permissionsFailed) {
+  const validationState = arrangerQueryVisitor(ast, initialValidationState);
+  if (validationState.permissionsFailed) {
     return sendForbidden(res);
   }
 
-  if (verificationState.addSecurityTags) {
+  if (validationState.addSecurityTags) {
     const gqlQueryVariables = req.body.variables || {};
-    const sqonAlias = [...verificationState.filtersVariableNames][0];
+    const sqonAlias = [...validationState.filtersVariableNames][0];
     const sqon = gqlQueryVariables[sqonAlias] ?? { content: [], op: "and" };
-    const sqonSecurityTags = {
-      content: {
-        field: "securityTags",
-        value: extractSecurityTags(decodedToken),
-      },
-      op: "in",
-    };
-    const sqonWithSecurityTags = {
-      ...sqon,
-      content: [...(sqon.content || []), sqonSecurityTags],
+    const userSecurityTags = extractSecurityTags(decodedToken);
+    const secureSqon = {
+      content: [
+        {
+          content: {
+            field: "securityTags",
+            value: userSecurityTags,
+          },
+          op: "in",
+        },
+        validationState.hasPrescriptions
+          ? {
+              content: {
+                field: "patientInfo.securityTags",
+                value: userSecurityTags,
+              },
+              op: "in",
+            }
+          : null,
+        { ...sqon },
+      ].filter((p) => !!p),
+      op: "and",
     };
 
     req.body.variables = {
       ...gqlQueryVariables,
-      [sqonAlias]: sqonWithSecurityTags,
+      [sqonAlias]: secureSqon,
     };
   }
+
   next();
 };
