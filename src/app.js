@@ -20,6 +20,8 @@ import transcriptsReportHandler from "./controllers/transcriptsReportHandler.js"
 import { sendForbidden } from "./httpUtils.js";
 import patientSecurityHandler from "./controllers/patientSecurityHandler.js";
 import nanuqSequencingExportHandler from "./controllers/nanuqSequencingExportHandler.js";
+import { SUGGESTIONS_PERMISSIONS_ENFORCER } from "./permissionsUtils.js";
+
 const app = express();
 
 app.use(bodyParser.json({ limit: "4MB" }));
@@ -66,13 +68,15 @@ app.get(
   transcriptsReportHandler
 );
 
-app.get("/genesFeature/suggestions/:prefix", keycloak.protect(), (req, res) =>
-  genomicSuggestionsHandler(req, res, SUGGESTIONS_TYPES.GENE)
+app.get(
+  "/genesFeature/suggestions/:prefix",
+  keycloak.enforcer(SUGGESTIONS_PERMISSIONS_ENFORCER),
+  (req, res) => genomicSuggestionsHandler(req, res, SUGGESTIONS_TYPES.GENE)
 );
 
 app.get(
   "/variantsFeature/suggestions/:prefix",
-  keycloak.protect(),
+  keycloak.enforcer(SUGGESTIONS_PERMISSIONS_ENFORCER),
   (req, res) => genomicSuggestionsHandler(req, res, SUGGESTIONS_TYPES.VARIANT)
 );
 

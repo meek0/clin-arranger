@@ -7,11 +7,19 @@ import {
   extractSecurityTags,
   translateRsNameToGqlType,
 } from "../permissionsUtils.js";
-import { rsPatient, rsServiceRequest, prescriptions } from "../config/vars.js";
+import {
+  patients,
+  prescriptions,
+  rsPatient,
+  rsServiceRequest,
+  rsSVariants,
+  variants,
+} from "../config/vars.js";
 
 const translationRsNameToGqlType = {
   ServiceRequest: prescriptions,
-  Patient: "Patients",
+  Patient: patients,
+  Variants: variants,
 };
 
 /**
@@ -24,16 +32,17 @@ const containsAtLeastOneMutationOperation = (ast) =>
   ast.definitions.some((d) => d.operation === "mutation");
 
 export default (req, res, next) => {
-  const decodedToken = jwt_decode(req.headers.authorization);
+  const decodedRpt = jwt_decode(req.headers.authorization);
 
   const ast = parse(req.body?.query);
   if (containsAtLeastOneMutationOperation(ast)) {
     return sendForbidden(res);
   }
 
-  const rsReadPermissions = extractReadPermissions(decodedToken, [
+  const rsReadPermissions = extractReadPermissions(decodedRpt, [
     rsServiceRequest,
     rsPatient,
+    rsSVariants,
   ]);
   const gqlReadPermissions = translateRsNameToGqlType(
     rsReadPermissions,
@@ -56,7 +65,7 @@ export default (req, res, next) => {
     const gqlQueryVariables = req.body.variables || {};
     const sqonAlias = [...validationState.filtersVariableNames][0];
     const sqon = gqlQueryVariables[sqonAlias] ?? { content: [], op: "and" };
-    const userSecurityTags = extractSecurityTags(decodedToken);
+    const userSecurityTags = extractSecurityTags(decodedRpt);
     const secureSqon = {
       content: [
         {

@@ -1,5 +1,10 @@
 import { BREAK, visit } from "graphql";
-import { prescriptions, patients } from "./config/vars.js";
+import {
+  patients,
+  prescriptions,
+  rsSVariants,
+  variants,
+} from "./config/vars.js";
 
 /**
  * Extract from rpt token read permission(s) for fields of interest
@@ -78,7 +83,7 @@ const containsMultipleFilters = (s) => s.size > 1;
  * @params {string} fieldName - current graphql field being explored
  * */
 const fieldRequiresVerification = (fieldName) =>
-  [prescriptions, patients].includes(fieldName);
+  [prescriptions, patients, variants].includes(fieldName);
 
 /**
  * @params {string} fieldName - current graphql field being explored
@@ -109,6 +114,11 @@ export const arrangerQueryVisitor = (ast, state) => {
             return BREAK;
           }
 
+          if (fieldName === variants) {
+            // if one has read permission on variants in its token it's fine - nothing else to manipulate.
+            return;
+          }
+
           if (fieldName === prescriptions) {
             validationState.hasPrescriptions = true;
           }
@@ -137,3 +147,8 @@ export const arrangerQueryVisitor = (ast, state) => {
   });
   return validationState;
 };
+
+/**
+ * permissions needed to read variants suggestions
+ * */
+export const SUGGESTIONS_PERMISSIONS_ENFORCER = `${rsSVariants}:read`;
