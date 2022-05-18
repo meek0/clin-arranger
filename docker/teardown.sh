@@ -1,1 +1,0 @@
-docker-compose -p clin-arranger down

@@ -8,3 +8,13 @@ services:
     volumes:
       - .:/code
     command: sh -c 'npm install && npm run start'
+  clin_admin:
+    image: node:18.1-alpine
+    working_dir: /code
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/code
+    command: sh -c 'npm install && npm run start-admin'
+    profiles:
+      - admin

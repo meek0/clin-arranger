@@ -3,7 +3,7 @@ import app from "./app.js";
 import adminGraphql from "@arranger/admin/dist";
 import { esHost, esUser, esPass } from "./configs.js";
 
-const PORT = 5050;
+const PORT = 5000;
 
 const adminApp = await adminGraphql.default({
   esHost,
