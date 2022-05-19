@@ -5,11 +5,8 @@ ds.config({
   example: "./.env.example",
 });
 
-const isProd = process.env.NODE_ENV === "production";
-
 export const env = process.env.NODE_ENV,
   port = process.env.PORT || 5050,
-  logs = isProd ? "combined" : "dev",
   logsRequestInterceptor = process.env.LOGS_REQUEST_INTERCEPTOR,
   authRealm = process.env.AUTH_REALM,
   authServerUrl = process.env.AUTH_SERVER_URL,
@@ -22,14 +19,13 @@ export const env = process.env.NODE_ENV,
   esHost = process.env.ES_HOST || "http://localhost:9200/",
   esUser = process.env.ES_USER,
   esPass = process.env.ES_PASS,
-  useSecurity = process.env.USE_SECURITY !== "false",
   indexNamePatients = process.env.PATIENTS_INDEX_NAME,
   indexNameVariants = process.env.VARIANTS_INDEX_NAME,
   indexNamePrescriptions = process.env.PRESCRIPTIONS_INDEX_NAME;
 
-export const rsPatient = "Patient"
-export const rsServiceRequest = "ServiceRequest"
-export const rsSVariants = "Variants"
+export const rsPatient = "Patient";
+export const rsServiceRequest = "ServiceRequest";
+export const rsSVariants = "Variants";
 export const prescriptions = "Prescriptions";
 export const patients = "Patients";
 export const variants = "Variants";

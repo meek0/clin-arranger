@@ -4,7 +4,6 @@ import {
   authRealm,
   authServerUrl,
   logsRequestInterceptor,
-  useSecurity,
 } from "./config/vars.js";
 import logger from "./config/logger.js";
 import bodyParser from "body-parser";
@@ -80,16 +79,14 @@ app.get(
   (req, res) => genomicSuggestionsHandler(req, res, SUGGESTIONS_TYPES.VARIANT)
 );
 
-if (useSecurity) {
-  //Only forward
-  // 1) HTTP POST and GET methods
-  // 2) /<project-id>/graphql and /<project-id>/ping routes
-  // to arranger server
-  //note: do not keycloak protect GET routes above since
-  // we want to be able to easily ping arranger and have a graphql playground
-  app.all("*", arrangerRoutesHandler);
+//Only forward
+// 1) HTTP POST and GET methods
+// 2) /<project-id>/graphql and /<project-id>/ping routes
+// to arranger server
+//note: do not keycloak protect GET routes above since
+// we want to be able to easily ping arranger and have a graphql playground
+app.all("*", arrangerRoutesHandler);
 
-  app.post("*", keycloak.protect(), arrangerGqlSecurityHandler);
-}
+app.post("*", keycloak.protect(), arrangerGqlSecurityHandler);
 
 export default app;
