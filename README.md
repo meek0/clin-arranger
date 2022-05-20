@@ -36,17 +36,11 @@ Before going further, make sure that ```docker``` and ```docker-compose``` are i
 # 3. create an .env file (you may have to adjust the template to your needs)
   touch .env
 
-# 4.1 in a terminal, run docker-compose from project's docker-compose file. 
-  docker-compose up # for regular service
+# 4 in a terminal, run docker-compose from project's docker-compose file. 
+  docker-compose --profile <target profile> up # for admin service
 
-# 4.2 in a terminal, run docker-compose from project's docker-compose file. 
-  docker-compose --profile admin up # for admin service
-
-# 5.1 to clean up regular service afterwards once your are done developing.
-  docker-compose down
-  
-# 5.2 to clean up admin afterwards once your are done developing.
-  docker-compose --profile admin down
+# 5 to clean up afterwards once your are done developing.
+  docker-compose --profile  <target profile> down
 ```
 :warning: _With this setup, your host and the app's container share the project directory/volume._
 

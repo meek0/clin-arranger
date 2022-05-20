@@ -8,6 +8,8 @@ services:
     volumes:
       - .:/code
     command: sh -c 'npm install && npm run start'
+    profiles:
+      - dev
   clin_admin:
     image: node:18.1-alpine
     working_dir: /code
@@ -18,3 +20,11 @@ services:
     command: sh -c 'npm install && npm run start-admin'
     profiles:
       - admin
+  clin_arranger_test:
+    image: node:18.1-alpine
+    working_dir: /code
+    volumes:
+      - .:/code
+    command: sh -c 'npm install && npm run test'
+    profiles:
+      - test

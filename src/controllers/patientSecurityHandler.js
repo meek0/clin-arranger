@@ -4,7 +4,7 @@ import {
   extractSecurityTags,
   haveNonEmptyTagsIntersection,
 } from "../permissionsUtils.js";
-import { rsPatient, indexNamePatients } from "../config/vars.js";
+import { rsPatient, indexNameSequencings } from "../config/vars.js";
 import { sendBadRequest, sendForbidden } from "../httpUtils.js";
 import jwt_decode from "jwt-decode";
 
@@ -19,7 +19,7 @@ const validatePatientInput = (pId) =>
   regexOnlyAlphaNumeric.test(pId);
 
 const extractPatientSecurityTags = (esResponse) =>
-  esResponse?.body?.hits?.hits?.[0]?._source?.securityTags || [];
+  esResponse?.body?.hits?.hits?.[0]?._source?.security_tags || [];
 
 export default async (req, res, next) => {
   const patientId = req.params.patientId;
@@ -37,11 +37,11 @@ export default async (req, res, next) => {
 
   const client = EsInstance.getInstance();
   const response = await client.search({
-    index: indexNamePatients,
+    index: indexNameSequencings,
     body: {
       query: {
         term: {
-          _id: patientId,
+          patient_id: patientId,
         },
       },
     },

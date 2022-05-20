@@ -5,7 +5,7 @@
   "type": "module",
   "main": "src/index.js",
   "engines": {
-    "node": ">=16.x"
+    "node": ">=18.x"
   },
   "scripts": {
     "start": "cross-env NODE_ENV=development nodemon -w .env -w src --exec node --experimental-modules=node --es-module-specifier-resolution=node ./src/index.js",

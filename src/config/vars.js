@@ -19,8 +19,8 @@ export const env = process.env.NODE_ENV,
   esHost = process.env.ES_HOST || "http://localhost:9200/",
   esUser = process.env.ES_USER,
   esPass = process.env.ES_PASS,
-  indexNamePatients = process.env.PATIENTS_INDEX_NAME,
   indexNameVariants = process.env.VARIANTS_INDEX_NAME,
+  indexNameSequencings = process.env.SEQUENCINGS_INDEX_NAME,
   indexNamePrescriptions = process.env.PRESCRIPTIONS_INDEX_NAME;
 
 export const rsPatient = "Patient";
@@ -29,3 +29,5 @@ export const rsSVariants = "Variants";
 export const prescriptions = "Prescriptions";
 export const patients = "Patients";
 export const variants = "Variants";
+export const analyses = "Analyses"
+export const sequencings = "Sequencings"

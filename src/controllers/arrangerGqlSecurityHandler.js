@@ -8,16 +8,18 @@ import {
   translateRsNameToGqlType,
 } from "../permissionsUtils.js";
 import {
+  analyses,
   patients,
   prescriptions,
   rsPatient,
   rsServiceRequest,
   rsSVariants,
+  sequencings,
   variants,
 } from "../config/vars.js";
 
 const translationRsNameToGqlType = {
-  ServiceRequest: prescriptions,
+  ServiceRequest: [prescriptions, analyses, sequencings],
   Patient: patients,
   Variants: variants,
 };
@@ -69,11 +71,23 @@ export default (req, res, next) => {
     const secureSqon = {
       content: [
         {
-          content: {
-            field: "securityTags",
-            value: userSecurityTags,
-          },
-          op: "in",
+          op: "or",
+          content: [
+            {
+              content: {
+                field: "securityTags",
+                value: userSecurityTags,
+              },
+              op: "in",
+            },
+            {
+              content: {
+                field: "security_tags",
+                value: userSecurityTags,
+              },
+              op: "in",
+            },
+          ],
         },
         validationState.hasPrescriptions
           ? {

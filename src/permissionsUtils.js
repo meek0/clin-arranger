@@ -4,6 +4,8 @@ import {
   prescriptions,
   rsSVariants,
   variants,
+  analyses,
+  sequencings,
 } from "./config/vars.js";
 
 /**
@@ -31,7 +33,7 @@ export const extractReadPermissions = (
  * @param {Object} mRsnameToGqlType
  */
 export const translateRsNameToGqlType = (rsnames, mRsnameToGqlType) =>
-  (rsnames || []).map((r) => mRsnameToGqlType[r]);
+  (rsnames || []).map((r) => mRsnameToGqlType[r] ?? []).flat();
 
 /**
  * Extract from rpt token security tags
@@ -83,7 +85,9 @@ const containsMultipleFilters = (s) => s.size > 1;
  * @params {string} fieldName - current graphql field being explored
  * */
 const fieldRequiresVerification = (fieldName) =>
-  [prescriptions, patients, variants].includes(fieldName);
+  [prescriptions, patients, variants, analyses, sequencings].includes(
+    fieldName
+  );
 
 /**
  * @params {string} fieldName - current graphql field being explored

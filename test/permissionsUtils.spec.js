@@ -3,7 +3,7 @@ import {
   arrangerQueryVisitor,
   extractReadPermissions,
 } from "../src/permissionsUtils.js";
-import { patients, prescriptions } from "../src/config/vars.js";
+import { sequencings, rsServiceRequest } from "../src/config/vars.js";
 import { parse } from "graphql";
 
 describe("Extract Read Permissions from Token", () => {
@@ -17,26 +17,21 @@ describe("Extract Read Permissions from Token", () => {
           },
           {
             scopes: ["read", "create", "update"],
-            rsname: "ServiceRequest",
-          },
-          {
-            scopes: ["read", "create", "update"],
-            rsname: "Patient",
+            rsname: rsServiceRequest,
           },
         ],
       },
     };
     const permissions = extractReadPermissions(partOfParsedToken, [
-      "Patient",
-      "ServiceRequest",
+      rsServiceRequest,
     ]);
-    expect(permissions).to.have.members(["Patient", "ServiceRequest"]);
+    expect(permissions).to.have.members([rsServiceRequest]);
   });
 });
 
 describe("Visit Query", () => {
   const mockInitialValidationState = {
-    gqlReadPermissions: [prescriptions, patients],
+    gqlReadPermissions: [sequencings],
     permissionsFailed: false,
     addSecurityTags: false,
     filtersVariableNames: new Set(),
@@ -45,7 +40,7 @@ describe("Visit Query", () => {
 
   it(`Should detect that security tags need to be added`, () => {
     const ast = parse(
-      "query p($sqon: JSON, $first: Int, $offset: Int, $sort: [Sort]) { Prescriptions {    hits(filters: $sqon, first: $first, offset: $offset, sort: $sort) { edges { node { id  cid authoredOn patientInfo { cid lastName  firstName organization { cid  name } }  }  } total } } }"
+      "query p($sqon: JSON, $first: Int, $offset: Int, $sort: [Sort]) { Sequencings {  hits(filters: $sqon, first: $first, offset: $offset, sort: $sort) { edges { node { analysis_code }  }  } total } }"
     );
     const validationState = arrangerQueryVisitor(
       ast,
@@ -57,11 +52,11 @@ describe("Visit Query", () => {
 
   it(`Should detect that two different names for sqon is used (not allowed)`, () => {
     const ast = parse(
-        "query p($sqon: JSON, $first: Int, $offset: Int, $sort: [Sort]) {  Patients { hits(filters: $sqon2) { edges { nodes { id } } } } Prescriptions { hits(filters: $sqon1, first: $first, offset: $offset, sort: $sort) { edges { node { id  cid authoredOn patientInfo { cid lastName  firstName organization { cid  name } }  }  } total } } }"
+      "query p($sqon: JSON, $first: Int, $offset: Int, $sort: [Sort]) {  Sequencings { hits(filters: $sqon2) { edges { nodes { patient_id } } } } Analyses { hits(filters: $sqon1, first: $first, offset: $offset, sort: $sort) { edges { node { patient_id }  } total } } }"
     );
     const validationState = arrangerQueryVisitor(
-        ast,
-        mockInitialValidationState
+      ast,
+      mockInitialValidationState
     );
     expect(validationState).to.include({ permissionsFailed: true });
   });
