@@ -95,12 +95,12 @@ const makeRows = (data) => {
 export const makeReport = (data) => {
   const columns = [
     {
-      header: `Génome Référence (${data.donor.genome_build})`,
+      header: `Génome référence (${data.donor.genome_build})`,
       key: "genomeBuild",
       width: 40,
     },
     { header: "Statut (origine parentale)", key: "status", width: 45 },
-    { header: "Fréquence Allélique", key: "fA", width: 24 },
+    { header: "Fréquence allélique", key: "fA", width: 24 },
     { header: "Prédiction in silico", key: "pSilico", width: 24 },
     { header: "ClinVar", key: "clinVar", width: 24 },
     { header: "OMIM", key: "omim", width: 55 },
