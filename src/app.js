@@ -17,9 +17,8 @@ import arrangerGqlSecurityHandler from "./controllers/arrangerGqlSecurityHandler
 import arrangerRoutesHandler from "./controllers/arrangerRoutesHandler.js";
 import transcriptsReportHandler from "./controllers/transcriptsReportHandler.js";
 import { sendForbidden } from "./httpUtils.js";
-import patientSecurityHandler from "./controllers/patientSecurityHandler.js";
 import nanuqSequencingExportHandler from "./controllers/nanuqSequencingExportHandler.js";
-import { SUGGESTIONS_PERMISSIONS_ENFORCER } from "./permissionsUtils.js";
+import { VARIANTS_READ_PERMISSION_ENFORCER } from "./permissionsUtils.js";
 
 const app = express();
 
@@ -59,23 +58,22 @@ app.get(
 
 app.get(
   "/report/transcripts/:patientId/:variantId",
-  keycloak.protect(),
+  keycloak.enforcer(VARIANTS_READ_PERMISSION_ENFORCER),
   cors({
     exposedHeaders: ["Content-Disposition"],
   }),
-  patientSecurityHandler,
   transcriptsReportHandler
 );
 
 app.get(
   "/genesFeature/suggestions/:prefix",
-  keycloak.enforcer(SUGGESTIONS_PERMISSIONS_ENFORCER),
+  keycloak.enforcer(VARIANTS_READ_PERMISSION_ENFORCER),
   (req, res) => genomicSuggestionsHandler(req, res, SUGGESTIONS_TYPES.GENE)
 );
 
 app.get(
   "/variantsFeature/suggestions/:prefix",
-  keycloak.enforcer(SUGGESTIONS_PERMISSIONS_ENFORCER),
+  keycloak.enforcer(VARIANTS_READ_PERMISSION_ENFORCER),
   (req, res) => genomicSuggestionsHandler(req, res, SUGGESTIONS_TYPES.VARIANT)
 );
 

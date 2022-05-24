@@ -155,4 +155,4 @@ export const arrangerQueryVisitor = (ast, state) => {
 /**
  * permissions needed to read variants suggestions
  * */
-export const SUGGESTIONS_PERMISSIONS_ENFORCER = `${rsSVariants}:read`;
+export const VARIANTS_READ_PERMISSION_ENFORCER = `${rsSVariants}:read`;
