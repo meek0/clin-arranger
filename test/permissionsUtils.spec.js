@@ -2,8 +2,8 @@ import { expect } from "chai";
 import {
   arrangerQueryVisitor,
   extractReadPermissions,
-} from "../src/permissionsUtils.js";
-import { sequencings, rsServiceRequest } from "../src/config/vars.js";
+} from "../app/permissionsUtils.js";
+import { sequencings, rsServiceRequest } from "../config/vars.js";
 import { parse } from "graphql";
 
 describe("Extract Read Permissions from Token", () => {

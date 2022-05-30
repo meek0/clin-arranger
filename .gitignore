@@ -19,7 +19,7 @@ npm-debug.log*
 __generated__
 
 .idea
-*.iml
 .vscode/chrome
 
-docker/esdata
+dev/esdata/*
+*.env-dev

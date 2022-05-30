@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { pathIsAllowed } from "../src/controllers/arrangerRoutesHandler.js";
+import { pathIsAllowed } from "../app/controllers/arrangerRoutesHandler.js";
 
 describe("Routes Guard", () => {
   it(`allow only allowed paths`, () => {

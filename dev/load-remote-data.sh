@@ -9,6 +9,11 @@ if [ ! -f "$FILE_ENV" ]; then
   exit 1
 fi
 
+if [ ! -d es_data ]; then
+  echo "You must provide create a directory named 'es_data' for elasticsearch"
+  exit 1
+fi
+
 # shellcheck source=src/.env-dev
 source $FILE_ENV
 

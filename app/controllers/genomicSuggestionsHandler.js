@@ -1,4 +1,4 @@
-import EsInstance from "../../services/esClient";
+import EsInstance from "../../services/esClient.js";
 import {
   indexNameGeneFeatureSuggestion,
   indexNameVariantFeatureSuggestion,
