@@ -26,15 +26,20 @@ read -r -a INDICES_TO_IMPORT <<<"$INDICES"
 docker pull elasticdump/elasticsearch-dump
 
 for ES_INDEX in "${INDICES_TO_IMPORT[@]}"; do
-  echo "about to copy: $ES_INDEX ."
+   read -r -p "=====> About to copy: $ES_INDEX. Do you want to proceed?" yn
+      case $yn in
+          [Yy]* ) ;;
+          [Nn]* ) exit 0;;
+          * ) exit 0;;
+      esac
 
-  docker run --rm -ti --network=host -e NODE_TLS_REJECT_UNAUTHORIZED=0 elasticdump/elasticsearch-dump \
+  docker run --rm -ti --network=host elasticdump/elasticsearch-dump \
     --input="$URL_REMOTE_ES"/"$ES_INDEX" \
     --output=http://localhost:9200/"$ES_INDEX" \
     --size="$SIZE" \
     --type=mapping
 
-  docker run --rm -ti --network=host -e NODE_TLS_REJECT_UNAUTHORIZED=0 elasticdump/elasticsearch-dump \
+  docker run --rm -ti --network=host elasticdump/elasticsearch-dump \
     --input="$URL_REMOTE_ES"/"$ES_INDEX" \
     --output=http://localhost:9200/"$ES_INDEX" \
     --size="$SIZE" \

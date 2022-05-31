@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "cross-env NODE_ENV=development nodemon -w .env -w app --exec node --experimental-modules=node --es-module-specifier-resolution=node app/index.js",
-    "start-admin": "node --experimental-modules=node --es-module-specifier-resolution=node admin/index.js",
+    "admin-project": "node --experimental-modules=node --es-module-specifier-resolution=node admin/index.js",
     "prod": "cross-env NODE_ENV=production node --experimental-modules=node --es-module-specifier-resolution=node app/index.js",
     "test": "mocha"
   },

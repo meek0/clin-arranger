@@ -1,4 +1,4 @@
-version: "3"
+version: "3.9"
 services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
@@ -19,15 +19,19 @@ services:
     ports:
       - "9200:9200"
       - "9300:9300"
-    profiles:
-      - es
+    networks:
+      - es-net
   kibana:
     image: docker.elastic.co/kibana/kibana:7.17.0
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     ports:
       - "5601:5601"
+    networks:
+      - es-net
     depends_on:
       - elasticsearch
-    profiles:
-      - es
+networks:
+  es-net:
+    name: es-net
+    driver: bridge

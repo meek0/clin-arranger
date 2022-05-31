@@ -1,25 +1,27 @@
-version: "3"
+version: "3.9"
 services:
   clin_arranger:
     image: node:18.1-alpine
     working_dir: /code
-    ports:
-      - "5050:5050"
     volumes:
       - .:/code
     command: sh -c 'npm install && npm run start'
     profiles:
       - dev
-  clin_admin:
+    ports:
+      - "5050:5050"
+  clin_arranger_with_local_es:
     image: node:18.1-alpine
     working_dir: /code
-    ports:
-      - "5000:5000"
     volumes:
       - .:/code
-    command: sh -c 'npm install && npm run start-admin'
+    command: sh -c 'npm install && npm run start'
     profiles:
-      - admin
+      - dev_with_local_es
+    ports:
+      - "5050:5050"
+    networks:
+      - es-net
   clin_arranger_test:
     image: node:18.1-alpine
     working_dir: /code
@@ -28,3 +30,6 @@ services:
     command: sh -c 'npm install && npm run test'
     profiles:
       - test
+networks:
+  es-net:
+    external: true

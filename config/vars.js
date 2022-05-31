@@ -22,6 +22,7 @@ export const env = process.env.NODE_ENV,
   esPass = process.env.ES_PASS,
   indexNameVariants = process.env.VARIANTS_INDEX_NAME,
   indexNameSequencings = process.env.SEQUENCINGS_INDEX_NAME,
+  indexNameAnalyses = process.env.ANALYSES_INDEX_NAME,
   indexNamePrescriptions = process.env.PRESCRIPTIONS_INDEX_NAME;
 
 export const rsPatient = "Patient";

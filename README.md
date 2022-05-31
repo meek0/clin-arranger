@@ -20,7 +20,8 @@ This application takes minimally the following variables as input:
 - **VARIANTS_INDEX_NAME**: Index of variants in ES.
 - **PRESCRIPTIONS_INDEX_NAME**: Index of prescriptions in ES.
 - **NODE_TLS_REJECT_UNAUTHORIZED**: Certificate validation: if equals to 0, certificate validation is disabled for TLS connections.
-
+- **LOG_LEVEL**: Logs levels (info, debug, error, ...) defined by Winston (library)
+- **PROJECT_INDICES**: Space-separated list of indices that make up the arranger project.
 
 ### Development Setup with Docker
 
@@ -42,6 +43,9 @@ Before going further, make sure that ```docker``` and ```docker-compose``` are i
 # 5 to clean up afterwards once your are done developing.
   docker-compose --profile  <target profile> down
 ```
+
+Note: you can activate multiple profiles at once: ```docker-compose --profile a --profile b ... up```
+
 :warning: _With this setup, your host and the app's container share the project directory/volume._
 
 ### Deactivating arranger-projects
