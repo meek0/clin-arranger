@@ -1,11 +1,5 @@
 import express from "express";
-import {
-  authClientId,
-  authRealm,
-  authServerUrl,
-  logsRequestInterceptor,
-} from "../config/vars.js";
-import logger from "../config/logger.js";
+import { authClientId, authRealm, authServerUrl } from "../config/vars.js";
 import bodyParser from "body-parser";
 import Keycloak from "keycloak-connect";
 import cors from "cors";
@@ -17,7 +11,6 @@ import arrangerGqlSecurityHandler from "./controllers/arrangerGqlSecurityHandler
 import arrangerRoutesHandler from "./controllers/arrangerRoutesHandler.js";
 import transcriptsReportHandler from "./controllers/transcriptsReportHandler.js";
 import { sendForbidden } from "./httpUtils.js";
-import nanuqSequencingExportHandler from "./controllers/nanuqSequencingExportHandler.js";
 import { VARIANTS_READ_PERMISSION_ENFORCER } from "./permissionsUtils.js";
 
 const app = express();
@@ -25,13 +18,6 @@ const app = express();
 app.use(bodyParser.json({ limit: "4MB" }));
 
 app.use(cors());
-
-if (logsRequestInterceptor === "true") {
-  app.use((req, res, next) => {
-    logger.info("REQ: ", req.body);
-    next();
-  });
-}
 
 const keycloak = new Keycloak(
   {},
@@ -46,15 +32,6 @@ const keycloak = new Keycloak(
 keycloak.accessDenied = (_, res) => sendForbidden(res);
 
 app.use(keycloak.middleware());
-
-app.get(
-  "/report/nanuq/sequencing/",
-  keycloak.protect(),
-  cors({
-    exposedHeaders: ["Content-Disposition"],
-  }),
-  nanuqSequencingExportHandler
-);
 
 app.get(
   "/report/transcripts/:patientId/:variantId",

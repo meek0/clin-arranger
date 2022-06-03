@@ -9,9 +9,6 @@ import {
 } from "../permissionsUtils.js";
 import {
   analyses,
-  patients,
-  prescriptions,
-  rsPatient,
   rsServiceRequest,
   rsSVariants,
   sequencings,
@@ -19,8 +16,7 @@ import {
 } from "../../config/vars.js";
 
 const translationRsNameToGqlType = {
-  ServiceRequest: [prescriptions, analyses, sequencings],
-  Patient: patients,
+  ServiceRequest: [analyses, sequencings],
   Variants: variants,
 };
 
@@ -43,7 +39,6 @@ export default (req, res, next) => {
 
   const rsReadPermissions = extractReadPermissions(decodedRpt, [
     rsServiceRequest,
-    rsPatient,
     rsSVariants,
   ]);
   const gqlReadPermissions = translateRsNameToGqlType(
@@ -56,7 +51,6 @@ export default (req, res, next) => {
     permissionsFailed: false,
     addSecurityTags: false,
     filtersVariableNames: new Set(),
-    hasPrescriptions: false,
   };
   const validationState = arrangerQueryVisitor(ast, initialValidationState);
   if (validationState.permissionsFailed) {
@@ -71,35 +65,14 @@ export default (req, res, next) => {
     const secureSqon = {
       content: [
         {
-          op: "or",
-          content: [
-            {
-              content: {
-                field: "securityTags",
-                value: userSecurityTags,
-              },
-              op: "in",
-            },
-            {
-              content: {
-                field: "security_tags",
-                value: userSecurityTags,
-              },
-              op: "in",
-            },
-          ],
+          content: {
+            field: "security_tags",
+            value: userSecurityTags,
+          },
+          op: "in",
         },
-        validationState.hasPrescriptions
-          ? {
-              content: {
-                field: "patientInfo.securityTags",
-                value: userSecurityTags,
-              },
-              op: "in",
-            }
-          : null,
         { ...sqon },
-      ].filter((p) => !!p),
+      ],
       op: "and",
     };
 
@@ -108,6 +81,5 @@ export default (req, res, next) => {
       [sqonAlias]: secureSqon,
     };
   }
-
   next();
 };

@@ -13,3 +13,8 @@ LICENSE
 README.md
 dist
 docker
+/dev/*
+docker-compose.yml
+.idea
+.nvmrc
+.env-dev

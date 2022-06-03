@@ -8,7 +8,6 @@ ds.config({
 export const env = process.env.NODE_ENV,
   logLevel = process.env.LOG_LEVEL || "info",
   port = process.env.PORT || 5050,
-  logsRequestInterceptor = process.env.LOGS_REQUEST_INTERCEPTOR,
   authRealm = process.env.AUTH_REALM,
   authServerUrl = process.env.AUTH_SERVER_URL,
   authClientId = process.env.AUTH_CLIENT_ID,
@@ -22,14 +21,10 @@ export const env = process.env.NODE_ENV,
   esPass = process.env.ES_PASS,
   indexNameVariants = process.env.VARIANTS_INDEX_NAME,
   indexNameSequencings = process.env.SEQUENCINGS_INDEX_NAME,
-  indexNameAnalyses = process.env.ANALYSES_INDEX_NAME,
-  indexNamePrescriptions = process.env.PRESCRIPTIONS_INDEX_NAME;
+  indexNameAnalyses = process.env.ANALYSES_INDEX_NAME;
 
-export const rsPatient = "Patient";
 export const rsServiceRequest = "ServiceRequest";
 export const rsSVariants = "Variants";
-export const prescriptions = "Prescriptions";
-export const patients = "Patients";
 export const variants = "Variants";
 export const analyses = "Analyses";
 export const sequencings = "Sequencings";

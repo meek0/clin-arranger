@@ -1,9 +1,13 @@
 FROM node:18.1-alpine
 
-ADD . /code
 WORKDIR /code
-RUN npm ci --only=production
+
+COPY package*.json ./
+
+RUN npm ci --omit=dev
+
+COPY . ./
 
 EXPOSE 5050
 
-CMD ["npm", "run",  "prod"]
+CMD sh -c "npm run admin-project && npm run prod"

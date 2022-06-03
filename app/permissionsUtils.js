@@ -1,7 +1,5 @@
 import { BREAK, visit } from "graphql";
 import {
-  patients,
-  prescriptions,
   rsSVariants,
   variants,
   analyses,
@@ -85,9 +83,7 @@ const containsMultipleFilters = (s) => s.size > 1;
  * @params {string} fieldName - current graphql field being explored
  * */
 const fieldRequiresVerification = (fieldName) =>
-  [prescriptions, patients, variants, analyses, sequencings].includes(
-    fieldName
-  );
+  [variants, analyses, sequencings].includes(fieldName);
 
 /**
  * @params {string} fieldName - current graphql field being explored
@@ -121,10 +117,6 @@ export const arrangerQueryVisitor = (ast, state) => {
           if (fieldName === variants) {
             // if one has read permission on variants in its token it's fine - nothing else to manipulate.
             return;
-          }
-
-          if (fieldName === prescriptions) {
-            validationState.hasPrescriptions = true;
           }
 
           // Take the closest hitsNode if it exists from node of interest (ex: Patients).

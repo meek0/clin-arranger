@@ -35,7 +35,6 @@ describe("Visit Query", () => {
     permissionsFailed: false,
     addSecurityTags: false,
     filtersVariableNames: new Set(),
-    hasPrescriptions: false,
   };
 
   it(`Should detect that security tags need to be added`, () => {

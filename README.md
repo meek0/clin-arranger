@@ -18,7 +18,8 @@ This application takes minimally the following variables as input:
 - **ES_PASS**: Elastic search config.
 - **PATIENTS_INDEX_NAME**: Index of patients in ES.
 - **VARIANTS_INDEX_NAME**: Index of variants in ES.
-- **PRESCRIPTIONS_INDEX_NAME**: Index of prescriptions in ES.
+- **ANALYSES_INDEX_NAME**: Index of analyses in ES.
+- **SEQUENCINGS_INDEX_NAME**: Index of sequencings in ES.
 - **NODE_TLS_REJECT_UNAUTHORIZED**: Certificate validation: if equals to 0, certificate validation is disabled for TLS connections.
 - **LOG_LEVEL**: Logs levels (info, debug, error, ...) defined by Winston (library)
 - **PROJECT_INDICES**: Space-separated list of indices that make up the arranger project.
@@ -63,3 +64,19 @@ https://<ES_HOSTS>/arranger-projects/_update_by_query
 }
 ```
 [^1]: Please note that this was tested on elasticsearch *v7.17.0*.
+
+### Test your Dockerfile
+If you want to replicate qa/staging/prod as faithfully as possible you can do:
+```bash
+# 1 make sure that vars in .env point to correct services
+  cat .env
+
+# 2 build the image
+  docker build -t <your-tag> .
+  
+# 3 run a container
+  docker run --rm -it --network=<es-net| or else> <your-tag>
+
+# 4 delete the image if you want to
+  docker rmi <your-tag>
+```
