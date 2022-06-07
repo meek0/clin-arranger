@@ -18,22 +18,6 @@ const commonMutations = [
     },
   },
   {
-    field: "donors.is_hc",
-    graphqlField: GRAPHQL_FIELD_VARIANTS,
-    extendedFieldMappingInput: {
-      isArray: false,
-      type: "boolean",
-    },
-  },
-  {
-    field: "donors.is_possibly_hc",
-    graphqlField: GRAPHQL_FIELD_VARIANTS,
-    extendedFieldMappingInput: {
-      isArray: false,
-      type: "boolean",
-    },
-  },
-  {
     field: "consequences.consequences",
     graphqlField: GRAPHQL_FIELD_VARIANTS,
     extendedFieldMappingInput: {
@@ -104,21 +88,14 @@ const commonMutations = [
     },
   },
   {
-    field: "donors.possibly_hc_complement.count",
-    graphqlField: GRAPHQL_FIELD_VARIANTS,
-    extendedFieldMappingInput: {
-      isArray: false,
-    },
-  },
-  {
-    field: "donors.possibly_hc_complement.symbol",
-    graphqlField: GRAPHQL_FIELD_VARIANTS,
-    extendedFieldMappingInput: {
-      isArray: false,
-    },
-  },
-  {
     field: "genes.omim.inheritance",
+    graphqlField: GRAPHQL_FIELD_VARIANTS,
+    extendedFieldMappingInput: {
+      isArray: true,
+    },
+  },
+  {
+    field: "genes.orphanet.inheritance",
     graphqlField: GRAPHQL_FIELD_VARIANTS,
     extendedFieldMappingInput: {
       isArray: true,
