@@ -21,14 +21,16 @@ const commonMutations = [
     field: "donors.is_hc",
     graphqlField: GRAPHQL_FIELD_VARIANTS,
     extendedFieldMappingInput: {
-      isArray: true,
+      isArray: false,
+      type: "boolean",
     },
   },
   {
     field: "donors.is_possibly_hc",
     graphqlField: GRAPHQL_FIELD_VARIANTS,
     extendedFieldMappingInput: {
-      isArray: true,
+      isArray: false,
+      type: "boolean",
     },
   },
   {
@@ -105,14 +107,14 @@ const commonMutations = [
     field: "donors.possibly_hc_complement.count",
     graphqlField: GRAPHQL_FIELD_VARIANTS,
     extendedFieldMappingInput: {
-      isArray: true,
+      isArray: false,
     },
   },
   {
     field: "donors.possibly_hc_complement.symbol",
     graphqlField: GRAPHQL_FIELD_VARIANTS,
     extendedFieldMappingInput: {
-      isArray: true,
+      isArray: false,
     },
   },
   {
