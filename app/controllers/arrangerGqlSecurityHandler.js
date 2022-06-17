@@ -13,11 +13,12 @@ import {
   rsSVariants,
   sequencings,
   variants,
+  cnv,
 } from "../../config/vars.js";
 
 const translationRsNameToGqlType = {
   ServiceRequest: [analyses, sequencings],
-  Variants: variants,
+  Variants: [variants, cnv],
 };
 
 /**
