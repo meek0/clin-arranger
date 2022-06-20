@@ -20,6 +20,7 @@ export const env = process.env.NODE_ENV,
   esUser = process.env.ES_USER,
   esPass = process.env.ES_PASS,
   indexNameVariants = process.env.VARIANTS_INDEX_NAME,
+  indexNameCnv = process.env.CNV_INDEX_NAME,
   indexNameSequencings = process.env.SEQUENCINGS_INDEX_NAME,
   indexNameAnalyses = process.env.ANALYSES_INDEX_NAME;
 
@@ -28,3 +29,4 @@ export const rsSVariants = "Variants";
 export const variants = "Variants";
 export const analyses = "Analyses";
 export const sequencings = "Sequencings";
+export const cnv = "cnv";

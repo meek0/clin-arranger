@@ -1,6 +1,7 @@
 const GRAPHQL_FIELD_VARIANTS = "Variants";
 const GRAPHQL_FIELD_ANALYSES = "Analyses";
 const GRAPHQL_FIELD_SEQUENCINGS = "Sequencings";
+const GRAPHQL_FIELD_CNV = "cnv";
 
 // Reminder: by arranger standards, project id must be lowered case.
 const PROJECTS_IDS = {
@@ -143,6 +144,34 @@ const commonMutations = [
       isArray: true,
     },
   },
+  {
+    field: "calls",
+    graphqlField: GRAPHQL_FIELD_CNV,
+    extendedFieldMappingInput: {
+      isArray: true,
+    },
+  },
+  {
+    field: "pe",
+    graphqlField: GRAPHQL_FIELD_CNV,
+    extendedFieldMappingInput: {
+      isArray: true,
+    },
+  },
+  {
+    field: "filters",
+    graphqlField: GRAPHQL_FIELD_CNV,
+    extendedFieldMappingInput: {
+      isArray: true,
+    },
+  },
+  {
+    field: "genes",
+    graphqlField: GRAPHQL_FIELD_CNV,
+    extendedFieldMappingInput: {
+      isArray: true,
+    },
+  },
 ];
 
 const personalizeProject = (id, indices) => {
@@ -169,6 +198,10 @@ export const projectsConfig = () => [
         graphqlField: GRAPHQL_FIELD_SEQUENCINGS,
         esIndex: "clin-qa-sequencings",
       },
+      {
+        graphqlField: GRAPHQL_FIELD_CNV,
+        esIndex: "clin_qa_cnv_centric",
+      },
     ]),
   },
   {
@@ -185,6 +218,10 @@ export const projectsConfig = () => [
         graphqlField: GRAPHQL_FIELD_SEQUENCINGS,
         esIndex: "clin-staging-sequencings",
       },
+      {
+        graphqlField: GRAPHQL_FIELD_CNV,
+        esIndex: "clin_staging_cnv_centric",
+      },
     ]),
   },
   {
@@ -200,6 +237,10 @@ export const projectsConfig = () => [
       {
         graphqlField: GRAPHQL_FIELD_SEQUENCINGS,
         esIndex: "clin-prod-sequencings",
+      },
+      {
+        graphqlField: GRAPHQL_FIELD_CNV,
+        esIndex: "clin_prod_cnv_centric",
       },
     ]),
   },
