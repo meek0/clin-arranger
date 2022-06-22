@@ -4,7 +4,8 @@ import {
   variants,
   analyses,
   sequencings,
-  cnv
+  cnv,
+  genes
 } from "../config/vars.js";
 
 /**
@@ -84,7 +85,7 @@ const containsMultipleFilters = (s) => s.size > 1;
  * @params {string} fieldName - current graphql field being explored
  * */
 const fieldRequiresVerification = (fieldName) =>
-  [variants, analyses, sequencings, cnv].includes(fieldName);
+  [variants, analyses, sequencings, cnv, genes].includes(fieldName);
 
 /**
  * @params {string} fieldName - current graphql field being explored

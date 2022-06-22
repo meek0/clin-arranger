@@ -2,6 +2,7 @@ const GRAPHQL_FIELD_VARIANTS = "Variants";
 const GRAPHQL_FIELD_ANALYSES = "Analyses";
 const GRAPHQL_FIELD_SEQUENCINGS = "Sequencings";
 const GRAPHQL_FIELD_CNV = "cnv";
+const GRAPHQL_FIELD_GENES = "Genes";
 
 // Reminder: by arranger standards, project id must be lowered case.
 const PROJECTS_IDS = {
@@ -172,6 +173,55 @@ const commonMutations = [
       isArray: true,
     },
   },
+  {
+    field: "alias",
+    graphqlField: GRAPHQL_FIELD_GENES,
+    extendedFieldMappingInput: {
+      isArray: true,
+    },
+  },
+  {
+    field: "orphanet",
+    graphqlField: GRAPHQL_FIELD_GENES,
+    extendedFieldMappingInput: {
+      isArray: true,
+    },
+  },
+  {
+    field: "hpo",
+    graphqlField: GRAPHQL_FIELD_GENES,
+    extendedFieldMappingInput: {
+      isArray: true,
+    },
+  },
+  {
+    field: "omim",
+    graphqlField: GRAPHQL_FIELD_GENES,
+    extendedFieldMappingInput: {
+      isArray: true,
+    },
+  },
+  {
+    field: "ddd",
+    graphqlField: GRAPHQL_FIELD_GENES,
+    extendedFieldMappingInput: {
+      isArray: true,
+    },
+  },
+  {
+    field: "cosmic",
+    graphqlField: GRAPHQL_FIELD_GENES,
+    extendedFieldMappingInput: {
+      isArray: true,
+    },
+  },
+  {
+    field: "number_of_variants_per_patient",
+    graphqlField: GRAPHQL_FIELD_GENES,
+    extendedFieldMappingInput: {
+      isArray: true,
+    },
+  }
 ];
 
 const personalizeProject = (id, indices) => {
@@ -202,6 +252,10 @@ export const projectsConfig = () => [
         graphqlField: GRAPHQL_FIELD_CNV,
         esIndex: "clin_qa_cnv_centric",
       },
+      {
+        graphqlField: GRAPHQL_FIELD_GENES,
+        esIndex: "clin_qa_gene_centric",
+      },
     ]),
   },
   {
@@ -222,6 +276,10 @@ export const projectsConfig = () => [
         graphqlField: GRAPHQL_FIELD_CNV,
         esIndex: "clin_staging_cnv_centric",
       },
+      {
+        graphqlField: GRAPHQL_FIELD_GENES,
+        esIndex: "clin_staging_gene_centric",
+      },
     ]),
   },
   {
@@ -241,6 +299,10 @@ export const projectsConfig = () => [
       {
         graphqlField: GRAPHQL_FIELD_CNV,
         esIndex: "clin_prod_cnv_centric",
+      },
+      {
+        graphqlField: GRAPHQL_FIELD_GENES,
+        esIndex: "clin_prod_gene_centric",
       },
     ]),
   },
