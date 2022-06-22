@@ -18,7 +18,7 @@ import {
 
 const translationRsNameToGqlType = {
   ServiceRequest: [analyses, sequencings],
-  Variants: [variants, cnv],
+  Variants: [variants, cnv, genes],
 };
 
 /**

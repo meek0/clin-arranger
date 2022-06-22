@@ -9,6 +9,7 @@ import {
   indexNameSequencings,
   indexNameAnalyses,
   indexNameCnv,
+  indexNameGenes,
 } from "../config/vars.js";
 
 const adminLogger = logger.child({
@@ -41,7 +42,7 @@ const sameIndices = (xs, ys) => {
 adminLogger.info(`Starting script`);
 
 const projectIndices =
-  [indexNameVariants, indexNameSequencings, indexNameAnalyses, indexNameCnv]
+  [indexNameVariants, indexNameSequencings, indexNameAnalyses, indexNameCnv, indexNameGenes]
     ?.filter((p) => !!p)
     ?.map((p) => p?.trim()) ?? [];
 
