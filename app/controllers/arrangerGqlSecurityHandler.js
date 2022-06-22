@@ -14,6 +14,7 @@ import {
   sequencings,
   variants,
   cnv,
+  genes,
 } from "../../config/vars.js";
 
 const translationRsNameToGqlType = {
