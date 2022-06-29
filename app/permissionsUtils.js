@@ -89,6 +89,12 @@ const fieldRequiresVerification = (fieldName) =>
 
 /**
  * @params {string} fieldName - current graphql field being explored
+ * */
+ const fieldHasPermissionOnly = (fieldName) =>
+  [variants, cnv, genes].includes(fieldName);
+
+/**
+ * @params {string} fieldName - current graphql field being explored
  * @params {string[]} gqlReadPermissions - read permissions from token that were translated to graphl
  * */
 const fieldIsIncludedInToken = (fieldName, gqlReadPermissions) =>
@@ -116,8 +122,8 @@ export const arrangerQueryVisitor = (ast, state) => {
             return BREAK;
           }
 
-          if (fieldName === variants) {
-            // if one has read permission on variants in its token it's fine - nothing else to manipulate.
+          if (fieldHasPermissionOnly(fieldName)) {
+            // ex: if one has read permission on variants in its token it's fine - nothing else to manipulate.
             return;
           }
 
