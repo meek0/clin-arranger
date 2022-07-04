@@ -20,6 +20,7 @@ This application takes minimally the following variables as input:
 - **VARIANTS_INDEX_NAME**: Index of variants in ES.
 - **CNV_INDEX_NAME**: Index of cnv in ES.
 - **GENES_INDEX_NAME**: Index of genes in ES.
+- **HPO_INDEX_NAME**: Index of HPOs in ES.
 - **ANALYSES_INDEX_NAME**: Index of analyses in ES.
 - **SEQUENCINGS_INDEX_NAME**: Index of sequencings in ES.
 - **NODE_TLS_REJECT_UNAUTHORIZED**: Certificate validation: if equals to 0, certificate validation is disabled for TLS connections.

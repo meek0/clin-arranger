@@ -14,6 +14,7 @@ export const env = process.env.NODE_ENV,
   indexNameGeneFeatureSuggestion = process.env.GENES_SUGGESTIONS_INDEX_NAME,
   indexNameVariantFeatureSuggestion =
     process.env.VARIANTS_SUGGESTIONS_INDEX_NAME,
+  indexNameHPO = process.env.HPO_INDEX_NAME,
   maxNOfGenomicFeatureSuggestions =
     process.env.MAX_NUMBER_OF_GF_SUGGESTIONS || 5,
   esHost = process.env.ES_HOST || "http://localhost:9200/",

@@ -6,12 +6,12 @@ import cors from "cors";
 import genomicSuggestionsHandler, {
   SUGGESTIONS_TYPES,
 } from "./controllers/genomicSuggestionsHandler.js";
-
+import { searchHPOAutocomplete, searchHPODescendants, searchHPOAncestors } from "./controllers/hpoHandler";
 import arrangerGqlSecurityHandler from "./controllers/arrangerGqlSecurityHandler.js";
 import arrangerRoutesHandler from "./controllers/arrangerRoutesHandler.js";
 import transcriptsReportHandler from "./controllers/transcriptsReportHandler.js";
 import { sendForbidden } from "./httpUtils.js";
-import { VARIANTS_READ_PERMISSION_ENFORCER } from "./permissionsUtils.js";
+import { VARIANTS_READ_PERMISSION_ENFORCER, HPO_READ_PERMISSION_ENFORCER } from "./permissionsUtils.js";
 
 const app = express();
 
@@ -52,6 +52,24 @@ app.get(
   "/variantsFeature/suggestions/:prefix",
   keycloak.enforcer(VARIANTS_READ_PERMISSION_ENFORCER),
   (req, res) => genomicSuggestionsHandler(req, res, SUGGESTIONS_TYPES.VARIANT)
+);
+
+app.get(
+  "/hpo/autocomplete",
+  keycloak.enforcer(HPO_READ_PERMISSION_ENFORCER),
+  (req, res) => searchHPOAutocomplete(req, res)
+);
+
+app.get(
+  "/hpo/descendants",
+  keycloak.enforcer(HPO_READ_PERMISSION_ENFORCER),
+  (req, res) => searchHPODescendants(req, res)
+);
+
+app.get(
+  "/hpo/ancestors",
+  keycloak.enforcer(HPO_READ_PERMISSION_ENFORCER),
+  (req, res) => searchHPOAncestors(req, res)
 );
 
 //Only forward

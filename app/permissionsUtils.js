@@ -1,6 +1,7 @@
 import { BREAK, visit } from "graphql";
 import {
   rsSVariants,
+  rsServiceRequest,
   variants,
   analyses,
   sequencings,
@@ -156,3 +157,8 @@ export const arrangerQueryVisitor = (ast, state) => {
  * permissions needed to read variants suggestions
  * */
 export const VARIANTS_READ_PERMISSION_ENFORCER = `${rsSVariants}:read`;
+
+/**
+ * permissions needed to read hpo
+ * */
+export const HPO_READ_PERMISSION_ENFORCER = `${rsServiceRequest}:read`;
