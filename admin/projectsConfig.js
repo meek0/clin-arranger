@@ -174,6 +174,13 @@ const commonMutations = [
     },
   },
   {
+    field: "genes.panels",
+    graphqlField: GRAPHQL_FIELD_CNV,
+    extendedFieldMappingInput: {
+      isArray: true,
+    },
+  },
+  {
     field: "alias",
     graphqlField: GRAPHQL_FIELD_GENES,
     extendedFieldMappingInput: {
