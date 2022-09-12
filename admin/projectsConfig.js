@@ -5,7 +5,7 @@ const GRAPHQL_FIELD_CNV = "cnv";
 const GRAPHQL_FIELD_GENES = "Genes";
 
 // Reminder: by arranger standards, project id must be lowered case.
-const PROJECTS_IDS = {
+export const PROJECTS_IDS = {
   clin_qa: "clin_qa",
   clin_staging: "clin_staging",
   clin_prod: "clin_prod",

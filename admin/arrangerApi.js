@@ -1,5 +1,8 @@
 import { updateFieldExtendedMapping } from "@arranger/admin/dist/schemas/ExtendedMapping/utils";
-import { addArrangerProject } from "@arranger/admin/dist/schemas/ProjectSchema/utils";
+import {
+  addArrangerProject,
+  removeArrangerProject,
+} from "@arranger/admin/dist/schemas/ProjectSchema/utils";
 import {
   getProjectMetadataEsLocation,
   createNewIndex,
@@ -28,5 +31,6 @@ export const ArrangerApi = {
   createNewIndices,
   fixExtendedMapping,
   getProjectMetadataEsLocation,
+  removeArrangerProject,
   constants,
 };
