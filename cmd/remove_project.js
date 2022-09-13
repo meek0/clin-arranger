@@ -18,6 +18,6 @@ const removeArrangerProject = ArrangerApi.removeArrangerProject(es.getInstance()
 
 await removeArrangerProject(PROJECTS_IDS[`clin_${env}`]);
 
-cmdLogger.info(`Deleted project ${project}`);
+cmdLogger.info(`Removed project ${project}`);
 
 process.exit(0);
