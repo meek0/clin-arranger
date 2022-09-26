@@ -53,6 +53,12 @@ export const haveNonEmptyTagsIntersection = (yTags, xTags) =>
   yTags.some((yt) => xTags.includes(yt));
 
 /**
+ * Check if at least one security tag is LDM
+ */
+export const isLDM = (tags) => 
+  tags.some(t => t.startsWith('LDM'))
+
+/**
  * Find the variable name of the "filters" argument of the "hits" field.
  * @params {Object[]} args - arguments of graphql Field
  * @params {Object} args.name
