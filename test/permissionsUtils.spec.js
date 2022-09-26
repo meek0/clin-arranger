@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import {
+  isLDM,
   arrangerQueryVisitor,
   extractReadPermissions,
 } from "../app/permissionsUtils.js";
@@ -60,3 +61,13 @@ describe("Visit Query", () => {
     expect(validationState).to.include({ permissionsFailed: true });
   });
 });
+
+describe('isLDM', () => {
+  it(`Should return true`, () => {
+    expect(isLDM(['tag1', 'tag2', 'LDM-1', 'LDM-2'])).to.be.true;
+  })
+  it(`Should return false`, () => {
+    expect(isLDM([])).to.be.false;
+    expect(isLDM(['tag1', 'tag2'])).to.be.false;
+  })
+})
