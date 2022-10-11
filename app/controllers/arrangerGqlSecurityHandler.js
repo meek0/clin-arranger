@@ -2,7 +2,7 @@ import { parse } from "graphql";
 import { sendForbidden } from "../httpUtils";
 import jwt_decode from "jwt-decode";
 import {
-  isLDM,
+  isGenetician,
   arrangerQueryVisitor,
   extractReadPermissions,
   extractSecurityTags,
@@ -60,12 +60,11 @@ export default (req, res, next) => {
     return sendForbidden(res);
   }
 
-  const userSecurityTags = extractSecurityTags(decodedRpt);
-
-  if (!isLDM(userSecurityTags) && validationState.addSecurityTags) {
+  if (!isGenetician(decodedRpt) && validationState.addSecurityTags) {
     const gqlQueryVariables = req.body.variables || {};
     const sqonAlias = [...validationState.filtersVariableNames][0];
     const sqon = gqlQueryVariables[sqonAlias] ?? { content: [], op: "and" };
+    const userSecurityTags = extractSecurityTags(decodedRpt);
     const secureSqon = {
       content: [
         {

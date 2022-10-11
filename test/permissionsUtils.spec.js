@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import {
-  isLDM,
+  isGenetician,
   arrangerQueryVisitor,
   extractReadPermissions,
 } from "../app/permissionsUtils.js";
@@ -62,12 +62,24 @@ describe("Visit Query", () => {
   });
 });
 
-describe('isLDM', () => {
+describe('isGenetician', () => {
   it(`Should return true`, () => {
-    expect(isLDM(['tag1', 'tag2', 'LDM-1', 'LDM-2'])).to.be.true;
+    const parsedToken = {
+      realm_access: {
+        roles: [
+          'clin_genetician'
+        ]
+    }}
+    expect(isGenetician(parsedToken)).to.be.true;
   })
   it(`Should return false`, () => {
-    expect(isLDM([])).to.be.false;
-    expect(isLDM(['tag1', 'tag2'])).to.be.false;
+    expect(isGenetician({})).to.be.false;
+    const parsedToken = {
+      realm_access: {
+        roles: [
+          'clin_prescriber'
+        ]
+    }}
+    expect(isGenetician(parsedToken)).to.be.false;
   })
 })
