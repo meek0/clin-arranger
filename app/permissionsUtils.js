@@ -53,10 +53,10 @@ export const haveNonEmptyTagsIntersection = (yTags, xTags) =>
   yTags.some((yt) => xTags.includes(yt));
 
 /**
- * Check if at least one security tag is LDM
+ * Check if user is genetician
  */
-export const isLDM = (tags) => 
-  tags.some(t => t.startsWith('LDM'))
+export const isGenetician = (parsedToken) => 
+  !!parsedToken.realm_access?.roles.some(r => r === 'clin_genetician')
 
 /**
  * Find the variable name of the "filters" argument of the "hits" field.
