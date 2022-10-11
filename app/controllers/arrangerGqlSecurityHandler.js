@@ -2,7 +2,7 @@ import { parse } from "graphql";
 import { sendForbidden } from "../httpUtils";
 import jwt_decode from "jwt-decode";
 import {
-  isLDM,
+  isGenetician,
   arrangerQueryVisitor,
   extractReadPermissions,
   extractSecurityTags,
