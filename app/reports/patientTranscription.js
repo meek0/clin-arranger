@@ -1,3 +1,4 @@
+import logger from "../../config/logger.js";
 import { isHeader } from "./reportUtils.js";
 import Report from "./index.js";
 
@@ -20,8 +21,29 @@ const mZygosity = {
   HET: "Heterozygote",
 };
 
+const parentalOrigins = {
+  'possible_denovo': 'Possiblement de novo',
+  'possible_mother': 'Possiblement mère',
+  'possible_father': 'Possiblement père',
+  'denovo': 'de novo',
+  'mother': 'Mère',
+  'father': 'Père',
+  'both': 'Père et Mère',
+  'ambiguous': 'Indéterminé',
+  'unknown': 'Inconnu',
+}
+
 const translateZygosityIfNeeded = (z) =>
   ["HOM", "HET"].includes(z) ? mZygosity[z] : z;
+
+export const translateParentalOrigin = (origin) => {
+  const sanitizedOrigin = origin?.toLowerCase();
+  const translatedOrigin = parentalOrigins[sanitizedOrigin];
+  if (!translatedOrigin) {
+    logger.warn(`Missing parental origin translation for: ${origin}`)
+  }
+  return translatedOrigin || parentalOrigins['unknown']
+}
 
 /**
  * @param {{
@@ -63,10 +85,10 @@ const makeRows = (data) => {
         .filter((e) => !!e)
         .join("\n"),
       status: [
-        `${translateZygosityIfNeeded(donor.zygosity)} (${getOrElse(
-          donor.transmission,
-          "unknown_parents_genotype"
-        )})`,
+        `${translateZygosityIfNeeded(donor.zygosity)} (${translateParentalOrigin(getOrElse(
+          donor.parental_origin,
+          "unknown"
+        ))})`,
         `Couverture de la variation ${composeIfPossible([
           donor.ad_alt,
           donor.ad_total,
