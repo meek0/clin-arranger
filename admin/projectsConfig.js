@@ -228,6 +228,13 @@ const commonMutations = [
     extendedFieldMappingInput: {
       isArray: true,
     },
+  },
+  {
+    field: "number_of_cnvs_per_patient",
+    graphqlField: GRAPHQL_FIELD_GENES,
+    extendedFieldMappingInput: {
+      isArray: true,
+    },
   }
 ];
 
