@@ -223,7 +223,14 @@ const commonMutations = [
     },
   },
   {
-    field: "number_of_variants_per_patient",
+    field: "number_of_snvs_per_patient",
+    graphqlField: GRAPHQL_FIELD_GENES,
+    extendedFieldMappingInput: {
+      isArray: true,
+    },
+  },
+  {
+    field: "number_of_cnvs_per_patient",
     graphqlField: GRAPHQL_FIELD_GENES,
     extendedFieldMappingInput: {
       isArray: true,
