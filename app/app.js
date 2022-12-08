@@ -33,6 +33,12 @@ keycloak.accessDenied = (_, res) => sendForbidden(res);
 
 app.use(keycloak.middleware());
 
+app.get("/health", async (req, res) => {
+  res.status(200).send({
+    status: "UP",
+  });
+});
+
 app.get(
   "/report/transcripts/:patientId/:variantId",
   keycloak.enforcer(VARIANTS_READ_PERMISSION_ENFORCER),
