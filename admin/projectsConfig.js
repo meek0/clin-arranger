@@ -97,6 +97,13 @@ const commonMutations = [
     },
   },
   {
+    field: "genes.omim.inheritance_code",
+    graphqlField: GRAPHQL_FIELD_VARIANTS,
+    extendedFieldMappingInput: {
+      isArray: true
+    }
+  },
+  {
     field: "genes.orphanet.inheritance",
     graphqlField: GRAPHQL_FIELD_VARIANTS,
     extendedFieldMappingInput: {
