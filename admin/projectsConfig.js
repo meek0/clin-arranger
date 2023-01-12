@@ -111,6 +111,13 @@ const commonMutations = [
     },
   },
   {
+    field: "genes.spliceai.type",
+    graphqlField: GRAPHQL_FIELD_VARIANTS,
+    extendedFieldMappingInput: {
+      isArray: true,
+    },
+  },
+  {
     field: "panels",
     graphqlField: GRAPHQL_FIELD_VARIANTS,
     extendedFieldMappingInput: {
