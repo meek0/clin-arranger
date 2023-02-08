@@ -2,6 +2,7 @@ import express from "express";
 import { authClientId, authRealm, authServerUrl } from "../config/vars.js";
 import bodyParser from "body-parser";
 import Keycloak from "keycloak-connect";
+import compression from "compression";
 import cors from "cors";
 import genomicSuggestionsHandler, {
   SUGGESTIONS_TYPES,
@@ -14,6 +15,8 @@ import { sendForbidden } from "./httpUtils.js";
 import { VARIANTS_READ_PERMISSION_ENFORCER, HPO_READ_PERMISSION_ENFORCER } from "./permissionsUtils.js";
 
 const app = express();
+
+app.use(compression())
 
 app.use(bodyParser.json({ limit: "4MB" }));
 
