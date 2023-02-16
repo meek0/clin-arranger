@@ -13,6 +13,7 @@ import arrangerRoutesHandler from "./controllers/arrangerRoutesHandler.js";
 import transcriptsReportHandler from "./controllers/transcriptsReportHandler.js";
 import { sendForbidden } from "./httpUtils.js";
 import { VARIANTS_READ_PERMISSION_ENFORCER, HPO_READ_PERMISSION_ENFORCER } from "./permissionsUtils.js";
+import variantDonorsHandler from "./controllers/variantDonorsHandler.js"
 
 const app = express();
 
@@ -90,5 +91,7 @@ app.get(
 app.all("*", arrangerRoutesHandler);
 
 app.post("*", keycloak.protect(), arrangerGqlSecurityHandler);
+
+app.use(variantDonorsHandler)
 
 export default app;
