@@ -1,6 +1,5 @@
 import {expect} from "chai";
 import booleanFilterMiddleware from "../app/middlewares/booleanFilterMiddleware.js";
-import sinon from 'sinon'
 
 describe("explode boolean multivalues query", () => {
     it(`Should clean query`, () => {
@@ -23,7 +22,7 @@ describe("explode boolean multivalues query", () => {
                 "pivot": "donors"
             }
         }
-        booleanFilterMiddleware({body: {variables: initialQuery}}, null, sinon.spy())
+        booleanFilterMiddleware({body: {variables: initialQuery}}, null, () => {})
         const expectedResult = {
             sqon: {
                 "content": [
@@ -77,7 +76,7 @@ describe("explode boolean multivalues query", () => {
                 "pivot": "donors"
             }
         }
-        booleanFilterMiddleware({body: {variables: initialQuery}}, null, sinon.spy())
+        booleanFilterMiddleware({body: {variables: initialQuery}}, null, () => {})
 
         expect(JSON.stringify(initialQuery)).to.eql(JSON.stringify(expectedQuery))
     })
