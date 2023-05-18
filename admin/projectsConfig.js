@@ -209,6 +209,27 @@ const commonMutations = [
     },
   },
   {
+    field: "genes.omim.inheritance",
+    graphqlField: GRAPHQL_FIELD_CNV,
+    extendedFieldMappingInput: {
+      isArray: true,
+    },
+  },
+  {
+    field: "genes.omim.inheritance_code",
+    graphqlField: GRAPHQL_FIELD_CNV,
+    extendedFieldMappingInput: {
+      isArray: true
+    }
+  },
+  {
+    field: "genes.orphanet.inheritance",
+    graphqlField: GRAPHQL_FIELD_CNV,
+    extendedFieldMappingInput: {
+      isArray: true,
+    },
+  },
+  {
     field: "alias",
     graphqlField: GRAPHQL_FIELD_GENES,
     extendedFieldMappingInput: {
