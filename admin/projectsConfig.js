@@ -230,6 +230,13 @@ const commonMutations = [
     },
   },
   {
+    field: "genes.cosmic.tumour_types_germline",
+    graphqlField: GRAPHQL_FIELD_CNV,
+    extendedFieldMappingInput: {
+      isArray: true,
+    },
+  },
+  {
     field: "alias",
     graphqlField: GRAPHQL_FIELD_GENES,
     extendedFieldMappingInput: {
