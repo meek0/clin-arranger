@@ -27,7 +27,7 @@ export const cleanupDonors = (body, ids) => {
 }
 
 export default (req, res, next) => {
-  const ids = extractValuesFromSqonByField(req.body?.variables?.sqon, 'donors.patient_id') 
+  const ids = extractValuesFromSqonByField(req.body?.variables?.sqon, 'donors.patient_id')
   if (ids?.length > 0) {
   // one way to modify body is to replace the res.send() function
     const originalSend = res.send;
