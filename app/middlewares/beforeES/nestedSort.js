@@ -12,6 +12,7 @@ const getPatientID = (obj) => {
     return null;
 }
 export default function (body) {
+
     body.sort = body.sort.map( (sort) => {
         const field = Object.keys(sort)[0]
         if (field === 'gene') {
@@ -33,16 +34,19 @@ export default function (body) {
 
         if(sort[field].nested && sort[field].nested.path && sort[field].nested.path === 'donors') {
             const patient_id = getPatientID(body.query)
-            const newSort = structuredClone(sort)
-            newSort[field].nested.filter = {
-                term: {
-                    "donors.patient_id": patient_id,
+            if(patient_id) {
+                const newSort = structuredClone(sort)
+                newSort[field].nested.filter = {
+                    term: {
+                        "donors.patient_id": patient_id,
+                    }
                 }
+                return newSort
             }
-            return newSort
         }
         return sort
     })
+    console.log('new ES body', JSON.stringify(body))
     return body
 
 }
