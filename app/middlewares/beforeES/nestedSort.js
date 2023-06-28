@@ -12,8 +12,7 @@ const getPatientID = (obj) => {
     return null;
 }
 export default function (body) {
-
-    body.sort = body.sort.map( (sort) => {
+    body.sort = body.sort?.map( (sort) => {
         const field = Object.keys(sort)[0]
         if (field === 'gene') {
             return {
