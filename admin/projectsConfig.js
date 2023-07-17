@@ -6,7 +6,7 @@ const GRAPHQL_FIELD_GENES = "Genes";
 
 // Reminder: by arranger standards, project id must be lowered case.
 export const PROJECTS_IDS = {
-  clin_qa: "clin_qa",
+  clin_qa: "clin_qa_scores",
   clin_staging: "clin_staging",
   clin_prod: "clin_prod",
 };
@@ -14,6 +14,13 @@ export const PROJECTS_IDS = {
 const commonMutations = [
   {
     field: "genes_symbol",
+    graphqlField: GRAPHQL_FIELD_VARIANTS,
+    extendedFieldMappingInput: {
+      isArray: true,
+    },
+  },
+  {
+    field: "variant_type",
     graphqlField: GRAPHQL_FIELD_VARIANTS,
     extendedFieldMappingInput: {
       isArray: true,
@@ -319,7 +326,7 @@ export const projectsConfig = () => [
       },
       {
         graphqlField: GRAPHQL_FIELD_VARIANTS,
-        esIndex: "clin_qa_variant_centric",
+        esIndex: "clin_qa_green_variant_centric_re_010",
       },
       {
         graphqlField: GRAPHQL_FIELD_SEQUENCINGS,
