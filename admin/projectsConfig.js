@@ -20,6 +20,13 @@ const commonMutations = [
     },
   },
   {
+    field: "variant_type",
+    graphqlField: GRAPHQL_FIELD_VARIANTS,
+    extendedFieldMappingInput: {
+      isArray: true,
+    },
+  },
+  {
     field: "consequences.consequences",
     graphqlField: GRAPHQL_FIELD_VARIANTS,
     extendedFieldMappingInput: {
