@@ -30,7 +30,7 @@ describe("extractValuesFromSqonByField", () => {
           {
             content: {
               field: "donors.patient_id",
-              value: [681481],
+              value: ['681481'],
             },
             op: "in",
           },
@@ -69,7 +69,7 @@ describe("extractValuesFromSqonByField", () => {
       {
         content: {
           field: "donors.patient_id",
-          value: [681481],
+          value: ['681481'],
         },
         op: "in",
       },

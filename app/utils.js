@@ -16,16 +16,22 @@ export const extractValuesFromContent = (content, field) => {
   return values.map((v) =>  String(v))
 }
 
-export const extractValuesFromSqonByField = (sqon, field) => {
-  const ids = []
-  sqon?.content?.forEach(c1 => {
-    if (Array.isArray(c1.content)) {
-      c1.content.forEach(c2 => {
-        ids.push(...extractValuesFromContent(c2.content, field))
-      })
-    } else {
-      ids.push(...extractValuesFromContent(c1.content, field))
+
+export function extractValuesFromSqonByField(jsonObj, field) {
+  const ids = [];
+
+  function traverse(obj) {
+    if (typeof obj === 'object' && obj !== null) {
+      if (obj.field === field) {
+        ids.push(...obj.value);
+      }
+
+      for (const key in obj) {
+        traverse(obj[key]);
+      }
     }
-  });
+  }
+
+  traverse(jsonObj);
   return Array.from(new Set(ids));
 }
