@@ -9,6 +9,7 @@ The Law of the Land is: 1 arranger project per environment (qa, staging, prod). 
 ## Variables
 - **VARIANTS_INDEX_NAME**: index for variants in ES.
 - **CNV_INDEX_NAME**: index for cnv in ES.
+- **COVERAGE_BY_GENE_INDEX_NAME**: index of coverage by gene in ES
 - **GENES_INDEX_NAME**: index for genes in ES.
 - **HPO_INDEX_NAME**: Index of HPOs in ES.
 - **SEQUENCINGS_INDEX_NAME**: index for sequences in ES.

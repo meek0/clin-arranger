@@ -3,6 +3,7 @@ const GRAPHQL_FIELD_ANALYSES = "Analyses";
 const GRAPHQL_FIELD_SEQUENCINGS = "Sequencings";
 const GRAPHQL_FIELD_CNV = "cnv";
 const GRAPHQL_FIELD_GENES = "Genes";
+const GRAPHQL_FIELD_COVERAGES = "Coverages";
 
 // Reminder: by arranger standards, project id must be lowered case.
 export const PROJECTS_IDS = {
@@ -305,7 +306,14 @@ const commonMutations = [
     extendedFieldMappingInput: {
       isArray: true,
     },
-  }
+  },
+  {
+    field: "panels",
+    graphqlField: GRAPHQL_FIELD_COVERAGES,
+    extendedFieldMappingInput: {
+      isArray: true,
+    },
+  },
 ];
 
 const personalizeProject = (id, indices) => {
@@ -340,6 +348,10 @@ export const projectsConfig = () => [
         graphqlField: GRAPHQL_FIELD_GENES,
         esIndex: "clin_qa_gene_centric",
       },
+      {
+        graphqlField: GRAPHQL_FIELD_COVERAGES,
+        esIndex: "clin_qa_coverage_by_gene_centric",
+      },
     ]),
   },
   {
@@ -364,6 +376,10 @@ export const projectsConfig = () => [
         graphqlField: GRAPHQL_FIELD_GENES,
         esIndex: "clin_staging_gene_centric",
       },
+      {
+        graphqlField: GRAPHQL_FIELD_COVERAGES,
+        esIndex: "clin_staging_coverage_by_gene_centric",
+      },
     ]),
   },
   {
@@ -387,6 +403,10 @@ export const projectsConfig = () => [
       {
         graphqlField: GRAPHQL_FIELD_GENES,
         esIndex: "clin_prod_gene_centric",
+      },
+      {
+        graphqlField: GRAPHQL_FIELD_COVERAGES,
+        esIndex: "clin_prod_coverage_by_gene_centric",
       },
     ]),
   },

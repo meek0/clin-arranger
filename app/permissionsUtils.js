@@ -6,7 +6,8 @@ import {
   analyses,
   sequencings,
   cnv,
-  genes
+  genes,
+  coverages
 } from "../config/vars.js";
 
 /**
@@ -92,13 +93,13 @@ const containsMultipleFilters = (s) => s.size > 1;
  * @params {string} fieldName - current graphql field being explored
  * */
 const fieldRequiresVerification = (fieldName) =>
-  [variants, analyses, sequencings, cnv, genes].includes(fieldName);
+  [variants, analyses, sequencings, cnv, genes, coverages].includes(fieldName);
 
 /**
  * @params {string} fieldName - current graphql field being explored
  * */
  const fieldHasPermissionOnly = (fieldName) =>
-  [variants, cnv, genes].includes(fieldName);
+  [variants, cnv, genes, coverages].includes(fieldName);
 
 /**
  * @params {string} fieldName - current graphql field being explored
