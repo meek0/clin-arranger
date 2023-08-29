@@ -19,6 +19,7 @@ This application takes minimally the following variables as input:
 - **PATIENTS_INDEX_NAME**: Index of patients in ES.
 - **VARIANTS_INDEX_NAME**: Index of variants in ES.
 - **CNV_INDEX_NAME**: Index of cnv in ES.
+- **COVERAGE_BY_GENE_INDEX_NAME**: index of coverage by gene in ES
 - **GENES_INDEX_NAME**: Index of genes in ES.
 - **HPO_INDEX_NAME**: Index of HPOs in ES.
 - **ANALYSES_INDEX_NAME**: Index of analyses in ES.
