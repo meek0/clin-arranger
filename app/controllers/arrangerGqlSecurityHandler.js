@@ -9,6 +9,7 @@ import {
   translateRsNameToGqlType,
 } from "../permissionsUtils.js";
 import {
+  coverages,
   analyses,
   rsServiceRequest,
   rsSVariants,
@@ -20,7 +21,7 @@ import {
 
 const translationRsNameToGqlType = {
   ServiceRequest: [analyses, sequencings],
-  Variants: [variants, cnv, genes],
+  Variants: [variants, cnv, genes, coverages],
 };
 
 /**
