@@ -14,7 +14,7 @@ const getPatientID = (obj) => {
 export default function (body) {
     body.sort = body.sort?.map( (sort) => {
         const field = Object.keys(sort)[0]
-        if (field === 'gene') {
+        if (field === 'gene' && JSON.stringify(body).includes('nested')) {
             return {
                 'consequences.symbol': {
                     missing: sort[field].missing,
