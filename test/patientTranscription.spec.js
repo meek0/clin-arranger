@@ -84,7 +84,6 @@ describe('makeReport', () => {
     }
 
     const assertCell = (sheet, row, column, value) => {
-      console.log(sheet._rows[row]._cells[column]._value)
       expect(sheet._rows[row]._cells[column]._value.value).to.equals(value);
     }
 
