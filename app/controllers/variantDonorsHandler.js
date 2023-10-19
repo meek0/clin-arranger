@@ -44,8 +44,6 @@ export default (req, res, next) => {
     const patientIds = extractValuesFromSqonByField(sqon, 'donors.patient_id')
     const analysisIds = extractValuesFromSqonByField(sqon, 'donors.analysis_service_request_id')
 
-    console.log('FOO', analysisIds)
-
     if (patientIds?.length > 0) {
         // one way to modify body is to replace the res.send() function
         const originalSend = res.send;
