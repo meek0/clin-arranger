@@ -17,7 +17,6 @@ export const pathIsAllowed = (path) => {
 
 export default (req, res, next) => {
   if ([POST, GET].includes(req.method) && pathIsAllowed(req.path)) {
-    global.sqonQuery = req.body.variables.sqon;
     return next();
   }
   return sendNotFound(res);
