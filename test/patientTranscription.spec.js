@@ -98,7 +98,7 @@ describe('makeReport', () => {
     assertColumn(sheet.columns[4],'clinVar','ClinVar')
     assertColumn(sheet.columns[5],'omim','OMIM')
     assertColumn(sheet.columns[6],'interpretation','Interprétation')
-    assertColumn(sheet.columns[7],'serviceRequestId','Numéro requête Clin')
+    assertColumn(sheet.columns[7],'serviceRequestId','Numéro requête CQGC')
     assertColumn(sheet.columns[8],'sampleId','Numéro échantillon')
 
     // row #0 contains headers
