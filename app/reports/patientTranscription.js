@@ -127,7 +127,7 @@ export const makeReport = (data) => {
     { header: "ClinVar", key: "clinVar", width: 24 },
     { header: "OMIM", key: "omim", width: 55 },
     { header: "Interprétation", key: "interpretation", width: 24 },
-    { header: "Numéro requête Clin", key: "serviceRequestId", width: 24 },
+    { header: "Numéro requête CQGC", key: "serviceRequestId", width: 24 },
     { header: "Numéro échantillon", key: "sampleId", width: 24 },
   ];
 
