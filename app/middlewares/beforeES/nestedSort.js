@@ -72,6 +72,6 @@ export default function (body) {
         }
         return sort
     })
-    //console.log('new ES body', JSON.stringify(body))
+    // console.log('new ES body', JSON.stringify(body))
     return body
 }
