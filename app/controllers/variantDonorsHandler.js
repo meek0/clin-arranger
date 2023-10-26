@@ -23,7 +23,9 @@ export const cleanupDonors = (body, patientIds, analysisIds) => {
                     // analysis is optional in both sqon and body response for retro-compatibility
                     const donorAnalysisId = d.node.analysis_service_request_id
                     const hasAnalysisId = analysisIdsSet.size === 0 || !donorAnalysisId || analysisIdsSet.has(String(donorAnalysisId))
-                    return hasPatientId && hasAnalysisId;
+                    const isValid = hasPatientId && hasAnalysisId
+                    // console.warn('[variantDonorsHandler]', variant.hash, patientIds, analysisIds, isValid)
+                    return isValid;
                 });
                 variant.node.donors.hits.edges = newDonors;
                 variant.node.donors.hits.total = newDonors.length;
