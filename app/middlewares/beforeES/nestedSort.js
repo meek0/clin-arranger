@@ -1,19 +1,4 @@
-const DONORS_PATIENT_ID = 'donors.patient_id';
-const DONORS_ANALYSIS_SERVICE_REQUEST_ID = 'donors.analysis_service_request_id';
-
-const findSqonValueInQuery = (obj, fieldName) => {
-    for (var key in obj) {
-        if (key === fieldName) {
-            return obj[key][0];
-        } else if (typeof obj[key] === 'object') {
-            var result = findSqonValueInQuery(obj[key], fieldName);
-            if (result !== null) {
-                return result;
-            }
-        }
-    }
-    return null;
-}
+import {findSqonValueInQuery, DONORS_ANALYSIS_SERVICE_REQUEST_ID, DONORS_PATIENT_ID} from "../../utils.js"
 
 const replaceSqonSort = (sort, sortedField, patientId, analysisId) => {
     const newSort = structuredClone(sort)
@@ -72,6 +57,6 @@ export default function (body) {
         }
         return sort
     })
-    // console.log('new ES body', JSON.stringify(body))
+    // console.log('[nestedSort]', JSON.stringify(body))
     return body
 }

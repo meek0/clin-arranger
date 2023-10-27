@@ -24,8 +24,8 @@
   },
   "homepage": "https://github.com/Ferlab-Ste-Justine/clin-arranger#readme",
   "dependencies": {
-    "@ferlab/arranger-admin": "^2.20.1",
-    "@ferlab/arranger-server": "^2.20.1",
+    "@ferlab/arranger-admin": "^2.20.2",
+    "@ferlab/arranger-server": "^2.20.2",
     "@elastic/elasticsearch": "^7.17.0",
     "body-parser": "^1.19.0",
     "compression": "^1.7.4",
