@@ -44,7 +44,7 @@ export const findSqonValueInQuery = (obj, fieldName) => {
       if (key === fieldName) {
           return obj[key][0];
       } else if (typeof obj[key] === 'object') {
-          var result = findSqonValueInQuery(obj[key], fieldName);
+          const result = findSqonValueInQuery(obj[key], fieldName);
           if (result !== null) {
               return result;
           }

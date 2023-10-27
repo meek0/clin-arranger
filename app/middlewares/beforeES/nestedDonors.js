@@ -20,7 +20,7 @@ const addInnerHitsDonors = (body) => {
                     ]
                   }
             } else if (typeof obj[key] === 'object') {
-                var result = addInnerHitsDonorsPath(obj[key]);
+                const result = addInnerHitsDonorsPath(obj[key]);
                 if (result !== null) {
                     return result;
                 }

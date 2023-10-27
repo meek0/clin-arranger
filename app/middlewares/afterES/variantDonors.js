@@ -1,3 +1,6 @@
+// extract the inner_hits from ES response if available and copy its content where is should be normally:
+// - inner_hits.donors (is from beforeES/nestedDonors)
+// - (add more inner_hits bellow ...)
 export default function (_, hits) {
     if (hits?.hits) {
         hits.hits = hits.hits?.map((hit) => {
@@ -5,7 +8,6 @@ export default function (_, hits) {
             if (innerHitsDonors) {
                 hit._source.donors = structuredClone(innerHitsDonors);
                 delete hit.inner_hits;
-
             }
             return hit;
         });
