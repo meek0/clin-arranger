@@ -7,6 +7,7 @@ import app from "./app.js";
 
 import * as beforeES from './middlewares/beforeES'
 import * as afterES from './middlewares/afterES'
+import * as beforeAggrES from './middlewares/beforeAggrES'
 
 const arrangerRoutes = await ArrangerServer.default({
     esHost: process.env.ES_HOST,
@@ -14,7 +15,8 @@ const arrangerRoutes = await ArrangerServer.default({
     esPass: process.env.ES_PASS,
     middlewares: {
         preES: Object.values(beforeES),
-        postES: Object.values(afterES)
+        postES: Object.values(afterES),
+        preAggrES: Object.values(beforeAggrES),
     }
 })
 
