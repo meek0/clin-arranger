@@ -10,26 +10,27 @@ const addInnerHitsDonors = (body) => {
             "donors"
         ]
     }
+
+    let countOfNestedDonors = 0;
     
     const addInnerHitsDonorsPath = (obj) => {
         for (var key in obj) {
             if (key === 'path' && obj[key] === 'donors') {
+                countOfNestedDonors ++;
                 return obj.inner_hits = {
                     _source: [
                       "donors.*"
                     ]
                   }
             } else if (typeof obj[key] === 'object') {
-                const result = addInnerHitsDonorsPath(obj[key]);
-                if (result !== null) {
-                    return result;
-                }
+                addInnerHitsDonorsPath(obj[key]);
             }
         }
         return null;
     }
-    addInnerHitsDonorsPath(newBody);
-    return newBody;
+    addInnerHitsDonorsPath(newBody.query);
+     // keep original body for complex nested queries
+    return countOfNestedDonors === 1 ? newBody : body;
 }
 
 export default function (body) {
@@ -37,7 +38,7 @@ export default function (body) {
     const analysis_id = findSqonValueInQuery(body.query, DONORS_ANALYSIS_SERVICE_REQUEST_ID)
 
     if(patient_id || analysis_id) {
-        body = addInnerHitsDonors(body)
+       body = addInnerHitsDonors(body)
     }
 
     // console.log('[nestedDonors]', JSON.stringify(body))

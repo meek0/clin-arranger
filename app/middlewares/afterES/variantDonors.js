@@ -4,9 +4,12 @@
 export default function (_, hits) {
     if (hits?.hits) {
         hits.hits = hits.hits?.map((hit) => {
-            const innerHitsDonors = hit?.inner_hits?.donors?.hits?.hits?.map((h)=> h._source)
-            if (innerHitsDonors) {
-                hit._source.donors = structuredClone(innerHitsDonors);
+            if (hit?.inner_hits) {
+                const innerHitsDonors = hit?.inner_hits?.donors?.hits?.hits?.map((h)=> h._source)
+                // don't replace donors if already exist for complex nested queries
+                if (innerHitsDonors && innerHitsDonors.length > 0 && !hit._source.donors) {
+                    hit._source.donors = structuredClone(innerHitsDonors);
+                }
                 delete hit.inner_hits;
             }
             return hit;
