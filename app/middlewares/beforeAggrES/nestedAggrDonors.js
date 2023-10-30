@@ -43,7 +43,7 @@ export default function (body) {
 
     if(patient_id || analysis_id) {
        body = addAggsNested(body, patient_id, analysis_id)
-       console.log('[nestedAggrDonors]', JSON.stringify(body))
+       // console.log('[nestedAggrDonors]', JSON.stringify(body))
     }
 
     return body
