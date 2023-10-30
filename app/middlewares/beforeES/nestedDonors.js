@@ -28,7 +28,7 @@ const addInnerHitsDonors = (body) => {
         }
         return null;
     }
-    addInnerHitsDonorsPath(newBody);
+    addInnerHitsDonorsPath(newBody.query);
      // keep original body for complex nested queries
     return countOfNestedDonors === 1 ? newBody : body;
 }
