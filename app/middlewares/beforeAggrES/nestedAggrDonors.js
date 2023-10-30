@@ -2,30 +2,34 @@ import {findSqonValueInQuery, DONORS_ANALYSIS_SERVICE_REQUEST_ID, DONORS_PATIENT
 
 const addAggsNested = (body, patient_id, analysis_id) => {
     const newBody = structuredClone(body)
+
+    const buildFilter = (aggs) => {
+      return {
+        filter_patient: {
+          filter: {
+            terms: {
+              [DONORS_PATIENT_ID]: [patient_id]
+            }
+          },
+          aggs:analysis_id ?  {
+              filter_analysis: {
+                filter: {
+                  terms: {
+                    [DONORS_ANALYSIS_SERVICE_REQUEST_ID]: [analysis_id]
+                  }
+                },
+                aggs: aggs
+              }
+            } : aggs
+          }
+        }
+    }
     
     const addAggsNestedIds = (obj) => {
         for (var key in obj) {
             if (key.endsWith(':nested') && obj[key]?.nested?.path === 'donors') {
                 const nestedAggs = structuredClone(obj[key].aggs)
-                obj[key].aggs = {
-                    filter_patient: {
-                      filter: {
-                        terms: {
-                          [DONORS_PATIENT_ID]: [patient_id]
-                        }
-                      },
-                      aggs: {
-                        filter_analysis: {
-                          filter: {
-                            terms: {
-                              [DONORS_ANALYSIS_SERVICE_REQUEST_ID]: [analysis_id]
-                            }
-                          },
-                          aggs: nestedAggs
-                        }
-                      }
-                    }
-                }
+                obj[key].aggs = buildFilter(nestedAggs)
             } else if (typeof obj[key] === 'object') {
                 addAggsNestedIds(obj[key]);
             }
