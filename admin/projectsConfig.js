@@ -139,7 +139,7 @@ const commonMutations = [
       isArray: true,
     },
   },
-  {
+  /*{
     field: "varsome.acmg.classifications",
     graphqlField: GRAPHQL_FIELD_VARIANTS,
     extendedFieldMappingInput: {
@@ -154,14 +154,14 @@ const commonMutations = [
     },
   },
   {
-    field: "consequences.refseq_mrna_id",
+    field: "varsome.publications",
     graphqlField: GRAPHQL_FIELD_VARIANTS,
     extendedFieldMappingInput: {
       isArray: true,
     },
-  },
+  },*/
   {
-    field: "varsome.publications",
+    field: "consequences.refseq_mrna_id",
     graphqlField: GRAPHQL_FIELD_VARIANTS,
     extendedFieldMappingInput: {
       isArray: true,
