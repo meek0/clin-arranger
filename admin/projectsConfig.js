@@ -168,7 +168,7 @@ const commonMutations = [
     },
   },
   {
-    field: "franklin.franklin_acmg_evidence",
+    field: "franklin_max.acmg_evidence",
     graphqlField: GRAPHQL_FIELD_VARIANTS,
     extendedFieldMappingInput: {
       isArray: true,
