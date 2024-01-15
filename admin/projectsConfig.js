@@ -35,6 +35,13 @@ const commonMutations = [
     },
   },
   {
+    field: "exomiser_max.acmg_evidence",
+    graphqlField: GRAPHQL_FIELD_VARIANTS,
+    extendedFieldMappingInput: {
+      isArray: true,
+    },
+  },
+  {
     field: "donors.filters",
     graphqlField: GRAPHQL_FIELD_VARIANTS,
     extendedFieldMappingInput: {
@@ -92,6 +99,13 @@ const commonMutations = [
   },
   {
     field: "donors.possibly_hc_complement",
+    graphqlField: GRAPHQL_FIELD_VARIANTS,
+    extendedFieldMappingInput: {
+      isArray: true,
+    },
+  },
+  {
+    field: "donors.exomiser.acmg_evidence",
     graphqlField: GRAPHQL_FIELD_VARIANTS,
     extendedFieldMappingInput: {
       isArray: true,
