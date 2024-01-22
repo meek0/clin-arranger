@@ -7,7 +7,7 @@ import cors from "cors";
 import genomicSuggestionsHandler, {
   SUGGESTIONS_TYPES,
 } from "./controllers/genomicSuggestionsHandler.js";
-import { searchHPOAutocomplete, searchHPODescendants, searchHPOAncestors } from "./controllers/hpoHandler";
+import {searchHPOAutocomplete, searchHPODescendants, searchHPOAncestors, countHPO} from "./controllers/hpoHandler";
 import arrangerGqlSecurityHandler from "./controllers/arrangerGqlSecurityHandler.js";
 import arrangerRoutesHandler from "./controllers/arrangerRoutesHandler.js";
 import transcriptsReportHandler from "./controllers/transcriptsReportHandler.js";
@@ -75,6 +75,12 @@ app.get(
   "/hpo/descendants",
   keycloak.enforcer(HPO_READ_PERMISSION_ENFORCER),
   (req, res) => searchHPODescendants(req, res)
+);
+
+app.get(
+  "/hpo/count",
+  keycloak.enforcer(HPO_READ_PERMISSION_ENFORCER),
+  (req, res) => countHPO(req, res)
 );
 
 app.get(

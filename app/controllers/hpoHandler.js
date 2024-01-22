@@ -6,7 +6,7 @@ import {
 const SIZE_HPO_CHILDREN = 1000
 
 export async function searchHPOAutocomplete(req, res) {
-  
+
   const params = req.query || req.params || req.body
   const { prefix } = params
 
@@ -106,3 +106,12 @@ export async function searchHPOAncestors (req, res) {
   });
 };
 
+export const countHPO = async (_,res) => {
+  const client = EsInstance.getInstance();
+
+  const {body} = await client.count({
+    index: indexNameHPO
+  })
+
+  res.status(200).send({count: body.count})
+}
