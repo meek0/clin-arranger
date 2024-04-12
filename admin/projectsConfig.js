@@ -112,6 +112,13 @@ const commonMutations = [
     },
   },
   {
+    field: "donors.all_analyses",
+    graphqlField: GRAPHQL_FIELD_VARIANTS,
+    extendedFieldMappingInput: {
+      isArray: true,
+    },
+  },
+  {
     field: "genes.omim.inheritance",
     graphqlField: GRAPHQL_FIELD_VARIANTS,
     extendedFieldMappingInput: {
