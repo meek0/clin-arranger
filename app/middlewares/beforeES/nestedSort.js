@@ -1,6 +1,6 @@
-import {findSqonValueInQuery, DONORS_ANALYSIS_SERVICE_REQUEST_ID, DONORS_PATIENT_ID} from "../../utils.js"
+import {findSqonValueInQuery, DONORS_ANALYSIS_SERVICE_REQUEST_ID, DONORS_PATIENT_ID, DONORS_BIOINFO_ANALYSIS_CODE} from "../../utils.js"
 
-const replaceSqonSort = (sort, sortedField, patientId, analysisId) => {
+const replaceSqonSort = (sort, sortedField, patientId, analysisId, bioinfo_analysis_code) => {
     const newSort = structuredClone(sort)
     const newFilter =[]
     if(patientId){
@@ -17,6 +17,15 @@ const replaceSqonSort = (sort, sortedField, patientId, analysisId) => {
             {
                 term: {
                     [DONORS_ANALYSIS_SERVICE_REQUEST_ID]: analysisId
+                }
+            },
+        )
+    }
+    if(bioinfo_analysis_code){
+        newFilter.push(
+            {
+                term: {
+                    [DONORS_BIOINFO_ANALYSIS_CODE]: bioinfo_analysis_code
                 }
             },
         )
@@ -51,8 +60,10 @@ export default function (body) {
         if(sort[field].nested && sort[field].nested.path && sort[field].nested.path === 'donors') {
             const patient_id = findSqonValueInQuery(body.query, DONORS_PATIENT_ID)
             const analysis_id = findSqonValueInQuery(body.query, DONORS_ANALYSIS_SERVICE_REQUEST_ID)
-            if(patient_id || analysis_id) {
-                return replaceSqonSort(sort, field, patient_id, analysis_id);
+            const bioinfo_analysis_code = findSqonValueInQuery(body.query, DONORS_BIOINFO_ANALYSIS_CODE)
+            
+            if(patient_id || analysis_id || bioinfo_analysis_code) {
+                return replaceSqonSort(sort, field, patient_id, analysis_id, bioinfo_analysis_code);
             }
         }
         return sort

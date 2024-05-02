@@ -1,4 +1,4 @@
-import {findSqonValueInQuery, DONORS_ANALYSIS_SERVICE_REQUEST_ID, DONORS_PATIENT_ID} from "../../utils.js"
+import {findSqonValueInQuery, DONORS_ANALYSIS_SERVICE_REQUEST_ID, DONORS_PATIENT_ID, DONORS_BIOINFO_ANALYSIS_CODE} from "../../utils.js"
 
 const addInnerHitsDonors = (body) => {
     const newBody = structuredClone(body)
@@ -36,8 +36,9 @@ const addInnerHitsDonors = (body) => {
 export default function (body) {
     const patient_id = findSqonValueInQuery(body.query, DONORS_PATIENT_ID)
     const analysis_id = findSqonValueInQuery(body.query, DONORS_ANALYSIS_SERVICE_REQUEST_ID)
+    const bioinfo_analysis_code = findSqonValueInQuery(body.query, DONORS_BIOINFO_ANALYSIS_CODE)
 
-    if(patient_id || analysis_id) {
+    if(patient_id || analysis_id || bioinfo_analysis_code) {
        body = addInnerHitsDonors(body)
     }
 

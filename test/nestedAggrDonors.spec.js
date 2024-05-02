@@ -314,4 +314,158 @@ describe("nestedAggrDonors", () => {
     }
     expect(nestedAggrDonors(query)).to.eql(expected)
   });
+  it(`Should add nested filter patientId + analysisId + bioinfo analysis code in aggr if donors`, () => {
+    const common = {
+        bool: {
+            must: [
+                {
+                    terms: {
+                        "donors.patient_id": [
+                            "508428"
+                        ],
+                        boost: 0
+                    }
+                },
+                {
+                    terms: {
+                        "donors.analysis_service_request_id": [
+                            "508427"
+                        ],
+                        boost: 0
+                    }
+                },
+                {
+                    terms: {
+                        "donors.bioinfo_analysis_code": [
+                            "TEBA"
+                        ],
+                        boost: 0
+                    }
+                }
+            ]
+        }
+    }
+    const query = {
+        query: {
+            bool: {
+                must: [
+                    {
+                        bool: {
+                            must: [
+                                {
+                                    nested: {
+                                        path: "donors",
+                                        query: common
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        bool: {
+                            must_not: []
+                        }
+                    }
+                ]
+            }
+        },
+        aggs: {
+            'donors.exomiser.gene_combined_score:global': {
+                global: {},
+                aggs: {
+                    "donors.exomiser.gene_combined_score:nested": {
+                        nested: {
+                            "path": "donors"
+                        },
+                        aggs: {
+                            "donors.exomiser.gene_combined_score:stats": {
+                                stats: {
+                                    field: "donors.exomiser.gene_combined_score"
+                                }
+                            }
+                        }
+                    }   
+                }
+            }
+        },
+    }
+    const expected = {
+        query: {
+            bool: {
+                must: [
+                    {
+                        bool: {
+                            must: [
+                                {
+                                    nested: {
+                                        path: "donors",
+                                        query: common
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        bool: {
+                            must_not: []
+                        }
+                    }
+                ]
+            }
+        },
+        aggs: {
+            "donors.exomiser.gene_combined_score:global": {
+                aggs: {
+                    "donors.exomiser.gene_combined_score:nested": {
+                        aggs: {
+                            filter_patient: {
+                                aggs: {
+                                    filter_analysis: {
+                                        aggs: {
+                                            filter_bioinfo: {
+                                                aggs: {
+                                                    "donors.exomiser.gene_combined_score:stats": {
+                                                        stats: {
+                                                        field: "donors.exomiser.gene_combined_score"
+                                                        }
+                                                    }
+                                                },
+                                                filter: {
+                                                    terms: {
+                                                        "donors.bioinfo_analysis_code": [
+                                                        "TEBA"
+                                                        ]
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        filter: {
+                                            terms: {
+                                                "donors.analysis_service_request_id": [
+                                                "508427"
+                                                ]
+                                            }
+                                        }
+                                    }
+                                },
+                                filter: {
+                                    terms: {
+                                        "donors.patient_id": [
+                                        "508428"
+                                        ]
+                                    }
+                                }
+                            }
+                        },
+                        nested: {
+                            path: "donors"
+                        }
+                    }
+                },
+                global: {}
+            }
+        }
+    }
+    expect(nestedAggrDonors(query)).to.eql(expected)
+  });
 });
