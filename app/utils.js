@@ -38,6 +38,7 @@ export function extractValuesFromSqonByField(jsonObj, field) {
 
 export const DONORS_PATIENT_ID = 'donors.patient_id';
 export const DONORS_ANALYSIS_SERVICE_REQUEST_ID = 'donors.analysis_service_request_id';
+export const DONORS_BIOINFO_ANALYSIS_CODE = 'donors.bioinfo_analysis_code';
 
 export const findSqonValueInQuery = (obj, fieldName) => {
   for (var key in obj) {
