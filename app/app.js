@@ -7,7 +7,7 @@ import cors from "cors";
 import genomicSuggestionsHandler, {
   SUGGESTIONS_TYPES,
 } from "./controllers/genomicSuggestionsHandler.js";
-import {searchHPOAutocomplete, searchHPODescendants, searchHPOAncestors, countHPO} from "./controllers/hpoHandler";
+import {searchHPOAutocomplete, searchHPODescendants, searchHPOAncestors, countHPO} from "./controllers/hpoHandler.js";
 import arrangerGqlSecurityHandler from "./controllers/arrangerGqlSecurityHandler.js";
 import arrangerRoutesHandler from "./controllers/arrangerRoutesHandler.js";
 import transcriptsReportHandler from "./controllers/transcriptsReportHandler.js";
@@ -22,7 +22,9 @@ app.use(compression())
 
 app.use(bodyParser.json({ limit: "4MB" }));
 
-app.use(cors());
+app.use(cors({
+    exposedHeaders: ['Authorization']
+}));
 
 const keycloak = new Keycloak(
   {},

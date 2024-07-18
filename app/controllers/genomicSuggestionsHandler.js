@@ -3,7 +3,7 @@ import {
   indexNameGeneFeatureSuggestion,
   indexNameVariantFeatureSuggestion,
   maxNOfGenomicFeatureSuggestions,
-} from "../../config/vars";
+} from "../../config/vars.js";
 
 export const SUGGESTIONS_TYPES = {
   VARIANT: "variant",

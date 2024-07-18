@@ -1,7 +1,7 @@
 import EsInstance from "../../services/esClient.js";
 import {
   indexNameHPO,
-} from "../../config/vars";
+} from "../../config/vars.js";
 
 const SIZE_HPO_CHILDREN = 1000
 
@@ -43,7 +43,7 @@ export async function searchHPOAutocomplete(req, res) {
 };
 
 export async function searchHPODescendants(req, res) {
-  
+
   const params = req.query || req.params || req.body
   const { parentHpoId } = params
 

@@ -12,7 +12,7 @@ const addInnerHitsDonors = (body) => {
     }
 
     let countOfNestedDonors = 0;
-    
+
     const addInnerHitsDonorsPath = (obj) => {
         for (var key in obj) {
             if (key === 'path' && obj[key] === 'donors') {
