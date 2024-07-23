@@ -13,7 +13,7 @@ import arrangerRoutesHandler from "./controllers/arrangerRoutesHandler.js";
 import transcriptsReportHandler from "./controllers/transcriptsReportHandler.js";
 import { sendForbidden } from "./httpUtils.js";
 import { VARIANTS_READ_PERMISSION_ENFORCER, HPO_READ_PERMISSION_ENFORCER } from "./permissionsUtils.js";
-import variantDonorsHandler from "./controllers/variantDonorsHandler.js"
+import beforeSendHandler from "./controllers/beforeSendHandler.js"
 import booleanFilterMiddleware from './middlewares/booleanFilterMiddleware.js'
 
 const app = express();
@@ -101,8 +101,7 @@ app.all("*", arrangerRoutesHandler);
 
 app.post("*", keycloak.protect(), arrangerGqlSecurityHandler);
 
-app.use(variantDonorsHandler)
-
+app.use(beforeSendHandler)
 app.use(booleanFilterMiddleware)
 
 export default app;

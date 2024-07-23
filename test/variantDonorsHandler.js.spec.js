@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { cleanupDonors } from "../app/controllers/variantDonorsHandler.js";
+import { cleanupDonors } from "../app/controllers/beforeSendHandler.js";
 
 describe("cleanupDonors", () => {
 
