@@ -8,6 +8,7 @@ export default async function (_, hits) {
             const res = await getVariantsProperties(uniqueIds);
             mapVariantPropertiesToHits(hits.hits, res);
         } catch (e) {
+            console.error('Failed to fetch variant flags: ', e?.message);
             return hits;
         }
     }

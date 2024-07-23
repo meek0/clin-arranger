@@ -9,7 +9,7 @@ const usersApiClient = axios.create({
 });
 
 export function mapHitToUniqueId(hit) {
-    return hit._source.variant_class === 'SNV' ? `${hit._source.locus}_snv` : `${hit._source.hash}_cnv`;
+    return hit._source.patient_id ? `${hit._source.hash}_cnv` : `${hit._source.locus}_snv`;
 }
 
 export function mapVariantPropertiesToHits(hits, variantProperties) {
