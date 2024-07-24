@@ -8,23 +8,34 @@ const usersApiClient = axios.create({
     baseURL: usersApiUrl
 });
 
-export function mapHitToUniqueId(hit) {
-    return hit._source.patient_id ? `${hit._source.hash}_cnv` : `${hit._source.locus}_snv`;
+export function mapVariantToUniqueId(variant) {
+    const node = variant?.node;
+    if (node) {
+        if (node.patient_id && node.hash) { // CNV
+            return `${node.hash}_cnv`;
+        } else if (node.locus) {    // SNV
+            return `${node.locus}_snv`;
+        } else {
+            return null;    // avoid undefined_cnv/snv
+        }
+    } else {
+        return null;
+    }
 }
 
-export function mapVariantPropertiesToHits(hits, variantProperties) {
-    if (Array.isArray(hits) && Array.isArray(variantProperties)) {
-        hits.forEach(hit => {
-            const uniqueId = mapHitToUniqueId(hit);
+export function mapVariantPropertiesToVariants(variants, variantProperties) {
+    if (Array.isArray(variants) && Array.isArray(variantProperties)) {
+        variants.forEach(variant => {
+            const uniqueId = mapVariantToUniqueId(variant);
             const foundProperties = variantProperties.filter(props => props.unique_id === uniqueId);
             foundProperties.forEach(props => props.timestamp = new Date(props.timestamp));
             foundProperties.sort((a, b) => b.timestamp - a.timestamp);
             const lastFoundProperties = foundProperties[0] || PROPERTIES_NOT_FOUND;
-            hit._source.flags = lastFoundProperties.properties.flags;
+            variant.node.flags = [...lastFoundProperties.properties.flags];
+            // console.log('variant.node.flags', variant.node.flags);
         });
     }
-
-    return hits;
+    return variants;
 }
 
 export async function getVariantsProperties(ids) {
@@ -34,7 +45,6 @@ export async function getVariantsProperties(ids) {
                 unique_id: ids
             }
         });
-
         return response.data;
     } else {
         return [];

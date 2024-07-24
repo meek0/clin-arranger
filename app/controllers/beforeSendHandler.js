@@ -1,15 +1,9 @@
 import {extractValuesFromSqonByField} from "../utils.js"
+import { mapVariantToUniqueId, mapVariantPropertiesToVariants, getVariantsProperties } from '../../services/variantPropertiesUtils.js';
 
 
-export const cleanupDonors = (body, patientIds, analysisIds, bioinfoCodes) => {
-    if (!patientIds?.length || !body?.length) {
-        return body;
-    }
-
-    const data = JSON.parse(body);
-    const variants = data?.data?.Variants?.hits?.edges;
-
-    if (variants?.length) {
+export const cleanupDonors = (variants, patientIds, analysisIds, bioinfoCodes) => {
+    if (patientIds?.length && variants?.length) {
         // Create a set of patient_ids for faster lookup
         const patientIdsSet = new Set(patientIds.map(id => String(id)));
         const analysisIdsSet = new Set(analysisIds.map(id => String(id)));
@@ -34,27 +28,45 @@ export const cleanupDonors = (body, patientIds, analysisIds, bioinfoCodes) => {
                 variant.node.donors.hits.total = newDonors.length;
             }
         });
-
-        return JSON.stringify(data);
     }
-
-    return body;
 };
 
+async function fetchFlags (variants) {  
+    try {
+        if (variants?.length) {
+            const uniqueIds = variants.map(mapVariantToUniqueId).filter(id => !!id);
+            const variantProperties  = await getVariantsProperties(uniqueIds)
+            mapVariantPropertiesToVariants(variants, variantProperties);
+        }
+    } catch(e) {
+        console.error('Failed to fetch variant flags: ' + e);
+    }
+}
 
-export default (req, res, next) => {
+
+
+export default async function(req, res, next) {
 
     const sqon = req.body?.variables?.sqon;
     
     const patientIds = extractValuesFromSqonByField(sqon, 'donors.patient_id')
     const analysisIds = extractValuesFromSqonByField(sqon, 'donors.analysis_service_request_id')
     const bioinfoCodes = extractValuesFromSqonByField(sqon, 'donors.bioinfo_analysis_code')
+    const withFlags = req.body?.query?.includes('flags');
 
-    if (patientIds?.length > 0) {
+    if (patientIds?.length > 0 || withFlags) {
         // one way to modify body is to replace the res.send() function
         const originalSend = res.send;
-        res.send = function () { // function is mandatory, () => {} doesn't work here
-            arguments[0] = cleanupDonors(arguments[0], patientIds, analysisIds, bioinfoCodes)
+        res.send = async function () { // function is mandatory, () => {} doesn't work here
+            // parse variants from response body
+            const data = JSON.parse(arguments[0]);
+            const variants = data?.data?.Variants?.hits?.edges;
+            cleanupDonors(variants, patientIds, analysisIds, bioinfoCodes)
+            if (withFlags) {
+                await fetchFlags(variants)
+            }
+            // override response body with modified data
+            arguments[0] = JSON.stringify(data);
             originalSend.apply(res, arguments);
         };
     }
