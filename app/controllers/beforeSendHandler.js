@@ -2,15 +2,8 @@ import {extractValuesFromSqonByField} from "../utils.js"
 import { mapVariantToUniqueId, mapVariantPropertiesToVariants, getVariantsProperties } from '../../services/variantPropertiesUtils.js';
 
 
-export const cleanupDonors = (body, patientIds, analysisIds, bioinfoCodes) => {
-    if (!patientIds?.length || !body?.length) {
-        return body;
-    }
-
-    const data = JSON.parse(body);
-    const variants = data?.data?.Variants?.hits?.edges;
-
-    if (variants?.length) {
+export const cleanupDonors = (variants, patientIds, analysisIds, bioinfoCodes) => {
+    if (patientIds?.length && variants?.length) {
         // Create a set of patient_ids for faster lookup
         const patientIdsSet = new Set(patientIds.map(id => String(id)));
         const analysisIdsSet = new Set(analysisIds.map(id => String(id)));
@@ -35,29 +28,19 @@ export const cleanupDonors = (body, patientIds, analysisIds, bioinfoCodes) => {
                 variant.node.donors.hits.total = newDonors.length;
             }
         });
-
-        return JSON.stringify(data);
     }
-
-    return body;
 };
 
-async function fetchFlags (body) {  
+async function fetchFlags (variants) {  
     try {
-        const data = JSON.parse(body);
-        const variants = data?.data?.Variants?.hits?.edges;
-
         if (variants?.length) {
             const uniqueIds = variants.map(mapVariantToUniqueId).filter(id => !!id);
             const variantProperties  = await getVariantsProperties(uniqueIds)
             mapVariantPropertiesToVariants(variants, variantProperties);
         }
-        return JSON.stringify(data);
-
     } catch(e) {
-        console.error('Failed to fetch variant flags: ' + e?.message);
+        console.error('Failed to fetch variant flags: ' + e);
     }
-    return body;
 }
 
 
@@ -75,12 +58,15 @@ export default async function(req, res, next) {
         // one way to modify body is to replace the res.send() function
         const originalSend = res.send;
         res.send = async function () { // function is mandatory, () => {} doesn't work here
-            if (patientIds?.length > 0) {
-                arguments[0] = cleanupDonors(arguments[0], patientIds, analysisIds, bioinfoCodes)
-            }
+            // parse variants from response body
+            const data = JSON.parse(arguments[0]);
+            const variants = data?.data?.Variants?.hits?.edges;
+            cleanupDonors(variants, patientIds, analysisIds, bioinfoCodes)
             if (withFlags) {
-                arguments[0] = await fetchFlags(arguments[0])
+                await fetchFlags(variants)
             }
+            // override response body with modified data
+            arguments[0] = JSON.stringify(data);
             originalSend.apply(res, arguments);
         };
     }
