@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { mapVariantToUniqueId, mapVariantPropertiesToVariants } from '../services/variantPropertiesUtils.js';
+import { mapVariantToUniqueId, mapVariantPropertiesToVariants } from '../services/usersApiClient.js';
 
 const cnvBody = {
     data:{

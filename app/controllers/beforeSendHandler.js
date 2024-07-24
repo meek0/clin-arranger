@@ -1,5 +1,5 @@
 import {extractValuesFromSqonByField} from "../utils.js"
-import { mapVariantToUniqueId, mapVariantPropertiesToVariants, getVariantsProperties } from '../../services/variantPropertiesUtils.js';
+import { mapVariantToUniqueId, mapVariantPropertiesToVariants, getVariantsProperties } from '../../services/usersApiClient.js';
 
 
 export const cleanupDonors = (variants, patientIds, analysisIds, bioinfoCodes) => {
@@ -31,7 +31,7 @@ export const cleanupDonors = (variants, patientIds, analysisIds, bioinfoCodes) =
     }
 };
 
-async function fetchFlags (variants) {  
+async function fetchFlags (variants) {
     try {
         if (variants?.length) {
             const uniqueIds = variants.map(mapVariantToUniqueId).filter(id => !!id);
@@ -48,7 +48,7 @@ async function fetchFlags (variants) {
 export default async function(req, res, next) {
 
     const sqon = req.body?.variables?.sqon;
-    
+
     const patientIds = extractValuesFromSqonByField(sqon, 'donors.patient_id')
     const analysisIds = extractValuesFromSqonByField(sqon, 'donors.analysis_service_request_id')
     const bioinfoCodes = extractValuesFromSqonByField(sqon, 'donors.bioinfo_analysis_code')

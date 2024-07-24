@@ -18,7 +18,7 @@ import {
   cnv,
   genes,
 } from "../../config/vars.js";
-import usersApiClient from '../../services/variantPropertiesUtils.js';
+import usersApiClient from '../../services/usersApiClient.js';
 
 const translationRsNameToGqlType = {
   ServiceRequest: [analyses, sequencings],
