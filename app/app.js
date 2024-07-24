@@ -7,13 +7,13 @@ import cors from "cors";
 import genomicSuggestionsHandler, {
   SUGGESTIONS_TYPES,
 } from "./controllers/genomicSuggestionsHandler.js";
-import {searchHPOAutocomplete, searchHPODescendants, searchHPOAncestors, countHPO} from "./controllers/hpoHandler";
+import {searchHPOAutocomplete, searchHPODescendants, searchHPOAncestors, countHPO} from "./controllers/hpoHandler.js";
 import arrangerGqlSecurityHandler from "./controllers/arrangerGqlSecurityHandler.js";
 import arrangerRoutesHandler from "./controllers/arrangerRoutesHandler.js";
 import transcriptsReportHandler from "./controllers/transcriptsReportHandler.js";
 import { sendForbidden } from "./httpUtils.js";
 import { VARIANTS_READ_PERMISSION_ENFORCER, HPO_READ_PERMISSION_ENFORCER } from "./permissionsUtils.js";
-import variantDonorsHandler from "./controllers/variantDonorsHandler.js"
+import beforeSendHandler from "./controllers/beforeSendHandler.js"
 import booleanFilterMiddleware from './middlewares/booleanFilterMiddleware.js'
 
 const app = express();
@@ -22,7 +22,9 @@ app.use(compression())
 
 app.use(bodyParser.json({ limit: "4MB" }));
 
-app.use(cors());
+app.use(cors({
+    exposedHeaders: ['Authorization']
+}));
 
 const keycloak = new Keycloak(
   {},
@@ -99,8 +101,7 @@ app.all("*", arrangerRoutesHandler);
 
 app.post("*", keycloak.protect(), arrangerGqlSecurityHandler);
 
-app.use(variantDonorsHandler)
-
+app.use(beforeSendHandler)
 app.use(booleanFilterMiddleware)
 
 export default app;

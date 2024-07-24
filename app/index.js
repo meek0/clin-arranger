@@ -1,13 +1,13 @@
 // import "regenerator-runtime/runtime";
 
 import ArrangerServer from "@ferlab/arranger-server";
-import {port, env} from "../config/vars";
-import logger from "../config/logger";
+import {port, env} from "../config/vars.js";
+import logger from "../config/logger.js";
 import app from "./app.js";
 
-import * as beforeES from './middlewares/beforeES'
-import * as afterES from './middlewares/afterES'
-import * as beforeAggrES from './middlewares/beforeAggrES'
+import * as beforeES from './middlewares/beforeES/index.js'
+import * as afterES from './middlewares/afterES/index.js'
+import * as beforeAggrES from './middlewares/beforeAggrES/index.js'
 
 const arrangerRoutes = await ArrangerServer.default({
     esHost: process.env.ES_HOST,
