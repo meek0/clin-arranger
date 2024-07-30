@@ -31,11 +31,11 @@ export const cleanupDonors = (variants, patientIds, analysisIds, bioinfoCodes) =
     }
 };
 
-async function fetchFlags (variants) {
+async function fetchFlags (req, variants) {
     try {
         if (variants?.length) {
             const uniqueIds = variants.map(mapVariantToUniqueId).filter(id => !!id);
-            const variantProperties  = await getVariantsProperties(uniqueIds)
+            const variantProperties  = await getVariantsProperties(req, uniqueIds)
             mapVariantPropertiesToVariants(variants, variantProperties);
         }
     } catch(e) {
@@ -63,7 +63,7 @@ export default async function(req, res, next) {
             const variants = data?.data?.Variants?.hits?.edges;
             cleanupDonors(variants, patientIds, analysisIds, bioinfoCodes)
             if (withFlags) {
-                await fetchFlags(variants)
+                await fetchFlags(req, variants)
             }
             // override response body with modified data
             arguments[0] = JSON.stringify(data);
