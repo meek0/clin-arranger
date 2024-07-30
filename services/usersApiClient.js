@@ -38,11 +38,14 @@ export function mapVariantPropertiesToVariants(variants, variantProperties) {
     return variants;
 }
 
-export async function getVariantsProperties(ids) {
+export async function getVariantsProperties(req, ids) {
     if (Array.isArray(ids) && ids.length > 0) {
         const response = await usersApiClient.get('/variants', {
             params: {
                 unique_id: ids
+            },
+            headers: {
+                Authorization: req.headers.authorization
             }
         });
         return response.data;

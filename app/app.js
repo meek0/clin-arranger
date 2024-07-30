@@ -22,9 +22,7 @@ app.use(compression())
 
 app.use(bodyParser.json({ limit: "4MB" }));
 
-app.use(cors({
-    exposedHeaders: ['Authorization']
-}));
+app.use(cors());
 
 const keycloak = new Keycloak(
   {},
