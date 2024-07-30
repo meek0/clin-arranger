@@ -40,6 +40,10 @@ async function fetchFlags (variants) {
         }
     } catch(e) {
         console.error('Failed to fetch variant flags: ' + e);
+
+        if (variants?.length) {
+            variants.forEach(variant => variant.node.flags = []); // ensure empty flags
+        }
     }
 }
 
