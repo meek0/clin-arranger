@@ -24,10 +24,11 @@ export function mapVariantToUniqueId(variant) {
 }
 
 export function mapVariantPropertiesToVariants(variants, variantProperties) {
-    if (Array.isArray(variants) && Array.isArray(variantProperties)) {
+    const usableVariantProperties = Array.isArray(variantProperties) ? variantProperties : [];
+    if (Array.isArray(variants)) {
         variants.forEach(variant => {
             const uniqueId = mapVariantToUniqueId(variant);
-            const foundProperties = variantProperties.filter(props => props.unique_id === uniqueId);
+            const foundProperties = usableVariantProperties.filter(props => uniqueId === props?.unique_id);
             foundProperties.forEach(props => props.timestamp = new Date(props.timestamp));
             foundProperties.sort((a, b) => b.timestamp - a.timestamp);
             const lastFoundProperties = foundProperties[0] || PROPERTIES_NOT_FOUND;
