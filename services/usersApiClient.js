@@ -30,7 +30,7 @@ export function mapVariantPropertiesToVariants(variants, variantProperties) {
             const uniqueId = mapVariantToUniqueId(variant);
             const foundProperties = usableVariantProperties.filter(props => uniqueId === props?.unique_id);
             foundProperties.forEach(props => props.timestamp = new Date(props.timestamp));
-            foundProperties.sort((a, b) => b.timestamp - a.timestamp);
+            foundProperties.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
             const lastFoundProperties = foundProperties[0] || PROPERTIES_NOT_FOUND;
             variant.node.flags = [...lastFoundProperties.properties.flags];
             // console.log('variant.node.flags', variant.node.flags);
