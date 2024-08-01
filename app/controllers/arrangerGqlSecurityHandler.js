@@ -18,7 +18,6 @@ import {
   cnv,
   genes,
 } from "../../config/vars.js";
-import usersApiClient from '../../services/usersApiClient.js';
 
 const translationRsNameToGqlType = {
   ServiceRequest: [analyses, sequencings],
@@ -61,11 +60,6 @@ export default (req, res, next) => {
   if (validationState.permissionsFailed) {
     return sendForbidden(res);
   }
-
-  usersApiClient.interceptors.request.use((r) => {
-    r.headers['Authorization'] = req.headers.authorization;
-    return r;
-  });
 
   if (!isGenetician(decodedRpt) && validationState.addSecurityTags) {
     const gqlQueryVariables = req.body.variables || {};
