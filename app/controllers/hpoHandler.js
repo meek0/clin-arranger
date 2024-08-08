@@ -16,21 +16,21 @@ export async function searchHPOAutocomplete(req, res) {
     index: indexNameHPO,
     body: {
       query: {
-        bool: {
-          should: [
-            {
-              prefix: {
-                name: {
-                  value: prefix
-                }
-              }
-            },
-            {
-              match_phrase_prefix: {
-                hpo_id: prefix
-              }
-            }
+        multi_match: {
+          query: prefix,
+          type: "bool_prefix",
+          fields: [
+            "hpo_id",
+            "name",
+            "name._2gram",
+            "name._3gram",
+            "name._index_prefix"
           ]
+        }
+      },
+      highlight: {
+        fields: {
+          name: {}
         }
       }
     }
