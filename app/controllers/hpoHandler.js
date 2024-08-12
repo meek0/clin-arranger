@@ -8,7 +8,7 @@ const SIZE_HPO_CHILDREN = 1000
 export async function searchHPOAutocomplete(req, res) {
 
   const params = req.query || req.params || req.body
-  const { prefix } = params
+  const { prefix, no_highlight } = params
 
   const client = EsInstance.getInstance();
 
@@ -30,7 +30,10 @@ export async function searchHPOAutocomplete(req, res) {
       },
       highlight: {
         fields: {
-          name: {}
+          name: {
+            pre_tags: no_highlight ? [""] : ["<strong>"],
+            post_tags:  no_highlight ? [""] : ["</strong>"]
+          }
         }
       }
     }
