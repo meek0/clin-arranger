@@ -15,6 +15,7 @@ import { sendForbidden } from "./httpUtils.js";
 import { VARIANTS_READ_PERMISSION_ENFORCER, HPO_READ_PERMISSION_ENFORCER } from "./permissionsUtils.js";
 import beforeSendHandler from "./controllers/beforeSendHandler.js"
 import booleanFilterMiddleware from './middlewares/booleanFilterMiddleware.js'
+import logger from "../config/logger.js";
 
 const app = express();
 
@@ -34,7 +35,7 @@ const keycloak = new Keycloak(
   }
 );
 
-keycloak.accessDenied = (_, res) => sendForbidden(res);
+keycloak.accessDenied = (_, res) => sendForbidden(res)
 
 app.use(keycloak.middleware());
 
@@ -68,25 +69,25 @@ app.get(
 app.get(
   "/hpo/autocomplete",
   keycloak.enforcer(HPO_READ_PERMISSION_ENFORCER),
-  (req, res) => searchHPOAutocomplete(req, res)
+  searchHPOAutocomplete
 );
 
 app.get(
   "/hpo/descendants",
   keycloak.enforcer(HPO_READ_PERMISSION_ENFORCER),
-  (req, res) => searchHPODescendants(req, res)
+  searchHPODescendants
 );
 
 app.get(
   "/hpo/count",
   keycloak.enforcer(HPO_READ_PERMISSION_ENFORCER),
-  (req, res) => countHPO(req, res)
+  countHPO
 );
 
 app.get(
   "/hpo/ancestors",
   keycloak.enforcer(HPO_READ_PERMISSION_ENFORCER),
-  (req, res) => searchHPOAncestors(req, res)
+  searchHPOAncestors
 );
 
 //Only forward
@@ -101,5 +102,13 @@ app.post("*", keycloak.protect(), arrangerGqlSecurityHandler);
 
 app.use(beforeSendHandler)
 app.use(booleanFilterMiddleware)
+
+app.use((error, req, res, next) => {
+  logger.error(error.message)
+  res.status(500).json({
+    error: error.constructor.name,
+    message: error.message
+  })
+})
 
 export default app;
