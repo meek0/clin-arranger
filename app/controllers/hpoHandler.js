@@ -16,39 +16,24 @@ export async function searchHPOAutocomplete(req, res) {
     index: indexNameHPO,
     body: {
       query: {
-        bool:{
-          should: [{
-            multi_match: {
-              query: prefix,
-              type: "bool_prefix",
-              fields: [
-                "name",
-                "name._2gram",
-                "name._3gram",
-                "name._index_prefix"
-              ]
-            }
-          }, {
-            match_bool_prefix: {
-              hpo_id: {
-                query: prefix
-              }
-            }
-          }]
+        multi_match: {
+          query: prefix,
+          fields: [
+            "hpo_id",
+            "hpo_id.autocomplete",
+            "name",
+            "name._2gram",
+            "name._3gram",
+            "name._index_prefix",
+          ]
         }
       },
       highlight: {
+        pre_tags: no_highlight ? [""] : ["<strong>"],
+        post_tags: no_highlight ? [""] : ["</strong>"],
         fields: {
-          name: {
-            pre_tags: no_highlight ? [""] : ["<strong>"],
-            post_tags:  no_highlight ? [""] : ["</strong>"],
-            number_of_fragments: 0
-          },
-          id: {
-            pre_tags: no_highlight ? [""] : ["<strong>"],
-            post_tags:  no_highlight ? [""] : ["</strong>"],
-            number_of_fragments: 0
-          }
+          "name": {},
+          "hpo_id*": {}
         }
       }
     }
