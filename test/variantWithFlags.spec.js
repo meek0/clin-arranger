@@ -10,6 +10,18 @@ const cnvBody = {
                         node: {
                             hash: "3bbdfd2a87aa27b708420347et6a09063630fa9d",
                             patient_id: "P00001",
+                            donors: {
+                                hits: {
+                                    edges: [
+                                        {
+                                            node: {
+                                                analysis_service_request_id: "1290573",
+                                                patient_id: "P00001",
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
                         }
                     }
                 ]
@@ -27,6 +39,18 @@ const snvBody = {
                         node: {
                             hash: "3bbdfd2a87aa27b708420347et6a09063630fa9d",
                             locus: "10-101338156-T-K",
+                            donors: {
+                                hits: {
+                                    edges: [
+                                        {
+                                            node: {
+                                                analysis_service_request_id: "2910852",
+                                                patient_id: "P00002",
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
                         }
                     }
                 ]
@@ -38,7 +62,7 @@ const snvBody = {
 const variantProperties = [
     {
         id: 2,
-        unique_id: "10-101338156-T-K_snv",
+        unique_id: "3bbdfd2a87aa27b708420347et6a09063630fa9d_2910852_P00002_snv",
         author_id: "US0001",
         organization_id: "LDM-CHUSJ",
         timestamp: new Date("2024-07-10T16:28:35.193Z"),
@@ -50,7 +74,7 @@ const variantProperties = [
     },
     {
         id: 6,
-        unique_id: "10-101338156-T-K_snv",
+        unique_id: "3bbdfd2a87aa27b708420347et6a09063630fa9d_2910852_P00002_snv",
         author_id: "US0001",
         organization_id: "LDM-CHUSJ",
         timestamp: new Date("2024-07-16T10:30:53.638Z"),
@@ -65,10 +89,10 @@ const variantProperties = [
 
 describe("mapVariantToUniqueId", () => {
     it("should map SNV to correct unique_id", () => {
-        expect(mapVariantToUniqueId(snvBody.data.Variants.hits.edges[0])).to.eql("10-101338156-T-K_snv");
+        expect(mapVariantToUniqueId(snvBody.data.Variants.hits.edges[0])).to.eql("3bbdfd2a87aa27b708420347et6a09063630fa9d_2910852_P00002_snv");
     });
     it("should map CNV to correct unique_id", () => {
-        expect(mapVariantToUniqueId(cnvBody.data.Variants.hits.edges[0])).to.eql("3bbdfd2a87aa27b708420347et6a09063630fa9d_cnv");
+        expect(mapVariantToUniqueId(cnvBody.data.Variants.hits.edges[0])).to.eql("3bbdfd2a87aa27b708420347et6a09063630fa9d_1290573_P00001_cnv");
     });
     it("should be robust", () => {
         expect(mapVariantToUniqueId(null)).to.eql(null);
@@ -86,7 +110,19 @@ describe("mapVariantPropertiesToVariants", () => {
                 flags: [
                     "flag1",
                     "flag2",
-                ]
+                ],
+                donors: {
+                    hits: {
+                        edges: [
+                            {
+                                node: {
+                                    analysis_service_request_id: "2910852",
+                                    patient_id: "P00002",
+                                }
+                            }
+                        ]
+                    }
+                }
             }
         }
     ];
