@@ -10,11 +10,13 @@ const usersApiClient = axios.create({
 
 export function mapVariantToUniqueId(variant) {
     const node = variant?.node;
-    if (node) {
+    if (node && node.donors?.hits?.edges?.length > 0) {
+        const donorsNode = node.donors.hits.edges[0].node;
+        const quickId = `${node.hash}_${donorsNode.analysis_service_request_id}_${donorsNode.patient_id}`
         if (node.patient_id && node.hash) { // CNV
-            return `${node.hash}_cnv`;
+            return `${quickId}_cnv`;
         } else if (node.locus) {    // SNV
-            return `${node.locus}_snv`;
+            return `${quickId}_snv`;
         } else {
             return null;    // avoid undefined_cnv/snv
         }
