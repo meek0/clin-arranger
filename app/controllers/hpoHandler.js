@@ -27,18 +27,21 @@ export async function searchHPOAutocomplete(req, res) {
                   "name._2gram",
                   "name._3gram",
                 ],
-                analyzer: 'standard'
+                analyzer: 'standard',
+                operator: 'and'
               }
             },
             {
               multi_match: {
-              query: prefix,
-              fields: [
-                "hpo_id",
-                "hpo_id.autocomplete"
-              ]
+                type: "bool_prefix",
+                query: prefix,
+                fields: [
+                  "hpo_id",
+                  "hpo_id.autocomplete"
+                ],
+                analyzer: 'standard'
+              }
             }
-          }
           ]
         }
       },
