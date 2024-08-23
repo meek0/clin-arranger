@@ -15,16 +15,33 @@ export async function searchHPOAutocomplete(req, res) {
   const {body} = await client.search({
     index: indexNameHPO,
     body: {
+      size: 25,
       query: {
-        multi_match: {
-          query: prefix,
-          fields: [
-            "hpo_id",
-            "hpo_id.autocomplete",
-            "name",
-            "name._2gram",
-            "name._3gram",
-            "name._index_prefix",
+        bool: {
+          should: [
+            {
+              multi_match: {
+                query: prefix,
+                fields: [
+                  "name",
+                  "name._2gram",
+                  "name._3gram",
+                ],
+                analyzer: 'standard',
+                operator: 'and'
+              }
+            },
+            {
+              multi_match: {
+                type: "bool_prefix",
+                query: prefix,
+                fields: [
+                  "hpo_id",
+                  "hpo_id.autocomplete"
+                ],
+                analyzer: 'standard'
+              }
+            }
           ]
         }
       },
