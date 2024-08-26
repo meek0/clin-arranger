@@ -39,7 +39,8 @@ export async function searchHPOAutocomplete(req, res) {
                   "hpo_id",
                   "hpo_id.autocomplete"
                 ],
-                analyzer: 'standard'
+                analyzer: 'standard',
+                operator: 'and'
               }
             }
           ]
