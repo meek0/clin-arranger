@@ -64,7 +64,7 @@ export default async function(req, res, next) {
         res.send = async function () { // function is mandatory, () => {} doesn't work here
             // parse variants from response body
             const data = JSON.parse(arguments[0]);
-            const variants = data?.data?.Variants?.hits?.edges;
+            const variants = data?.data?.Variants?.hits?.edges || data?.data?.cnv?.hits?.edges;
             cleanupDonors(variants, patientIds, analysisIds, bioinfoCodes)
             if (withFlags) {
                 await fetchFlags(req, variants)

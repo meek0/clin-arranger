@@ -10,9 +10,17 @@ const usersApiClient = axios.create({
 
 export function mapVariantToUniqueId(variant) {
     const node = variant?.node;
-    if (node && node.donors?.hits?.edges?.length > 0) {
-        const donorsNode = node.donors.hits.edges[0].node;
-        const quickId = `${node.hash}_${donorsNode.analysis_service_request_id}_${donorsNode.patient_id}`
+    if (node && (node.donors?.hits?.edges?.length > 0 || node.analysis_service_request_id)) {
+        let quickId = '';
+        const donorsNode = node.donors?.hits?.edges?.[0].node;
+        if (donorsNode) {
+            quickId = `${node.hash}_${donorsNode.analysis_service_request_id}_${donorsNode.patient_id}`;
+        } else if (node.analysis_service_request_id) {
+            quickId = `${node.hash}_${node.analysis_service_request_id}_${node.patient_id}`;
+        } else {
+            return null;
+        }
+
         if (node.patient_id && node.hash) { // CNV
             return `${quickId}_cnv`;
         } else if (node.locus) {    // SNV
