@@ -15,6 +15,7 @@ import { sendForbidden } from "./httpUtils.js";
 import { VARIANTS_READ_PERMISSION_ENFORCER, HPO_READ_PERMISSION_ENFORCER } from "./permissionsUtils.js";
 import beforeSendHandler from "./controllers/beforeSendHandler.js"
 import booleanFilterMiddleware from './middlewares/booleanFilterMiddleware.js'
+import flagsFilterMiddleware from './middlewares/flagsFilterMiddleware.js'
 import logger from "../config/logger.js";
 
 const app = express();
@@ -102,6 +103,7 @@ app.post("*", keycloak.protect(), arrangerGqlSecurityHandler);
 
 app.use(beforeSendHandler)
 app.use(booleanFilterMiddleware)
+app.use(flagsFilterMiddleware)
 
 app.use((error, req, res, next) => {
   logger.error(error.message)
