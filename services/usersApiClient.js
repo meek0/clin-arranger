@@ -33,6 +33,10 @@ export function mapVariantToUniqueId(variant) {
     }
 }
 
+export function mapUniqueIdToHash(uniqueId) {
+    return uniqueId.split('_')[0];
+}
+
 export function mapVariantPropertiesToVariants(variants, variantProperties) {
     const usableVariantProperties = Array.isArray(variantProperties) ? variantProperties : [];
     if (Array.isArray(variants)) {
@@ -54,6 +58,22 @@ export async function getVariantsProperties(req, ids) {
         const response = await usersApiClient.get('/variants', {
             params: {
                 unique_id: ids
+            },
+            headers: {
+                Authorization: req.headers.authorization
+            }
+        });
+        return response.data;
+    } else {
+        return [];
+    }
+}
+
+export async function getVariantsByFlags(req, flags) {
+    if (Array.isArray(flags) && flags.length > 0) {
+        const response = await usersApiClient.get('/variants/filter', {
+            params: {
+                flag: flags
             },
             headers: {
                 Authorization: req.headers.authorization
