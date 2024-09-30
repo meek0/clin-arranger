@@ -17,26 +17,26 @@ async function handleFlags(req, index, content, fetchFunction) {
     
 }
 
-function handleContent(req, index, content, fetchFunction) {
+async function handleContent(req, index, content, fetchFunction) {
     if (!content) return
     if (content.constructor === Array) {
         content.map(c => handleContent(req, index, c, fetchFunction))
     } else if (content.constructor === Object) {
         if (content.content) {
-            handleContent(req, index, content.content, fetchFunction)
+            await handleContent(req, index, content.content, fetchFunction)
         } else if (content.field === 'flags') {
-            handleFlags(req, index, content, fetchFunction)
+            await handleFlags(req, index, content, fetchFunction)
         }
     }
 }
 
-export function handleRequest(req, fetchFunction) {
+export async function handleRequest(req, fetchFunction) {
     const index = req.body?.query?.includes('Cnv') ? 'cnv' 
     : req.body?.query?.includes('Variant') ? 'snv' : null
-    handleContent(req, index, req.body?.variables?.sqon?.content, fetchFunction)
+    await handleContent(req, index, req.body?.variables?.sqon?.content, fetchFunction)
 }
 
-export default function(req, _, next) {
-    handleRequest(req, getVariantsByFlags)
+export default async function(req, _, next) {
+    await handleRequest(req, getVariantsByFlags)
     next()
 }
