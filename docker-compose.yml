@@ -13,9 +13,6 @@ services:
     ports:
       - 5050:5050
       - 9229:9229
-    extra_hosts:
-      - auth.qa.cqgc.hsj.rtss.qc.ca:10.128.81.237
-      - search-external.qa.cqgc.hsj.rtss.qc.ca:10.128.81.238
     command:
       - npm
       - run
