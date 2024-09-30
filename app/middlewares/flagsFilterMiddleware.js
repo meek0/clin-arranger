@@ -1,14 +1,24 @@
 import { getVariantsByFlags, mapUniqueIdToHash } from '../../services/usersApiClient.js';
 
+const MISSING = '__missing__'
+
 async function handleFlags(req, index, content, fetchFunction) {
     var flags = content.value || []
-    var uniqueIds = await fetchFunction(req, flags)
-    var uniqueIdsByIndex = uniqueIds.filter(u => u.includes(index))
     content.field = 'hash'
-    content.value = uniqueIdsByIndex.map(mapUniqueIdToHash)
+    content.value = []
+    if (index) {
+        var uniqueIds = await fetchFunction(req, flags)
+        var uniqueIdsByIndex = uniqueIds.filter(u => u.includes(index))
+        content.value = uniqueIdsByIndex.map(mapUniqueIdToHash)
+    }
+    if (flags.includes(MISSING)) {
+        content.value.push(MISSING)
+    }
+    
 }
 
 function handleContent(req, index, content, fetchFunction) {
+    if (!content) return
     if (content.constructor === Array) {
         content.map(c => handleContent(req, index, c, fetchFunction))
     } else if (content.constructor === Object) {
@@ -21,12 +31,9 @@ function handleContent(req, index, content, fetchFunction) {
 }
 
 export function handleRequest(req, fetchFunction) {
-    const index = req.body?.query?.includes('Cnv') ? 'cnv' : req.body?.query?.includes('Variants') ? 'snv' : null
-    if (index) {
-        handleContent(req, index, req.body.variables.sqon.content, fetchFunction)
-    } else {
-        console.warn('[flagsFilterMiddleware] Supported indexes are [Variants, Cnv]')
-    }
+    const index = req.body?.query?.includes('Cnv') ? 'cnv' 
+    : req.body?.query?.includes('Variant') ? 'snv' : null
+    handleContent(req, index, req.body?.variables?.sqon?.content, fetchFunction)
 }
 
 export default function(req, _, next) {

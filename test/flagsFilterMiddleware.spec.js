@@ -3,18 +3,6 @@ import {handleRequest} from "../app/middlewares/flagsFilterMiddleware.js";
 
 describe("handleRequest", () => {
 
-    it(`Should handle a not supported index`, () => {
-
-        function fetchFunction (_, ids) {
-            fail('unexpected call');
-        }
-
-        var req = {body: {query: 'Unsupported'}}
-        var expected = {body: {query: 'Unsupported'}}
-        handleRequest(req, fetchFunction)
-        expect(req).to.eql(expected);
-    });
-
     it(`Should handle a flags request for Variants index as snv and ignore cnv`, async () => {
         const variables = {
             "sqon": {
@@ -23,7 +11,8 @@ describe("handleRequest", () => {
                     "content": {
                         "field": "flags",
                         "value": [
-                            "foo"
+                            "foo",
+                            "__missing__"
                         ]
                     },
                 },
@@ -57,7 +46,7 @@ describe("handleRequest", () => {
                     "content": {
                         "field": "hash",
                         "value": [
-                            'hash1', 'hash2'
+                            'hash1', 'hash2', '__missing__'
                         ]
                     },
                 },
@@ -91,7 +80,7 @@ describe("handleRequest", () => {
             else fail('unexpected ids: ' + ids);
         }
 
-        const req = {body: {query: 'Variants', variables: variables}}
+        const req = {body: {query: 'Variant', variables: variables}}
 
         await handleRequest(req, fetchFunction)
         expect(req.body.variables).to.eql(expected);
