@@ -6,10 +6,10 @@ env_init:
 # Docker
 start:
 	docker compose build --parallel
-	docker-compose --profile dev up -d --force-recreate 
+	docker compose --profile dev up -d --force-recreate 
 
 stop: 
-	docker-compose down
+	docker compose down
 
 clean:
 	docker image prune -a
