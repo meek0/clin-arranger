@@ -1,98 +1,99 @@
 import {expect} from "chai";
-import {extractFlagsAndIndexFromRequest, replaceSqonFlagsWithHash} from "../app/middlewares/flagsFilterMiddleware.js";
+import {handleRequest} from "../app/middlewares/flagsFilterMiddleware.js";
 
-describe("extractFlagsAndIndexFromRequest", () => {
-    it(`Should extract flags and detect index for SNV request`, () => {
-        const variables = {
-            "sqon": {
-                "content": [
-                    {
-                        "content": {
-                            "field": "flags",
-                            "value": [
-                                "flag1",
-                                "flag2"
-                            ]
-                        },
-                        "op": "all"
-                    }
-                ],
-                "op": "and",
-                "pivot": "donors"
-            }
+describe("handleRequest", () => {
+
+    it(`Should handle a not supported index`, () => {
+
+        function fetchFunction (_, ids) {
+            fail('unexpected call');
         }
-        const {flags, index} = extractFlagsAndIndexFromRequest({body: {query: 'Variants', variables: variables}})
-        expect(flags).to.eql(['flag1', 'flag2']);
-        expect(index).to.eql('snv');
+
+        var req = {body: {query: 'Unsupported'}}
+        var expected = {body: {query: 'Unsupported'}}
+        handleRequest(req, fetchFunction)
+        expect(req).to.eql(expected);
     });
-    it(`Should return empty flags and detect index for CNV request`, () => {
+
+    it(`Should handle a flags request for Variants index as snv and ignore cnv`, async () => {
         const variables = {
             "sqon": {
                 "content": [
-                    {
-                        "content": {
-                            "field": "foo",
-                            "value": 'bar'
+                {
+                    "content": {
+                        "field": "flags",
+                        "value": [
+                            "foo"
+                        ]
+                    },
+                },
+                {
+                    "content": [
+                        {
+                            "content": {
+                                "field": "flags",
+                                "value": [
+                                    "bar"
+                                ]
+                            },
                         },
-                        "op": "all"
-                    }
+                    ],
+                },
+                {
+                    "content": {
+                        "field": "donors.bioinfo_analysis_code",
+                        "value": [
+                            "TEBA"
+                        ]
+                    },
+                }
                 ],
-                "op": "and",
-                "pivot": "donors"
-            }
-        }
-        const {flags, index} = extractFlagsAndIndexFromRequest({body: {query: 'Cnv', variables: variables}})
-        expect(flags).to.eql([]);
-        expect(index).to.eql('cnv');
-    });
-    it(`Should return empty flags and null index if not supported`, () => {
-        const {flags, index} = extractFlagsAndIndexFromRequest({body: {query: 'foo'}})
-        expect(flags).to.eql([]);
-        expect(index).to.eql(null);
-    });
-});
-
-
-describe("replaceSqonFlagsWithHash", () => {
-    it(`Should replace sqon flags with expected hash`, () => {
-        const variables = {
-            "sqon": {
-                "content": [
-                    {
-                        "content": {
-                            "field": "flags",
-                            "value": [
-                                "flag1",
-                                "flag2"
-                            ]
-                        },
-                        "op": "all"
-                    }
-                ],
-                "op": "and",
-                "pivot": "donors"
             }
         }
         const expected = {
             "sqon": {
                 "content": [
-                    {
-                        "content": {
-                            "field": "hash",
-                            "value": [
-                                "hash1",
-                                "hash2",
-                                "hash3"
-                            ]
+                {
+                    "content": {
+                        "field": "hash",
+                        "value": [
+                            'hash1', 'hash2'
+                        ]
+                    },
+                },
+                {
+                    "content": [
+                        {
+                            "content": {
+                                "field": "hash",
+                                "value": [
+                                    'hash3'
+                                ]
+                            },
                         },
-                        "op": "all"
-                    }
+                    ],
+                },
+                {
+                    "content": {
+                        "field": "donors.bioinfo_analysis_code",
+                        "value": [
+                            "TEBA"
+                        ]
+                    },
+                }
                 ],
-                "op": "and",
-                "pivot": "donors"
             }
         }
-        replaceSqonFlagsWithHash(variables.sqon, ['hash1', 'hash2', 'hash3']);
-        expect(variables).to.eql(expected);
+
+        function fetchFunction (_, ids) {
+            if (ids.includes('foo')) return ['hash1_snv', 'hash2_snv', 'hash4_cnv'];
+            else if (ids.includes('bar')) return ['hash3_snv'];
+            else fail('unexpected ids: ' + ids);
+        }
+
+        const req = {body: {query: 'Variants', variables: variables}}
+
+        await handleRequest(req, fetchFunction)
+        expect(req.body.variables).to.eql(expected);
     });
 });

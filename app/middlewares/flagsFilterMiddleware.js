@@ -1,36 +1,35 @@
 import { getVariantsByFlags, mapUniqueIdToHash } from '../../services/usersApiClient.js';
 
-export function replaceSqonFlagsWithHash(sqon, hash) {
-    sqon?.content?.forEach(c => {
-        if (c?.content?.field === 'flags') {
-            c.content.field = 'hash'
-            c.content.value = hash
-        }
-    });
+async function handleFlags(req, index, content, fetchFunction) {
+    var flags = content.value || []
+    var uniqueIds = await fetchFunction(req, flags)
+    var uniqueIdsByIndex = uniqueIds.filter(u => u.includes(index))
+    content.field = 'hash'
+    content.value = uniqueIdsByIndex.map(mapUniqueIdToHash)
 }
 
-export function extractFlagsAndIndexFromRequest(req) {
-    const index = req.body?.query?.includes('Cnv') ? 'cnv' : req.body?.query?.includes('Variants') ? 'snv' : null
-    const flags = req.body?.variables?.sqon?.content?.find(c => c.content?.field === 'flags')?.content?.value || []
-    return { flags, index }
-}
-
-export default async function(req, _, next) {
-    const { flags, index } = extractFlagsAndIndexFromRequest(req)
-    if (flags?.length > 0) {
-
-        if (index) {
-            console.log('[flagsFilterMiddleware]', flags, index)
-
-            var uniqueIds = await getVariantsByFlags(req, flags)
-            var uniqueIdsByIndex = uniqueIds.filter(u => u.includes(index))
-            var hash = uniqueIdsByIndex.map(mapUniqueIdToHash)
-    
-            replaceSqonFlagsWithHash(req.body.variables.sqon, hash)
-        } else {
-            console.warn('[flagsFilterMiddleware] Supported indexes are [Variants, Cnv]')
+function handleContent(req, index, content, fetchFunction) {
+    if (content.constructor === Array) {
+        content.map(c => handleContent(req, index, c, fetchFunction))
+    } else if (content.constructor === Object) {
+        if (content.content) {
+            handleContent(req, index, content.content, fetchFunction)
+        } else if (content.field === 'flags') {
+            handleFlags(req, index, content, fetchFunction)
         }
-        
     }
+}
+
+export function handleRequest(req, fetchFunction) {
+    const index = req.body?.query?.includes('Cnv') ? 'cnv' : req.body?.query?.includes('Variants') ? 'snv' : null
+    if (index) {
+        handleContent(req, index, req.body.variables.sqon.content, fetchFunction)
+    } else {
+        console.warn('[flagsFilterMiddleware] Supported indexes are [Variants, Cnv]')
+    }
+}
+
+export default function(req, _, next) {
+    handleRequest(req, getVariantsByFlags)
     next()
 }
