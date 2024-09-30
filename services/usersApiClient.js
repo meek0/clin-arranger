@@ -69,7 +69,8 @@ export async function getVariantsProperties(req, ids) {
     }
 }
 
-export async function getVariantsByFlags(req, flags) {
+usersApiClient.getVariantsByFlags = async function(req, flags) {
+    console.log(`-> getVariantsByFlags: flags = ${JSON.stringify(flags)}`)
     if (Array.isArray(flags) && flags.length > 0) {
         const response = await usersApiClient.get('/variants/filter', {
             params: {
@@ -80,8 +81,10 @@ export async function getVariantsByFlags(req, flags) {
                 Authorization: req.headers.authorization
             }
         });
+        console.log(`usersApiClient returned: ${JSON.stringify(response.data)}`)
         return response.data;
     } else {
+        console.log(`flag length is 0`)
         return [];
     }
 }
