@@ -7,7 +7,7 @@ async function handleFlags(req, index, content, fetchFunction) {
     content.field = 'hash'
     content.value = []
     if (index) {
-        var uniqueIds = await fetchFunction(req, flags)
+        var uniqueIds = await fetchFunction(req, flags.filter(f => f !== MISSING))
         var uniqueIdsByIndex = uniqueIds.filter(u => u.includes(index))
         content.value = uniqueIdsByIndex.map(mapUniqueIdToHash)
     }
@@ -20,7 +20,7 @@ async function handleFlags(req, index, content, fetchFunction) {
 async function handleContent(req, index, content, fetchFunction) {
     if (!content) return
     if (content.constructor === Array) {
-        content.map(c => handleContent(req, index, c, fetchFunction))
+        await Promise.all(content.map(async c => await handleContent(req, index, c, fetchFunction)))
     } else if (content.constructor === Object) {
         if (content.content) {
             await handleContent(req, index, content.content, fetchFunction)
@@ -36,6 +36,7 @@ export async function handleRequest(req, fetchFunction) {
     await handleContent(req, index, req.body?.variables?.sqon?.content, fetchFunction)
 }
 
-export default function(req, _, next) {
-    handleRequest(req, getVariantsByFlags).then(() => next())
+export default async function(req, _, next) {
+    handleRequest(req, getVariantsByFlags)
+    next()
 }
