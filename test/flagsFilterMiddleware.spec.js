@@ -1,4 +1,6 @@
 import {expect} from "chai";
+import sinon from "sinon";
+import usersApiClient from '../services/usersApiClient.js';
 import {handleRequest} from "../app/middlewares/flagsFilterMiddleware.js";
 
 describe("handleRequest", () => {
@@ -74,15 +76,15 @@ describe("handleRequest", () => {
             }
         }
 
-        function fetchFunction (_, ids) {
+        sinon.stub(usersApiClient, 'getVariantsByFlags').callsFake(async function (_, ids) {
             if (ids.includes('foo')) return ['hash1_snv', 'hash2_snv', 'hash4_cnv'];
             else if (ids.includes('bar')) return ['hash3_snv'];
             else fail('unexpected ids: ' + ids);
-        }
+        })
 
         const req = {body: {query: 'Variant', variables: variables}}
 
-        await handleRequest(req, fetchFunction)
+        await handleRequest(req)
         expect(req.body.variables).to.eql(expected);
     });
 });
