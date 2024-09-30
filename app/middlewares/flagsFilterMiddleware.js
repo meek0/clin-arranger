@@ -36,7 +36,6 @@ export async function handleRequest(req, fetchFunction) {
     await handleContent(req, index, req.body?.variables?.sqon?.content, fetchFunction)
 }
 
-export default async function(req, _, next) {
-    await handleRequest(req, getVariantsByFlags)
-    next()
+export default function(req, _, next) {
+    handleRequest(req, getVariantsByFlags).then(() => next())
 }
