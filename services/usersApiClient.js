@@ -73,7 +73,8 @@ export async function getVariantsByFlags(req, flags) {
     if (Array.isArray(flags) && flags.length > 0) {
         const response = await usersApiClient.get('/variants/filter', {
             params: {
-                flag: flags
+                flag: flags,
+                timestamp: new Date().toISOString()
             },
             headers: {
                 Authorization: req.headers.authorization
