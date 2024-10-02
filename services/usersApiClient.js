@@ -69,12 +69,12 @@ export async function getVariantsProperties(req, ids) {
     }
 }
 
-usersApiClient.getVariantsByFlags = async function(req, flags) {
+usersApiClient.getVariantsByFlags = async function(req, flags, uniqueId) {
     if (Array.isArray(flags) && flags.length > 0) {
         const response = await usersApiClient.get('/variants/filter', {
             params: {
                 flag: flags,
-                timestamp: new Date().toISOString()
+                unique_id: uniqueId
             },
             headers: {
                 Authorization: req.headers.authorization
