@@ -48,7 +48,7 @@ describe("handleRequest", () => {
                     "content": {
                         "field": "hash",
                         "value": [
-                            'hash1', 'hash2', '__missing__'
+                            'hash1', 'hash2'
                         ]
                     },
                 },

@@ -11,9 +11,6 @@ async function handleFlags(req, index, content) {
         var uniqueIdsByIndex = uniqueIds.filter(u => u.includes(index))
         content.value = uniqueIdsByIndex.map(mapUniqueIdToHash)
     }
-    if (flags.includes(MISSING)) {
-        content.value.push(MISSING)
-    }
 }
 
 async function handleContent(req, index, content) {
