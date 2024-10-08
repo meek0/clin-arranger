@@ -4,7 +4,7 @@ import { mapVariantToUniqueId, mapVariantPropertiesToVariants, getVariantsProper
 
 export const cleanupDonors = (variants, patientIds, analysisIds, bioinfoCodes) => {
     return new Promise((resolve) => { 
-        var start = Date.now();
+        const start = Date.now();
         if (patientIds?.length && variants?.length) {
             // Create a set of patient_ids for faster lookup
             const patientIdsSet = new Set(patientIds.map(id => String(id)));
@@ -31,7 +31,7 @@ export const cleanupDonors = (variants, patientIds, analysisIds, bioinfoCodes) =
                 }
             });
         }
-        logger.info(`cleanupDonors in ${Date.now() - start} ms`);
+        logger.info(`cleanupDonors patient: ${patientIds} analysis: ${analysisIds} in ${Date.now() - start} ms`);
         resolve(null); 
     });
     
@@ -47,7 +47,6 @@ async function fetchFlags (req, variants) {
         }
     } catch(e) {
         logger.error('Failed to fetch variant flags: ' + e);
-
         if (variants?.length) {
             variants.forEach(variant => variant.node.flags = []); // ensure empty flags
         }
@@ -58,15 +57,15 @@ async function fetchFlags (req, variants) {
 
 async function parseResponseBody (arg) {
     return new Promise(resolve => {
-        var start = Date.now();
+        const start = Date.now();
         const data = JSON.parse(arg);
-        logger.info(`parseResponseBody in ${Date.now() - start} ms`);
+        logger.info(`parseResponseBody: ${arg.length} bytes in ${Date.now() - start} ms`);
         resolve(data);
     });
 }
 
 export default async function(req, res, next) {
-    var start = Date.now();
+    const start = Date.now();
     const sqon = req.body?.variables?.sqon;
 
     const patientIds = extractValuesFromSqonByField(sqon, 'donors.patient_id')
@@ -88,7 +87,7 @@ export default async function(req, res, next) {
             // override response body with modified data
             arguments[0] = JSON.stringify(data);
             originalSend.apply(res, arguments);
-            logger.info(`[${req.method}] ${res.statusCode} ${req.url} in ${Date.now() - start} ms`);
+            logger.info(`[${req.method}] ${res.statusCode} ${req.url} body length: ${arguments[0].length} bytes in ${Date.now() - start} ms`);
         };
     }
     next();
