@@ -10,7 +10,7 @@ export const cleanupDonors = (variants, patientIds, analysisIds, bioinfoCodes) =
         const analysisIdsSet = new Set(analysisIds.map(id => String(id)));
         const bioinfoCodesSet = new Set((bioinfoCodes||[]).map(id => String(id)));
 
-        variants.forEach(variant => {
+        for(const variant of variants) {
             const donors = variant.node.donors?.hits?.edges;
 
             if (donors?.length) {
@@ -28,7 +28,7 @@ export const cleanupDonors = (variants, patientIds, analysisIds, bioinfoCodes) =
                 variant.node.donors.hits.edges = newDonors;
                 variant.node.donors.hits.total = newDonors.length;
             }
-        });
+        };
     }
     logger.info(`cleanupDonors patient: ${patientIds} analysis: ${analysisIds} in ${Date.now() - start} ms`);
 }
@@ -37,9 +37,13 @@ async function fetchFlags (req, variants) {
     const start = Date.now();
     try {
         if (variants?.length) {
-            const uniqueIds = variants.map(mapVariantToUniqueId).filter(id => !!id);
-            const variantProperties  = await getVariantsProperties(req, uniqueIds)
-            mapVariantPropertiesToVariants(variants, variantProperties);
+            const uniqueIds = []
+            for(const variant of variants){
+                const uniqueId = mapVariantToUniqueId(variant)
+                if(uniqueId) uniqueIds.push(uniqueId)
+            }
+            const variantProperties = await getVariantsProperties(req, uniqueIds)
+            mapVariantPropertiesToVariants(variants, variantProperties)
         }
     } catch(e) {
         logger.error('Failed to fetch variant flags: ' + e);
