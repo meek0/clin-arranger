@@ -34,7 +34,7 @@ export const cleanupDonors = (variants, patientIds, analysisIds, bioinfoCodes) =
 }
 
 async function fetchFlags (req, variants) {
-    var start = Date.now();
+    const start = Date.now();
     try {
         if (variants?.length) {
             const uniqueIds = variants.map(mapVariantToUniqueId).filter(id => !!id);
