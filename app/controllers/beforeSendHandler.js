@@ -3,39 +3,35 @@ import logger from '../../config/logger.js'
 import { mapVariantToUniqueId, mapVariantPropertiesToVariants, getVariantsProperties } from '../../services/usersApiClient.js';
 
 export const cleanupDonors = (variants, patientIds, analysisIds, bioinfoCodes) => {
-    return new Promise((resolve) => { 
-        const start = Date.now();
-        if (patientIds?.length && variants?.length) {
-            // Create a set of patient_ids for faster lookup
-            const patientIdsSet = new Set(patientIds.map(id => String(id)));
-            const analysisIdsSet = new Set(analysisIds.map(id => String(id)));
-            const bioinfoCodesSet = new Set((bioinfoCodes||[]).map(id => String(id)));
+    const start = Date.now();
+    if (patientIds?.length && variants?.length) {
+        // Create a set of patient_ids for faster lookup
+        const patientIdsSet = new Set(patientIds.map(id => String(id)));
+        const analysisIdsSet = new Set(analysisIds.map(id => String(id)));
+        const bioinfoCodesSet = new Set((bioinfoCodes||[]).map(id => String(id)));
 
-            variants.forEach(variant => {
-                const donors = variant.node.donors?.hits?.edges;
+        variants.forEach(variant => {
+            const donors = variant.node.donors?.hits?.edges;
 
-                if (donors?.length) {
-                    const newDonors = donors.filter(d => {
-                        const hasPatientId = patientIdsSet.has(String(d.node.patient_id))
-                        // analysis is optional in both sqon and body response for retro-compatibility
-                        const donorAnalysisId = d.node.analysis_service_request_id
-                        const donorBioinfoCode = d.node.bioinfo_analysis_code
-                        const hasAnalysisId = analysisIdsSet.size === 0 || !donorAnalysisId || analysisIdsSet.has(String(donorAnalysisId))
-                        const hasBioinfoCode = bioinfoCodesSet.size === 0 || !donorBioinfoCode || bioinfoCodesSet.has(String(donorBioinfoCode))
-                        const isValid = hasPatientId && hasAnalysisId && hasBioinfoCode
-                        // console.warn('[variantDonorsHandler]', variant.hash, patientIds, analysisIds, isValid)
-                        return isValid;
-                    });
-                    variant.node.donors.hits.edges = newDonors;
-                    variant.node.donors.hits.total = newDonors.length;
-                }
-            });
-        }
-        logger.info(`cleanupDonors patient: ${patientIds} analysis: ${analysisIds} in ${Date.now() - start} ms`);
-        resolve(null); 
-    });
-    
-};
+            if (donors?.length) {
+                const newDonors = donors.filter(d => {
+                    const hasPatientId = patientIdsSet.has(String(d.node.patient_id))
+                    // analysis is optional in both sqon and body response for retro-compatibility
+                    const donorAnalysisId = d.node.analysis_service_request_id
+                    const donorBioinfoCode = d.node.bioinfo_analysis_code
+                    const hasAnalysisId = analysisIdsSet.size === 0 || !donorAnalysisId || analysisIdsSet.has(String(donorAnalysisId))
+                    const hasBioinfoCode = bioinfoCodesSet.size === 0 || !donorBioinfoCode || bioinfoCodesSet.has(String(donorBioinfoCode))
+                    const isValid = hasPatientId && hasAnalysisId && hasBioinfoCode
+                    // console.warn('[variantDonorsHandler]', variant.hash, patientIds, analysisIds, isValid)
+                    return isValid;
+                });
+                variant.node.donors.hits.edges = newDonors;
+                variant.node.donors.hits.total = newDonors.length;
+            }
+        });
+    }
+    logger.info(`cleanupDonors patient: ${patientIds} analysis: ${analysisIds} in ${Date.now() - start} ms`);
+}
 
 async function fetchFlags (req, variants) {
     var start = Date.now();
@@ -55,13 +51,11 @@ async function fetchFlags (req, variants) {
     }
 }
 
-async function parseResponseBody (arg) {
-    return new Promise(resolve => {
-        const start = Date.now();
-        const data = JSON.parse(arg);
-        logger.info(`parseResponseBody: ${arg.length} bytes in ${Date.now() - start} ms`);
-        resolve(data);
-    });
+function parseResponseBody (arg) {
+    const start = Date.now();
+    const data = JSON.parse(arg);
+    logger.info(`parseResponseBody: ${arg.length} bytes in ${Date.now() - start} ms`);
+    return data;
 }
 
 export default async function(req, res, next) {
@@ -78,9 +72,9 @@ export default async function(req, res, next) {
         const originalSend = res.send;
         res.send = async function () { // function is mandatory, () => {} doesn't work here
             // parse variants from response body
-            const data = await parseResponseBody(arguments[0]);
+            const data = parseResponseBody(arguments[0]);
             const variants = data?.data?.Variants?.hits?.edges || data?.data?.cnv?.hits?.edges;
-            await cleanupDonors(variants, patientIds, analysisIds, bioinfoCodes)
+            cleanupDonors(variants, patientIds, analysisIds, bioinfoCodes)
             if (withFlags) {
                 await fetchFlags(req, variants)
             }

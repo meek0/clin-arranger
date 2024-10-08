@@ -67,7 +67,7 @@ describe("cleanupDonors", () => {
     },
   ];
 
-  it(`Should cleanup donors by patientIds`, async () => {
+  it(`Should cleanup donors by patientIds`, () => {
     const expected = [
       {
         node: {
@@ -125,11 +125,11 @@ describe("cleanupDonors", () => {
         },
       },
     ];
-    await cleanupDonors(variants, ["0", "1"], [])
+    cleanupDonors(variants, ["0", "1"], [])
     expect(variants).to.eql(expected);
   });
 
-  it(`Should cleanup donors by patientIds and analysisId (if available)`, async () => {
+  it(`Should cleanup donors by patientIds and analysisId (if available)`, () => {
     const expected = [
       {
         node: {
@@ -187,11 +187,11 @@ describe("cleanupDonors", () => {
         },
       },
     ];
-    await cleanupDonors(variants, ["0", "1"], ["A", "B"])
+    cleanupDonors(variants, ["0", "1"], ["A", "B"])
     expect(variants).to.eql(expected);
   });
 
-  it(`Should cleanup donors by patientIds and analysisId and bioinfo analysis code (if available)`, async () => {
+  it(`Should cleanup donors by patientIds and analysisId and bioinfo analysis code (if available)`, () => {
     const expected = [
       {
         node: {
@@ -242,7 +242,7 @@ describe("cleanupDonors", () => {
         },
       },
     ];
-    await cleanupDonors(variants, ["0", "1"], ["A", "B"], ["TEBA"])
+    cleanupDonors(variants, ["0", "1"], ["A", "B"], ["TEBA"])
     expect(variants).to.eql(
       expected
     );
