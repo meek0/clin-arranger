@@ -1,4 +1,5 @@
 import {extractValuesFromSqonByField} from "../utils.js"
+import {stats} from "../stats.js"
 import logger from '../../config/logger.js'
 import { mapVariantToUniqueId, mapVariantPropertiesToVariants, getVariantsProperties } from '../../services/usersApiClient.js';
 
@@ -86,6 +87,7 @@ export default async function(req, res, next) {
             arguments[0] = JSON.stringify(data);
             originalSend.apply(res, arguments);
             logger.info(`[${req.method}] ${res.statusCode} ${req.url} body length: ${arguments[0].length} bytes in ${Date.now() - start} ms`);
+            logger.info(stats());
         };
     }
     next();
