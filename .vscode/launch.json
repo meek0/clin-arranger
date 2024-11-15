@@ -15,6 +15,12 @@
             "remoteRoot": "/code",
             "sourceMaps": true,
             "smartStep": true
+        },
+        {
+            "name": "clin-arranger-local",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/app/index.js"
         }
     ]
 }
