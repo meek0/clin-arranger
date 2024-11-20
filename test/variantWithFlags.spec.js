@@ -128,6 +128,6 @@ describe("mapVariantPropertiesToVariants", () => {
     ];
 
     it("should add latest variant properties flag to variant", () => {
-        expect(mapVariantPropertiesToVariants(snvBody.data.Variants.hits.edges, variantProperties)).to.eql(expected);
+        expect(mapVariantPropertiesToVariants(snvBody.data.Variants.hits.edges, variantProperties, ['flags'])).to.eql(expected);
     });
 });
