@@ -14,7 +14,8 @@
             "localRoot": "${workspaceFolder}",
             "remoteRoot": "/code",
             "sourceMaps": true,
-            "smartStep": true
+            "smartStep": true,
+            "autoAttachChildProcesses": false
         },
         {
             "name": "clin-arranger-local",
