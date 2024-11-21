@@ -37,7 +37,7 @@ export function mapUniqueIdToHash(uniqueId) {
     return uniqueId.split('_')[0];
 }
 
-export function mapVariantPropertiesToVariants(variants, variantProperties) {
+export function mapVariantPropertiesToVariants(variants, variantProperties, searchedFields) {
     const usableVariantProperties = Array.isArray(variantProperties) ? variantProperties : [];
     if (Array.isArray(variants)) {
         variants.forEach(variant => {
@@ -46,7 +46,8 @@ export function mapVariantPropertiesToVariants(variants, variantProperties) {
             foundProperties.forEach(props => props.timestamp = new Date(props.timestamp));
             foundProperties.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
             const lastFoundProperties = foundProperties[0] || PROPERTIES_NOT_FOUND;
-            variant.node.flags = [...lastFoundProperties.properties.flags];
+            if (searchedFields.indexOf('flags') > -1) variant.node.flags = [...lastFoundProperties.properties.flags];
+            if (searchedFields.indexOf('note') > -1) variant.node.note = lastFoundProperties.properties.note || null;
             // console.log('variant.node.flags', variant.node.flags);
         });
     }
@@ -74,6 +75,23 @@ usersApiClient.getVariantsByFlags = async function(req, flags, uniqueId) {
         const response = await usersApiClient.get('/variants/filter', {
             params: {
                 flag: flags,
+                unique_id: uniqueId
+            },
+            headers: {
+                Authorization: req.headers.authorization
+            }
+        });
+        return response.data;
+    } else {
+        return [];
+    }
+}
+
+usersApiClient.getVariantsByNotePresence = async function(req, hasNote, uniqueId) {
+    if (hasNote === 'true' || hasNote === 'false') {
+        const response = await usersApiClient.get('/variants/filter', {
+            params: {
+                note: hasNote,
                 unique_id: uniqueId
             },
             headers: {

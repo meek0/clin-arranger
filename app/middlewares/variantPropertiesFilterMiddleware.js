@@ -26,6 +26,17 @@ async function handleFlags(req, analysisIds, patientIds, index, content) {
     }
 }
 
+async function handleNote(req, analysisIds, patientIds, index, content) {
+    var note = (content.value || []).indexOf(MISSING) === -1 ? 'true' : 'false';
+    content.field = 'hash'
+    content.value = []
+    if (index) {
+        var uniqueIds = await usersApiClient.getVariantsByNotePresence(req, note, formatUniqueId(analysisIds, patientIds, index))
+        var uniqueIdsByIndex = uniqueIds.filter(u => u.includes(index))
+        content.value = uniqueIdsByIndex.map(mapUniqueIdToHash)
+    }
+}
+
 async function handleContent(req, analysisIds, patientIds, index, content) {
     if (!content) return
     if (content.constructor === Array) {
@@ -35,6 +46,8 @@ async function handleContent(req, analysisIds, patientIds, index, content) {
             await handleContent(req, analysisIds, patientIds, index, content.content)
         } else if (content.field === 'flags') {
             await handleFlags(req, analysisIds, patientIds, index, content)
+        } else if (content.field === 'note') {
+            await handleNote(req, analysisIds, patientIds, index, content)
         }
     }
 }

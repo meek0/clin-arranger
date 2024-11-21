@@ -1,9 +1,9 @@
 import {expect} from "chai";
 import sinon from "sinon";
 import usersApiClient from '../services/usersApiClient.js';
-import {handleRequest} from "../app/middlewares/flagsFilterMiddleware.js";
+import {handleRequest} from "../app/middlewares/variantPropertiesFilterMiddleware.js";
 
-describe("handleRequest", () => {
+describe("handleRequestWithFlags", () => {
 
     it(`Should handle a flags request for Variants index as SNV`, async () => {
         const variables = {

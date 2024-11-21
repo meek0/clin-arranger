@@ -34,7 +34,7 @@ export const cleanupDonors = (variants, patientIds, analysisIds, bioinfoCodes) =
     logger.info(`cleanupDonors patient: ${patientIds} analysis: ${analysisIds} in ${Date.now() - start} ms`);
 }
 
-async function fetchFlags (req, variants) {
+async function fetchVariantProperties (req, variants, searchedFields) {
     const start = Date.now();
     try {
         if (variants?.length) {
@@ -44,15 +44,15 @@ async function fetchFlags (req, variants) {
                 if(uniqueId) uniqueIds.push(uniqueId)
             }
             const variantProperties = await getVariantsProperties(req, uniqueIds)
-            mapVariantPropertiesToVariants(variants, variantProperties)
+            mapVariantPropertiesToVariants(variants, variantProperties, searchedFields);
         }
     } catch(e) {
-        logger.error('Failed to fetch variant flags: ' + e);
+        logger.error('Failed to fetch variant properties: ' + e);
         if (variants?.length) {
             variants.forEach(variant => variant.node.flags = []); // ensure empty flags
         }
     } finally {
-        logger.info(`fetchFlags in ${Date.now() - start} ms`);
+        logger.info(`fetchVariantProperties in ${Date.now() - start} ms`);
     }
 }
 
@@ -71,8 +71,9 @@ export default async function(req, res, next) {
     const analysisIds = extractValuesFromSqonByField(sqon, 'donors.analysis_service_request_id')
     const bioinfoCodes = extractValuesFromSqonByField(sqon, 'donors.bioinfo_analysis_code')
     const withFlags = req.body?.query?.includes('flags');
+    const withNote = req.body?.query?.includes('note');
 
-    if (patientIds?.length > 0 || withFlags) {
+    if (patientIds?.length > 0 || withFlags || withNote) {
         // one way to modify body is to replace the res.send() function
         const originalSend = res.send;
         res.send = async function () { // function is mandatory, () => {} doesn't work here
@@ -80,8 +81,11 @@ export default async function(req, res, next) {
             const data = parseResponseBody(arguments[0]);
             const variants = data?.data?.Variants?.hits?.edges || data?.data?.cnv?.hits?.edges;
             cleanupDonors(variants, patientIds, analysisIds, bioinfoCodes)
-            if (withFlags) {
-                await fetchFlags(req, variants)
+            if (withFlags || withNote) {
+                const searchedFields = [];
+                if (withFlags) searchedFields.push('flags');
+                if (withNote) searchedFields.push('note');
+                await fetchVariantProperties(req, variants, searchedFields)
             }
             // override response body with modified data
             arguments[0] = JSON.stringify(data);
