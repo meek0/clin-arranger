@@ -46,7 +46,7 @@ export function mapVariantPropertiesToVariants(variants, variantProperties, sear
             foundProperties.forEach(props => props.timestamp = new Date(props.timestamp));
             foundProperties.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
             const lastFoundProperties = foundProperties[0] || PROPERTIES_NOT_FOUND;
-            if (searchedFields.indexOf('flags') > -1) variant.node.flags = [...lastFoundProperties.properties.flags];
+            if (searchedFields.indexOf('flags') > -1) variant.node.flags = [...(lastFoundProperties.properties.flags || [])];
             if (searchedFields.indexOf('note') > -1) variant.node.note = lastFoundProperties.properties.note || null;
             // console.log('variant.node.flags', variant.node.flags);
         });
