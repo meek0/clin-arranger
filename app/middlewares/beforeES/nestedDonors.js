@@ -11,18 +11,17 @@ const addInnerHitsDonors = (body) => {
     }
 
     // Optimise query 
-    optimiseBooleanQuery(newBody.query)
+    // optimiseBooleanQuery(newBody.query)
 
     // keep original body for complex nested queries
     let nestedDonorsCount = addInnerHitsDonorsPath(newBody.query)
 
-    let maxIterations = 1
+    /* let maxIterations = 1
     while(nestedDonorsCount > 1 && maxIterations--){
         optimiseBooleanQuery(newBody.query)
         nestedDonorsCount = addInnerHitsDonorsPath(newBody.query)
-    }
+    } */
 
-    console.log(`nestedDonorsCount: ${nestedDonorsCount}`)
     return nestedDonorsCount === 1 ? newBody : body;
 }
 
@@ -40,7 +39,6 @@ export function addInnerHitsDonorsPath(obj, hasNestedDonorsInit = 0){
 }
 
 export function optimiseBooleanQuery(query){
-    const oldQuery = structuredClone(query)
     const optimizedBool = {
         must: [],
         should: [],
@@ -88,7 +86,7 @@ export function optimiseBooleanQuery(query){
                             path: "donors",
                             query: {
                                 bool: {
-                                    must: commonNestedDonors
+                                    must: [...commonNestedDonors]
                                 }
                             }
                         }
@@ -108,7 +106,7 @@ export function optimiseBooleanQuery(query){
                             if(!optimizedNestedDonor.bool[operator]?.length) delete optimizedNestedDonor.bool[operator]
                         }
                         
-                        finalDonorNested.nested.query.bool.must.push(optimizedNestedDonor)
+                        if(Object.keys(optimizedNestedDonor.bool).some(operator => optimizedNestedDonor.bool[operator].length)) finalDonorNested.nested.query.bool.must.push(optimizedNestedDonor)
                         optimizedBool.must.splice(index, 1)
                     }
                     optimizedBool.must.push(finalDonorNested)
@@ -128,12 +126,11 @@ export function optimiseBooleanQuery(query){
 
     // Final query
     query.bool = optimizedBool
-    if(JSON.stringify(oldQuery).length > 4000) console.log(`optimized query from:\n ${JSON.stringify(oldQuery)} \n to: \n ${JSON.stringify(query)}`)
 }
 
 function getCommonMustNestedDonors(donorsMustTerms, commonMustNestedDefault){
     if(!donorsMustTerms) return
-    if(!commonMustNestedDefault) return donorsMustTerms
+    if(!commonMustNestedDefault) return [...donorsMustTerms]
 
     const commonMustNested = commonMustNestedDefault
     let index = commonMustNested.length
@@ -226,5 +223,6 @@ export default function (body) {
         return body
     } catch(e) {
         console.error(e)
+        throw e
     }
 }
