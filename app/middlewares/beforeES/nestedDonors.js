@@ -11,16 +11,16 @@ const addInnerHitsDonors = (body) => {
     }
 
     // Optimise query 
-    optimiseBooleanQuery(newBody.query)
+    // optimiseBooleanQuery(newBody.query)
 
     // keep original body for complex nested queries
     let nestedDonorsCount = addInnerHitsDonorsPath(newBody.query)
 
-    let maxIterations = 1
+    /* let maxIterations = 1
     while(nestedDonorsCount > 1 && maxIterations--){
         optimiseBooleanQuery(newBody.query)
         nestedDonorsCount = addInnerHitsDonorsPath(newBody.query)
-    }
+    } */
 
     return nestedDonorsCount === 1 ? newBody : body;
 }
