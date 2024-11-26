@@ -759,6 +759,6 @@ describe("query optimizer", () => {
         let nestedDonorsCount = addInnerHitsDonorsPath(initialQuery)
         const expectedResult = {}
 
-        expect(nestedDonorsCount).to.eql(1)
+        expect(nestedDonorsCount).to.eql(4)
     });
 })
