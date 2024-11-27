@@ -136,184 +136,6 @@ describe("nestedDonors", () => {
     expect(nestedDonors(query)).to.eql(query)
   });
 
-  it(`Should not add inner_hits if multiple nested donors ES query`, () => {
-    const common = {
-        bool: {
-            must: [
-                {
-                    terms: {
-                        "donors.patient_id": [
-                            "508428"
-                        ],
-                        boost: 0
-                    }
-                },
-                {
-                    terms: {
-                        "donors.analysis_service_request_id": [
-                            "508427"
-                        ],
-                        boost: 0
-                    }
-                }
-            ]
-        }
-    }
-    const query = {
-        query: {
-            bool: {
-                must: [
-                    {
-                        bool: {
-                            must: [
-                                {
-                                    nested: {
-                                        path: "donors",
-                                        query: {
-                                            bool: {
-                                                must: [
-                                                    {
-                                                        terms: {
-                                                            "donors.patient_id": [
-                                                                "508428"
-                                                            ],
-                                                            boost: 0
-                                                        }
-                                                    },
-                                                    {
-                                                        terms: {
-                                                            "donors.analysis_service_request_id": [
-                                                                "508427"
-                                                            ],
-                                                            boost: 0
-                                                        }
-                                                    }
-                                                ]
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        bool: {
-                            must: [
-                                {
-                                    nested: {
-                                        path: "donors",
-                                        query: {
-                                            bool: {
-                                                must: [
-                                                    {
-                                                        terms: {
-                                                            "donors.patient_id": [
-                                                                "508430"
-                                                            ],
-                                                            boost: 0
-                                                        }
-                                                    },
-                                                    {
-                                                        terms: {
-                                                            "donors.analysis_service_request_id": [
-                                                                "508427"
-                                                            ],
-                                                            boost: 0
-                                                        }
-                                                    }
-                                                ]
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                ]
-            }
-        }
-    }
-
-    const expected = {
-        query: {
-            bool: {
-                must: [
-                    {
-                        bool: {
-                            must: [
-                                {
-                                    nested: {
-                                        path: "donors",
-                                        query: {
-                                            bool: {
-                                                must: [
-                                                    {
-                                                        terms: {
-                                                            "donors.patient_id": [
-                                                                "508428"
-                                                            ],
-                                                            boost: 0
-                                                        }
-                                                    },
-                                                    {
-                                                        terms: {
-                                                            "donors.analysis_service_request_id": [
-                                                                "508427"
-                                                            ],
-                                                            boost: 0
-                                                        }
-                                                    }
-                                                ]
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        bool: {
-                            must: [
-                                {
-                                    nested: {
-                                        path: "donors",
-                                        query: {
-                                            bool: {
-                                                must: [
-                                                    {
-                                                        terms: {
-                                                            "donors.patient_id": [
-                                                                "508430"
-                                                            ],
-                                                            boost: 0
-                                                        }
-                                                    },
-                                                    {
-                                                        terms: {
-                                                            "donors.analysis_service_request_id": [
-                                                                "508427"
-                                                            ],
-                                                            boost: 0
-                                                        }
-                                                    }
-                                                ]
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                ]
-            }
-        }
-    }
-
-    expect(nestedDonors(query)).to.eql(expected)
-  });
-
-
-  /*
   it(`Should add inner_hits if multiple same nested donors ES query`, () => {
     const common = {
         bool: {
@@ -371,34 +193,62 @@ describe("nestedDonors", () => {
     }
 
     const expected = {
-        _source: {
-            excludes: [
-                "donors"
-            ],
-            includes: [
-                "*"
-            ]
-        },
-        query: {
-            bool: {
-                must: [
+        "query": {
+            "bool": {
+                "must": [
                     {
-                        nested: {
-                            inner_hits: {
-                                _source: [
-                                  "donors.*"
-                                ]
+                        "nested": {
+                            "path": "donors",
+                            "query": {
+                                "bool": {
+                                    "must": [
+                                        {
+                                            "terms": {
+                                                "donors.patient_id": [
+                                                    "508428"
+                                                ],
+                                                "boost": 0
+                                            }
+                                        },
+                                        {
+                                            "terms": {
+                                                "donors.analysis_service_request_id": [
+                                                    "508427"
+                                                ],
+                                                "boost": 0
+                                            }
+                                        },
+                                        {
+                                            "bool": {}
+                                        },
+                                        {
+                                            "bool": {}
+                                        }
+                                    ]
+                                }
                             },
-                            path: "donors",
-                            query: common
+                            "inner_hits": {
+                                "_source": [
+                                    "donors.*"
+                                ]
+                            }
                         }
                     }
                 ]
             }
+        },
+        "_source": {
+            "includes": [
+                "*"
+            ],
+            "excludes": [
+                "donors"
+            ]
         }
     }
 
+    console.log(JSON.stringify(nestedDonors(query)))
     expect(nestedDonors(query)).to.eql(expected)
   });
-  */
+
 });

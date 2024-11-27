@@ -10,17 +10,17 @@ const addInnerHitsDonors = (body) => {
         }
     }
 
-    // Optimise query 
-    // optimiseBooleanQuery(newBody.query)
-
     // keep original body for complex nested queries
     let nestedDonorsCount = addInnerHitsDonorsPath(newBody.query)
-
-    /* let maxIterations = 1
-    while(nestedDonorsCount > 1 && maxIterations--){
-        optimiseBooleanQuery(newBody.query)
+    let counter = 0
+    while(nestedDonorsCount > 1 && counter < 10){
+        newBody.query = optimizeBooleanQuery(newBody.query)
         nestedDonorsCount = addInnerHitsDonorsPath(newBody.query)
-    } */
+        counter++
+    }
+
+    // console.log(`optimized query from:\n ${JSON.stringify(body.query)}\nto:\n ${JSON.stringify(newBody.query)}`)
+    // console.log(`nestedDonorsCount: ${nestedDonorsCount} in ${counter} iterations`)
 
     return nestedDonorsCount === 1 ? newBody : body;
 }
@@ -38,178 +38,131 @@ export function addInnerHitsDonorsPath(obj, hasNestedDonorsInit = 0){
     return hasNestedDonors
 }
 
-export function optimiseBooleanQuery(query){
-    const optimizedBool = {
-        must: [],
-        should: [],
-        must_not: []
-    }
-    let commonNestedDonors
-    for(const occurrenceType in query.bool){
-        const terms = query.bool[occurrenceType]
-        switch(occurrenceType){
-            case "must":
-                for(const term of terms){
-                    if(term.bool?.must) {
-                        for(const nestedDonorsMustTerm of term.bool.must){
-                            if(nestedDonorsMustTerm.nested?.path !== "donors") continue
-                            commonNestedDonors = getCommonMustNestedDonors(nestedDonorsMustTerm.nested.query.bool.must, commonNestedDonors)
-                        }
-                        optimizedBool.must.push(...term.bool.must)
-                    } else if(term.bool?.should) {
-                        // Remove wraping 'must query' if only one term
-                        const shouldNested = { bool: { should: [] } }
-                        for(const subTerm of term.bool.should){
-                            if(subTerm.bool?.must?.length === 1) shouldNested.bool.should.push(...subTerm.bool.must)
-                            else shouldNested.bool.should.push(subTerm)
-                        }
-
-                        // Merge should terms if all are nested donors
-                        const optimizedShouldNested = joinShouldNestedDonorsQueries(shouldNested) || shouldNested
-                        // Get common nested donors
-                        if(optimizedShouldNested.nested){
-                            commonNestedDonors = getCommonMustNestedDonors(optimizedShouldNested?.nested.query.bool.must, commonNestedDonors)
-                        }
-
-                        optimizedBool.must.push(optimizedShouldNested ? optimizedShouldNested : shouldNested)
-                    } else if(term.bool?.must_not){
-                        optimizedBool.must_not.push(...term.bool.must_not)
-                    } else {
-                        optimizedBool.must.push(term)
-                    }
-                }
-
-                // If common nested
-                if(commonNestedDonors?.length){  
-                    const finalDonorNested = {
-                        nested: {
-                            path: "donors",
-                            query: {
-                                bool: {
-                                    must: [...commonNestedDonors]
-                                }
-                            }
-                        }
-                    }
-                    let index = optimizedBool.must.length
-                    while(index--){
-                        const existingNestedMust = optimizedBool.must[index]
-                        if(!existingNestedMust.nested) continue
-                        const optimizedNestedDonor = {
-                            bool: {
-                                must: existingNestedMust.nested.query.bool.must.filter(term => !commonNestedDonors.some( cnd => _.isEqual(cnd, term) )),
-                                should: existingNestedMust.nested.query.bool.should,
-                                must_not: existingNestedMust.nested.query.bool.must_not
-                            }
-                        }
-                        for(const operator of ["must", "should", "must_not"]){
-                            if(!optimizedNestedDonor.bool[operator]?.length) delete optimizedNestedDonor.bool[operator]
-                        }
-                        
-                        if(Object.keys(optimizedNestedDonor.bool).some(operator => optimizedNestedDonor.bool[operator].length)) finalDonorNested.nested.query.bool.must.push(optimizedNestedDonor)
-                        optimizedBool.must.splice(index, 1)
-                    }
-                    optimizedBool.must.push(finalDonorNested)
-                }
-
-                break;
-            case "should":
-            default: 
-                optimizedBool[occurrenceType] = query.bool[occurrenceType]
-        }
-    }
-
-    // Optimize nested
-    for(const operator of ["must", "should", "must_not"]){
-        if(!optimizedBool[operator]?.length) delete optimizedBool[operator]
-    }
-
-    // Final query
-    query.bool = optimizedBool
+function isBooleanQuery(query){
+    return query?.bool && Object.keys(query).length === 1
 }
 
-function getCommonMustNestedDonors(donorsMustTerms, commonMustNestedDefault){
-    if(!donorsMustTerms) return
-    if(!commonMustNestedDefault) return [...donorsMustTerms]
+function isNestedTerm(term){
+    return term?.nested && Object.keys(term).length === 1
+}
 
-    const commonMustNested = commonMustNestedDefault
-    let index = commonMustNested.length
-    while(index--){
-        if(!donorsMustTerms.find( term => _.isEqual(term, commonMustNested[index]) )){
-            commonMustNested.splice(index, 1)
+export function optimizeBooleanQuery(query, parentOccurenceType, parentQuery) {
+    try{
+        // Only process boolean query
+        if(!isBooleanQuery(query)) throw new Error(`invalid boolean query`)
+
+        const optimizedQuery = { bool: {} }
+        const queryClone = structuredClone(query)
+        const occurrenceTypes = Object.keys(queryClone.bool)
+
+        for(const occurrenceType of occurrenceTypes){
+            // Query terms
+            const terms = queryClone.bool[occurrenceType]
+            const isSingleTerm = terms.length === 1
+            
+            if(!Array.isArray(terms)){
+                optimizedQuery.bool[occurrenceType] = queryClone.bool[occurrenceType]
+                continue
+            }
+
+            // Optimize nested queries
+            const optimizedTerms = []
+            for(const term of terms){
+                let optimizedTerm = isBooleanQuery(term) ? optimizeBooleanQuery(term, occurrenceType, optimizedQuery) : term  
+                if(optimizedTerm) optimizedTerms.push(optimizedTerm)
+            } 
+
+            // Check for common nested terms
+            const commonMustNestedTerms = getCommonMustNestedDonors(optimizedTerms)
+
+            switch(occurrenceType){
+                case "must":
+                    // Remove unnecessary wrapping boolean query
+                    if(isSingleTerm && !!parentOccurenceType) return optimizedTerms[0]
+                    mergeNestedTerms(optimizedQuery, optimizedTerms, commonMustNestedTerms, occurrenceType)
+                    break
+                case "should":
+                    mergeNestedTerms(optimizedQuery, optimizedTerms, commonMustNestedTerms, occurrenceType)
+                    break
+                case "must_not":
+                    if(parentOccurenceType === "must"){
+                        parentQuery.bool.must_not = optimizedTerms
+                        return null
+                    }
+                    optimizedQuery.bool.must_not = optimizedTerms
+                    break;
+                default:
+                    optimizedQuery.bool[occurrenceType] = optimizedTerms
+            }
+        }
+        return optimizedQuery
+    } catch(e){ 
+        const error = new Error(`cannot optimize query: ${JSON.stringify(query)}`)
+        console.error(error.message)
+        console.error(e)
+        throw error
+    }
+}
+
+function mergeNestedTerms(optimizedQuery, optimizedTerms, commonMustNestedTerms, occurrenceType){
+    if(commonMustNestedTerms?.length){
+
+       const optimizedNestedQuery = optimizedTerms.map( term => {
+            // Iterate over nested terms and remove common nested terms
+            term.nested.query.bool.must = term.nested.query.bool.must.filter( nestedTerm => !commonMustNestedTerms.some( cnd => _.isEqual(cnd, nestedTerm) ) )
+            if(!term.nested.query.bool.must.length) delete term.nested.query.bool.must
+            return optimizeBooleanQuery(term.nested.query, occurrenceType) 
+        })
+
+        const optimizedQueryBool = { bool: {} }
+        switch(occurrenceType){
+            case "must":
+                optimizedQueryBool.bool.must = [
+                    ...commonMustNestedTerms,
+                    ...optimizedNestedQuery
+                ]
+                break
+            case "should":
+                optimizedQueryBool.bool.must = commonMustNestedTerms
+                optimizedQueryBool.bool.should = optimizedNestedQuery
+                if(optimizedNestedQuery.length > 1) optimizedQueryBool.bool.minimum_should_match = 1
+                break
+        }
+
+        optimizedQuery.bool.must ||= []
+        optimizedQuery.bool.must.push({
+            nested: {
+                path: "donors",
+                query: optimizedQueryBool
+            }
+        })
+    } else {
+        optimizedQuery.bool[occurrenceType] = optimizedTerms
+    }
+}
+
+function getCommonMustNestedDonors(terms){
+    if(!terms?.length > 1) return []
+
+    let nestedPath, commonMustNested
+    for(const nestedTerm of terms){
+        if(!isNestedTerm(nestedTerm)) return []
+
+        if(nestedPath === undefined) nestedPath = nestedTerm.nested.path
+        else if(nestedPath && nestedPath !== nestedTerm.nested.path) nestedPath = null
+
+        if(nestedPath === null) return []
+
+        if(commonMustNested === undefined) commonMustNested = [...nestedTerm.nested.query.bool.must]
+        let index = commonMustNested.length
+        while(index--){
+            if(!nestedTerm.nested.query.bool.must.find( term => _.isEqual(term, commonMustNested[index]) )){
+                commonMustNested.splice(index, 1)
+            }
         }
     }
 
     return commonMustNested
-}
-
-function joinShouldNestedDonorsQueries(term){
-    if(!term.bool.should || Object.keys(term.bool).length !== 1) return
-    let otherTerms = []
-    const nestedShouldDonorTerms = []
-    term.bool.should.forEach(term => {
-        if(term.nested?.path === "donors") nestedShouldDonorTerms.push(term)
-        else otherTerms.push(term)
-    })
-    if(!nestedShouldDonorTerms.length) return
-
-    const shouldTerms = []
-    let initialized = false
-    const commonMustTerms = []
-    for(const shouldTerm of nestedShouldDonorTerms){
-        if(shouldTerm.nested.query.bool?.must){
-            if(!initialized){
-                commonMustTerms.push(...shouldTerm.nested.query.bool.must)
-                initialized = true
-            } else {
-                let index = commonMustTerms.length
-                while(index--){
-                    if(!shouldTerm.nested.query.bool.must.find( term => _.isEqual(term, commonMustTerms[index]) )){
-                        commonMustTerms.splice(index, 1)
-                    }
-                }
-            }
-        }
-        shouldTerms.push(shouldTerm.nested.query)
-    }
-
-    // Factorize common must terms
-    if(commonMustTerms.length){
-        for(const shouldTerm of shouldTerms){
-            let index = shouldTerm.bool.must.length
-            while(index--){
-                if(commonMustTerms.some(term => _.isEqual(term, shouldTerm.bool.must[index]))){
-                    shouldTerm.bool.must.splice(index, 1)
-                    if(!shouldTerm.bool.must.length) delete shouldTerm.bool.must
-                }
-            }
-        }
-    }
-
-    const optimizedDonor = {
-        nested: {
-            path: "donors",
-            query: {
-                bool: {
-                    should: shouldTerms,
-                    must: commonMustTerms
-                }
-            }
-        }
-    }
-
-    if(otherTerms.length) otherTerms.forEach(optimiseBooleanQuery)
-
-    if(otherTerms.length === 1 && otherTerms[0].bool?.must?.length === 1) otherTerms = otherTerms[0].bool.must
-
-    return otherTerms.length ? {
-        bool: {
-            should: [
-                optimizedDonor,
-                ...otherTerms
-            ]
-        }
-    } : optimizedDonor
 }
 
 export default function (body) {
