@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 import { usersApiUrl } from "../config/vars.js";
+import logger from "../config/logger.js";
 
 const PROPERTIES_NOT_FOUND = { properties: { flags: [] } };
 
@@ -48,7 +49,7 @@ export function mapVariantPropertiesToVariants(variants, variantProperties, sear
             const lastFoundProperties = foundProperties[0] || PROPERTIES_NOT_FOUND;
             if (searchedFields.indexOf('flags') > -1) variant.node.flags = [...(lastFoundProperties.properties.flags || [])];
             if (searchedFields.indexOf('note') > -1) variant.node.note = lastFoundProperties.properties.note || null;
-            // console.log('variant.node.flags', variant.node.flags);
+            logger.debug('variant.node.flags', variant.node.flags);
         });
     }
     return variants;

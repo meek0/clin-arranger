@@ -26,7 +26,8 @@ export const env = process.env.NODE_ENV,
   indexNameSequencings = process.env.SEQUENCINGS_INDEX_NAME,
   indexNameAnalyses = process.env.ANALYSES_INDEX_NAME,
   indexNameCoverageByGene = process.env.COVERAGE_BY_GENE_INDEX_NAME,
-  usersApiUrl = process.env.USERS_API_URL;
+  usersApiUrl = process.env.USERS_API_URL,
+  nestedDonorsOptimizationMaxIterations = process.env.NESTED_DONORS_OPTIMIZATION_MAX_ITERATIONS || 10;
 
 export const rsServiceRequest = "ServiceRequest";
 export const rsSVariants = "Variants";
