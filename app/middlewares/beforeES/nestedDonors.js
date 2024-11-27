@@ -1,28 +1,36 @@
 import {findSqonValueInQuery, DONORS_ANALYSIS_SERVICE_REQUEST_ID, DONORS_PATIENT_ID, DONORS_BIOINFO_ANALYSIS_CODE} from "../../utils.js"
-import _ from 'lodash';
+import _ from 'lodash'
+import logger from "../../../config/logger.js"
+import { nestedDonorsOptimizationMaxIterations } from "../../../config/vars.js"
 
 const addInnerHitsDonors = (body) => {
-    const newBody = {
-        ...structuredClone(body),
-        _source:  {
-            includes: ["*"],
-            excludes: ["donors"]
+    try{
+        const newBody = {
+            ...structuredClone(body),
+            _source:  {
+                includes: ["*"],
+                excludes: ["donors"]
+            }
         }
+        let nestedDonorsCount = addInnerHitsDonorsPath(newBody.query)
+        let counter = 0
+        while(nestedDonorsCount > 1 && counter < nestedDonorsOptimizationMaxIterations){
+            newBody.query = optimizeBooleanQuery(newBody.query)
+            nestedDonorsCount = addInnerHitsDonorsPath(newBody.query)
+            counter++
+        }
+
+        logger.debug(`optimized query from:\n ${JSON.stringify(body.query)}\nto:\n ${JSON.stringify(newBody.query)}`)
+        logger.debug(`nestedDonorsCount: ${nestedDonorsCount} in ${counter} iterations`)
+
+        // keep original body for complex nested queries
+        return nestedDonorsCount === 1 ? newBody : body;
+    } catch(e){
+        logger.error(`optimization failed for query:\n ${JSON.stringify(body.query)}`)
+        logger.error(e)
+        // If optimization fails, fallbck to original query
+        return body
     }
-
-    // keep original body for complex nested queries
-    let nestedDonorsCount = addInnerHitsDonorsPath(newBody.query)
-    let counter = 0
-    while(nestedDonorsCount > 1 && counter < 10){
-        newBody.query = optimizeBooleanQuery(newBody.query)
-        nestedDonorsCount = addInnerHitsDonorsPath(newBody.query)
-        counter++
-    }
-
-    // console.log(`optimized query from:\n ${JSON.stringify(body.query)}\nto:\n ${JSON.stringify(newBody.query)}`)
-    // console.log(`nestedDonorsCount: ${nestedDonorsCount} in ${counter} iterations`)
-
-    return nestedDonorsCount === 1 ? newBody : body;
 }
 
 export function addInnerHitsDonorsPath(obj, hasNestedDonorsInit = 0){
@@ -47,61 +55,54 @@ function isNestedTerm(term){
 }
 
 export function optimizeBooleanQuery(query, parentOccurenceType, parentQuery) {
-    try{
-        // Only process boolean query
-        if(!isBooleanQuery(query)) throw new Error(`invalid boolean query`)
+    // Only process boolean query
+    if(!isBooleanQuery(query)) throw new Error(`invalid boolean query`)
 
-        const optimizedQuery = { bool: {} }
-        const queryClone = structuredClone(query)
-        const occurrenceTypes = Object.keys(queryClone.bool)
+    const optimizedQuery = { bool: {} }
+    const queryClone = structuredClone(query)
+    const occurrenceTypes = Object.keys(queryClone.bool)
 
-        for(const occurrenceType of occurrenceTypes){
-            // Query terms
-            const terms = queryClone.bool[occurrenceType]
-            const isSingleTerm = terms.length === 1
-            
-            if(!Array.isArray(terms)){
-                optimizedQuery.bool[occurrenceType] = queryClone.bool[occurrenceType]
-                continue
-            }
-
-            // Optimize nested queries
-            const optimizedTerms = []
-            for(const term of terms){
-                let optimizedTerm = isBooleanQuery(term) ? optimizeBooleanQuery(term, occurrenceType, optimizedQuery) : term  
-                if(optimizedTerm) optimizedTerms.push(optimizedTerm)
-            } 
-
-            // Check for common nested terms
-            const commonMustNestedTerms = getCommonMustNestedDonors(optimizedTerms)
-
-            switch(occurrenceType){
-                case "must":
-                    // Remove unnecessary wrapping boolean query
-                    if(isSingleTerm && !!parentOccurenceType) return optimizedTerms[0]
-                    mergeNestedTerms(optimizedQuery, optimizedTerms, commonMustNestedTerms, occurrenceType)
-                    break
-                case "should":
-                    mergeNestedTerms(optimizedQuery, optimizedTerms, commonMustNestedTerms, occurrenceType)
-                    break
-                case "must_not":
-                    if(parentOccurenceType === "must"){
-                        parentQuery.bool.must_not = optimizedTerms
-                        return null
-                    }
-                    optimizedQuery.bool.must_not = optimizedTerms
-                    break;
-                default:
-                    optimizedQuery.bool[occurrenceType] = optimizedTerms
-            }
+    for(const occurrenceType of occurrenceTypes){
+        // Query terms
+        const terms = queryClone.bool[occurrenceType]
+        const isSingleTerm = terms.length === 1
+        
+        if(!Array.isArray(terms)){
+            optimizedQuery.bool[occurrenceType] = queryClone.bool[occurrenceType]
+            continue
         }
-        return optimizedQuery
-    } catch(e){ 
-        const error = new Error(`cannot optimize query: ${JSON.stringify(query)}`)
-        console.error(error.message)
-        console.error(e)
-        throw error
+
+        // Optimize nested queries
+        const optimizedTerms = []
+        for(const term of terms){
+            let optimizedTerm = isBooleanQuery(term) ? optimizeBooleanQuery(term, occurrenceType, optimizedQuery) : term  
+            if(optimizedTerm) optimizedTerms.push(optimizedTerm)
+        } 
+
+        // Check for common nested terms
+        const commonMustNestedTerms = getCommonMustNestedDonors(optimizedTerms)
+
+        switch(occurrenceType){
+            case "must":
+                // Remove unnecessary wrapping boolean query
+                if(isSingleTerm && !!parentOccurenceType) return optimizedTerms[0]
+                mergeNestedTerms(optimizedQuery, optimizedTerms, commonMustNestedTerms, occurrenceType)
+                break
+            case "should":
+                mergeNestedTerms(optimizedQuery, optimizedTerms, commonMustNestedTerms, occurrenceType)
+                break
+            case "must_not":
+                if(parentOccurenceType === "must"){
+                    parentQuery.bool.must_not = optimizedTerms
+                    return null
+                }
+                optimizedQuery.bool.must_not = optimizedTerms
+                break;
+            default:
+                optimizedQuery.bool[occurrenceType] = optimizedTerms
+        }
     }
+    return optimizedQuery
 }
 
 function mergeNestedTerms(optimizedQuery, optimizedTerms, commonMustNestedTerms, occurrenceType){
@@ -175,7 +176,7 @@ export default function (body) {
             
         return body
     } catch(e) {
-        console.error(e)
+        logger.error(e)
         throw e
     }
 }
