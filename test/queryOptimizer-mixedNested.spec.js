@@ -3,9 +3,9 @@ import _ from 'lodash'
 import { optimizeBooleanQuery, addInnerHitsDonorsPath } from "../app/middlewares/beforeES/nestedDonors.js"
 
 describe("Optimize Query Tests", () => {
-    it(`Should optimize request Q2`, () => {
+    it(`Should optimize request with mix nested`, () => {
 
-        const q2 = {
+        const input = {
             "bool": {
                 "must": [
                     {
@@ -16,18 +16,29 @@ describe("Optimize Query Tests", () => {
                                         "must": [
                                             {
                                                 "nested": {
-                                                    "path": "donors",
+                                                    "path": "consequences",
                                                     "query": {
                                                         "bool": {
                                                             "must": [
                                                                 {
-                                                                    "terms": {
-                                                                        "donors.parental_origin": [
-                                                                            "denovo"
-                                                                        ],
-                                                                        "boost": 0
+                                                                    "range": {
+                                                                        "consequences.predictions.dann_score": {
+                                                                            "boost": 0,
+                                                                            "lt": 0.05
+                                                                        }
                                                                     }
-                                                                },
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                "nested": {
+                                                    "path": "donors",
+                                                    "query": {
+                                                        "bool": {
+                                                            "must": [
                                                                 {
                                                                     "terms": {
                                                                         "donors.patient_id": [
@@ -57,18 +68,27 @@ describe("Optimize Query Tests", () => {
                                         "must": [
                                             {
                                                 "nested": {
+                                                    "path": "consequences",
+                                                    "query": {
+                                                        "bool": {
+                                                            "must_not": [
+                                                                {
+                                                                    "exists": {
+                                                                        "field": "consequences.predictions.dann_score",
+                                                                        "boost": 0
+                                                                    }
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                "nested": {
                                                     "path": "donors",
                                                     "query": {
                                                         "bool": {
                                                             "must": [
-                                                                {
-                                                                    "terms": {
-                                                                        "donors.filters": [
-                                                                            "long_indel"
-                                                                        ],
-                                                                        "boost": 0
-                                                                    }
-                                                                },
                                                                 {
                                                                     "terms": {
                                                                         "donors.patient_id": [
@@ -104,7 +124,7 @@ describe("Optimize Query Tests", () => {
                 ]
             }
         }
-
+        
         const output = {
             "bool": {
                 "must_not": [],
@@ -133,25 +153,7 @@ describe("Optimize Query Tests", () => {
                                         },
                                         {
                                             "bool": {
-                                                "should": [
-                                                    {
-                                                        "terms": {
-                                                            "donors.parental_origin": [
-                                                                "denovo"
-                                                            ],
-                                                            "boost": 0
-                                                        }
-                                                    },
-                                                    {
-                                                        "terms": {
-                                                            "donors.filters": [
-                                                                "long_indel"
-                                                            ],
-                                                            "boost": 0
-                                                        }
-                                                    }
-                                                ],
-                                                "minimum_should_match": 1
+                                                "should": []
                                             }
                                         }
                                     ]
@@ -163,16 +165,52 @@ describe("Optimize Query Tests", () => {
                                 ]
                             }
                         }
+                    },
+                    {
+                        "nested": {
+                            "path": "consequences",
+                            "query": {
+                                "bool": {
+                                    "must": [
+                                        {
+                                            "range": {
+                                                "consequences.predictions.dann_score": {
+                                                    "boost": 0,
+                                                    "lt": 0.05
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "nested": {
+                            "path": "consequences",
+                            "query": {
+                                "bool": {
+                                    "must_not": [
+                                        {
+                                            "exists": {
+                                                "field": "consequences.predictions.dann_score",
+                                                "boost": 0
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
                     }
                 ]
             }
         }
 
-        let optimizedQuery = q2
+        let optimizedQuery = input
         let counter = 0
         let nestedDonorsCount = addInnerHitsDonorsPath(optimizedQuery)
 
-        while(nestedDonorsCount > 1 && counter < 10){
+        while(nestedDonorsCount > 1 && counter < 1){
             optimizedQuery = optimizeBooleanQuery(optimizedQuery)
             nestedDonorsCount = addInnerHitsDonorsPath(optimizedQuery)
             counter++

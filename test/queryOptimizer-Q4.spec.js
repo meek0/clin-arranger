@@ -158,6 +158,14 @@ describe("Optimize Query Tests", () => {
                                     "must": [
                                         {
                                             "terms": {
+                                                "donors.transmission": [
+                                                    "autosomal_dominant_de_novo"
+                                                ],
+                                                "boost": 0
+                                            }
+                                        },
+                                        {
+                                            "terms": {
                                                 "donors.patient_id": [
                                                     "1282129"
                                                 ],
@@ -168,14 +176,6 @@ describe("Optimize Query Tests", () => {
                                             "terms": {
                                                 "donors.analysis_service_request_id": [
                                                     "1282128"
-                                                ],
-                                                "boost": 0
-                                            }
-                                        },
-                                        {
-                                            "terms": {
-                                                "donors.transmission": [
-                                                    "autosomal_dominant_de_novo"
                                                 ],
                                                 "boost": 0
                                             }

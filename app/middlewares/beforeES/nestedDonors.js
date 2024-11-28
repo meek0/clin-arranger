@@ -118,17 +118,31 @@ function mergeNestedTerms(optimizedQuery, optimizedTerms, commonMustNestedTerms,
         const optimizedNestedQuery = []
         const otherTerms = []
 
-        optimizedTerms.forEach( term => {
+        function cleanNestedTerm(term){
+            // If it's a query iterate over terms
+            if(isBooleanQuery(term)){
+                Object.values(term.bool).forEach( terms => terms.forEach(cleanNestedTerm))
+                return
+            }
+
+            // If it's not a nested donor term add to other terms to keep it in the query
             if(!isNestedTerm(term) || term.nested.path !== "donors"){
                 otherTerms.push(term)
                 return
             }
+
             // Iterate over nested terms and remove common nested terms
-            term.nested.query.bool.must = term.nested.query.bool.must.filter( nestedTerm => !commonMustNestedTerms.some( cnd => _.isEqual(cnd, nestedTerm) ) )
-            if(!term.nested.query.bool.must.length) delete term.nested.query.bool.must
+            if(term.nested.query.bool.must){
+                term.nested.query.bool.must = term.nested.query.bool.must.filter( nestedTerm => !commonMustNestedTerms.some( cnd => _.isEqual(cnd, nestedTerm) ) )
+                if(!term.nested.query.bool.must.length) delete term.nested.query.bool.must
+            }
+            if(!Object.keys(term.nested.query.bool).length) return
             const optimizedQuery = optimizeBooleanQuery(term.nested.query, occurrenceType)
             if(!optimizedQuery.bool || Object.keys(optimizedQuery.bool).length) optimizedNestedQuery.push(optimizedQuery)
-        })
+        }
+
+
+        optimizedTerms.forEach(cleanNestedTerm)
 
         switch(occurrenceType){
             case "must":
@@ -162,6 +176,22 @@ function getCommonMustNestedDonors(terms, occurrenceType){
     if(!terms?.length > 1) return []
 
     let nestedPath, commonMustNested
+
+    // Deal with nested queries
+    if(terms.every(term => isBooleanQuery(term))){
+        for(const query of terms){
+            // Only process must terms
+            if(!query.bool.must) continue
+            const nestedQueryCommonMustNested = getCommonMustNestedDonors(query.bool.must, "must")
+            if(nestedQueryCommonMustNested?.length){
+                if(!commonMustNested) commonMustNested = [...nestedQueryCommonMustNested]
+                else if(nestedQueryCommonMustNested.some( term => !commonMustNested.find( cmt => _.isEqual(cmt, term) ) )) return []
+            }
+        }
+        if(commonMustNested) return commonMustNested
+    }
+    
+    // Deal with nested terms
     for(const nestedTerm of terms){
         if(!isNestedTerm(nestedTerm)) {
             if(occurrenceType === "should") return []

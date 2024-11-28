@@ -192,31 +192,29 @@ describe("Optimize Query Tests", () => {
                 "must_not": [],
                 "must": [
                     {
-                        "bool": {
-                            "must": [
-                                {
-                                    "nested": {
-                                        "path": "donors",
-                                        "query": {
-                                            "bool": {
-                                                "must": [
-                                                    {
-                                                        "terms": {
-                                                            "donors.patient_id": [
-                                                                "1282129"
-                                                            ],
-                                                            "boost": 0
-                                                        }
-                                                    },
-                                                    {
-                                                        "terms": {
-                                                            "donors.analysis_service_request_id": [
-                                                                "1282128"
-                                                            ],
-                                                            "boost": 0
-                                                        }
-                                                    }
+                        "nested": {
+                            "path": "donors",
+                            "query": {
+                                "bool": {
+                                    "must": [
+                                        {
+                                            "terms": {
+                                                "donors.patient_id": [
+                                                    "1282129"
                                                 ],
+                                                "boost": 0
+                                            }
+                                        },
+                                        {
+                                            "terms": {
+                                                "donors.analysis_service_request_id": [
+                                                    "1282128"
+                                                ],
+                                                "boost": 0
+                                            }
+                                        },
+                                        {
+                                            "bool": {
                                                 "should": [
                                                     {
                                                         "range": {
@@ -261,15 +259,15 @@ describe("Optimize Query Tests", () => {
                                                 ],
                                                 "minimum_should_match": 1
                                             }
-                                        },
-                                        "inner_hits": {
-                                            "_source": [
-                                                "donors.*"
-                                            ]
                                         }
-                                    }
+                                    ]
                                 }
-                            ]
+                            },
+                            "inner_hits": {
+                                "_source": [
+                                    "donors.*"
+                                ]
+                            }
                         }
                     }
                 ]
