@@ -49,7 +49,6 @@ export function mapVariantPropertiesToVariants(variants, variantProperties, sear
             const lastFoundProperties = foundProperties[0] || PROPERTIES_NOT_FOUND;
             if (searchedFields.indexOf('flags') > -1) variant.node.flags = [...(lastFoundProperties.properties.flags || [])];
             if (searchedFields.indexOf('note') > -1) variant.node.note = lastFoundProperties.properties.note || null;
-            logger.debug('variant.node.flags', variant.node.flags);
         });
     }
     return variants;

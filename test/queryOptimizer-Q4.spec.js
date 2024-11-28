@@ -173,6 +173,14 @@ describe("Optimize Query Tests", () => {
                                             }
                                         },
                                         {
+                                            "terms": {
+                                                "donors.transmission": [
+                                                    "autosomal_dominant_de_novo"
+                                                ],
+                                                "boost": 0
+                                            }
+                                        },
+                                        {
                                             "bool": {
                                                 "should": [
                                                     {
@@ -197,14 +205,6 @@ describe("Optimize Query Tests", () => {
                                                     }
                                                 ],
                                                 "minimum_should_match": 1
-                                            }
-                                        },
-                                        {
-                                            "terms": {
-                                                "donors.transmission": [
-                                                    "autosomal_dominant_de_novo"
-                                                ],
-                                                "boost": 0
                                             }
                                         }
                                     ]
