@@ -194,7 +194,6 @@ export default function (body) {
 
         if(patient_id || analysis_id || bioinfo_analysis_code) {
             if (splitNestedDonorsOptimizationQuery) {
-                logger.debug(`[nestedDonors] Split donors query: ${JSON.stringify(body.query)}`)
                 body = {
                     ...structuredClone(body),
                     _source:  {
@@ -202,8 +201,9 @@ export default function (body) {
                         excludes: ["*"]
                     }
                 }
+                logger.debug(`[nestedDonors] Split donors query: ${JSON.stringify(body)}`)
             } else {
-                body = addInnerHitsDonors(body)
+               body = addInnerHitsDonors(body)
             }
         }
         return body

@@ -39,36 +39,32 @@ export default async function (body, hits) {
 
                 const esBody = {
                     query: {
-                    bool: {
+                      bool: {
                         must: [
-                        {
-                            bool: {
-                            must: [
-                                {
-                                    terms: {
-                                        "_id": ids
-                                    }
+                          {
+                            terms: {
+                              _id: ids,
+                            },
+                          },
+                          {
+                            nested: {
+                              path: "donors",
+                              query: {
+                                bool: {
+                                  must: buildNestedDonorsQuery(
+                                    patient_id,
+                                    analysis_id,
+                                    bioinfo_analysis_code
+                                  ),
                                 },
-                                {
-                                nested: {
-                                    path: "donors",
-                                    query: {
-                                        bool: {
-                                            must: buildNestedDonorsQuery(patient_id, analysis_id, bioinfo_analysis_code)
-                                        }
-                                    },
-                                    inner_hits: {
-                                        _source: [
-                                            "donors.*"
-                                        ]
-                                    }
-                                }
-                                }
-                            ]
-                            }
-                        }
+                              },
+                              inner_hits: {
+                                _source: ["donors.*"],
+                              },
+                            },
+                          },
                         ]
-                    }
+                      }
                     },
                     _source: {
                         includes: [
@@ -78,7 +74,8 @@ export default async function (body, hits) {
                             "donors"
                         ]
                     }
-                }
+                  }
+                  
 
                 logger.debug(`[variantDonors] Un-Split donors ES query: ${JSON.stringify(esBody)}`)
                 
