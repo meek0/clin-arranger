@@ -1,8 +1,26 @@
+import logger from "../../../config/logger.js";
 import { splitNestedDonorsOptimizationQuery, indexNameVariants } from "../../../config/vars.js";
 import EsInstance from "../../../services/esClient.js";
 import {findSqonValueInQuery, DONORS_ANALYSIS_SERVICE_REQUEST_ID, DONORS_PATIENT_ID, DONORS_BIOINFO_ANALYSIS_CODE} from "../../utils.js"
 
 const esClient = EsInstance.getInstance();
+
+const buildNestedDonorsQuery = (patient_id, analysis_id, bioinfo_analysis_code) => {
+    const must = []
+    const addTerm = (field, value) => {
+        if (value) {
+            must.push({
+                terms: {
+                    [field]: [value]
+                }
+            })
+        }
+    }
+    addTerm("donors.patient_id", patient_id)
+    addTerm("donors.analysis_service_request_id", analysis_id)
+    addTerm("donors.bioinfo_analysis_code", bioinfo_analysis_code)
+    return must;
+}
 
 // extract the inner_hits from ES response if available and copy its content where is should be normally:
 // - inner_hits.donors (is from beforeES/nestedDonors)
@@ -18,6 +36,7 @@ export default async function (body, hits) {
         if (patient_id || analysis_id || bioinfo_analysis_code) {
             const ids = hits?.hits?.map(hit => hit._id) || []
             if (ids.length) {
+
                 const esBody = {
                     query: {
                     bool: {
@@ -34,31 +53,9 @@ export default async function (body, hits) {
                                 nested: {
                                     path: "donors",
                                     query: {
-                                    bool: {
-                                        must: [
-                                        patient_id && {
-                                            terms: {
-                                            "donors.patient_id": [
-                                                patient_id
-                                            ],
-                                            }
-                                        },
-                                        analysis_id &&{
-                                            terms: {
-                                            "donors.analysis_service_request_id": [
-                                                analysis_id
-                                            ],
-                                            }
-                                        },
-                                        bioinfo_analysis_code && {
-                                            terms: {
-                                            "donors.bioinfo_analysis_code": [
-                                                bioinfo_analysis_code
-                                            ],
-                                            }
+                                        bool: {
+                                            must: buildNestedDonorsQuery(patient_id, analysis_id, bioinfo_analysis_code)
                                         }
-                                        ]
-                                    }
                                     },
                                     inner_hits: {
                                         _source: [
@@ -82,6 +79,8 @@ export default async function (body, hits) {
                         ]
                     }
                 }
+
+                logger.debug(`[variantDonors] Un-Split donors ES query: ${JSON.stringify(esBody)}`)
                 
                 const result = await esClient.search({
                     index: indexNameVariants,
@@ -94,6 +93,8 @@ export default async function (body, hits) {
                     if (newHit) {
                         hit._source = structuredClone(newHit._source)
                         hit.inner_hits = structuredClone(newHit.inner_hits)
+                    } else {
+                        logger.warn(`[variantDonors] No Un-split hit found for id: ${hit._id}`)
                     }
                 });
                
@@ -111,7 +112,7 @@ export default async function (body, hits) {
                 }
                 if (innerHitsDonors?.length && !hit._source?.donors) {
                     hit._source.donors = structuredClone(innerHitsDonors);
-                }
+                } 
                 delete hit.inner_hits;
             }
         });

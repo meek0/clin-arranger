@@ -194,7 +194,7 @@ export default function (body) {
 
         if(patient_id || analysis_id || bioinfo_analysis_code) {
             if (splitNestedDonorsOptimizationQuery) {
-                logger.debug(`splitting nested donors for query:\n ${JSON.stringify(body.query)}`)
+                logger.debug(`[nestedDonors] Split donors query: ${JSON.stringify(body.query)}`)
                 body = {
                     ...structuredClone(body),
                     _source:  {
