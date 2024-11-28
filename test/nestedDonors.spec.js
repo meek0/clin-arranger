@@ -217,12 +217,6 @@ describe("nestedDonors", () => {
                                                 ],
                                                 "boost": 0
                                             }
-                                        },
-                                        {
-                                            "bool": {}
-                                        },
-                                        {
-                                            "bool": {}
                                         }
                                     ]
                                 }
@@ -247,7 +241,6 @@ describe("nestedDonors", () => {
         }
     }
 
-    console.log(JSON.stringify(nestedDonors(query)))
     expect(nestedDonors(query)).to.eql(expected)
   });
 

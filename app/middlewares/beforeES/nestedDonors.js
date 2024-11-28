@@ -22,6 +22,7 @@ const addInnerHitsDonors = (body) => {
 
         logger.debug(`optimized query from:\n ${JSON.stringify(body.query)}\nto:\n ${JSON.stringify(newBody.query)}`)
         logger.debug(`nestedDonorsCount: ${nestedDonorsCount} in ${counter} iterations`)
+        if(nestedDonorsCount > 1) logger.warn(`cannot merge nested donors for query:\n ${JSON.stringify(body.query)}`)
 
         // keep original body for complex nested queries
         return nestedDonorsCount === 1 ? newBody : body;
@@ -80,12 +81,17 @@ export function optimizeBooleanQuery(query, parentOccurenceType, parentQuery) {
         } 
 
         // Check for common nested terms
-        const commonMustNestedTerms = getCommonMustNestedDonors(optimizedTerms)
+        const commonMustNestedTerms = getCommonMustNestedDonors(optimizedTerms, occurrenceType, optimizedQuery)
 
         switch(occurrenceType){
             case "must":
                 // Remove unnecessary wrapping boolean query
                 if(isSingleTerm && !!parentOccurenceType) return optimizedTerms[0]
+                else if(parentOccurenceType === "must" && parentQuery){
+                    parentQuery.bool.must ||= []
+                    parentQuery.bool.must.push(...optimizedTerms)
+                    return null
+                }
                 mergeNestedTerms(optimizedQuery, optimizedTerms, commonMustNestedTerms, occurrenceType)
                 break
             case "should":
@@ -107,15 +113,23 @@ export function optimizeBooleanQuery(query, parentOccurenceType, parentQuery) {
 
 function mergeNestedTerms(optimizedQuery, optimizedTerms, commonMustNestedTerms, occurrenceType){
     if(commonMustNestedTerms?.length){
+ 
+        const optimizedQueryBool = { bool: {} }
+        const optimizedNestedQuery = []
+        const otherTerms = []
 
-       const optimizedNestedQuery = optimizedTerms.map( term => {
+        optimizedTerms.forEach( term => {
+            if(!isNestedTerm(term) || term.nested.path !== "donors"){
+                otherTerms.push(term)
+                return
+            }
             // Iterate over nested terms and remove common nested terms
             term.nested.query.bool.must = term.nested.query.bool.must.filter( nestedTerm => !commonMustNestedTerms.some( cnd => _.isEqual(cnd, nestedTerm) ) )
             if(!term.nested.query.bool.must.length) delete term.nested.query.bool.must
-            return optimizeBooleanQuery(term.nested.query, occurrenceType) 
+            const optimizedQuery = optimizeBooleanQuery(term.nested.query, occurrenceType)
+            if(!optimizedQuery.bool || Object.keys(optimizedQuery.bool).length) optimizedNestedQuery.push(optimizedQuery)
         })
 
-        const optimizedQueryBool = { bool: {} }
         switch(occurrenceType){
             case "must":
                 optimizedQueryBool.bool.must = [
@@ -137,17 +151,23 @@ function mergeNestedTerms(optimizedQuery, optimizedTerms, commonMustNestedTerms,
                 query: optimizedQueryBool
             }
         })
+        optimizedQuery.bool.must.push(...otherTerms)
     } else {
-        optimizedQuery.bool[occurrenceType] = optimizedTerms
+        optimizedQuery.bool[occurrenceType] ||= []
+        optimizedQuery.bool[occurrenceType].push(...optimizedTerms)
     }
 }
 
-function getCommonMustNestedDonors(terms){
+function getCommonMustNestedDonors(terms, occurrenceType){
     if(!terms?.length > 1) return []
 
     let nestedPath, commonMustNested
     for(const nestedTerm of terms){
-        if(!isNestedTerm(nestedTerm)) return []
+        if(!isNestedTerm(nestedTerm)) {
+            if(occurrenceType === "should") return []
+            continue
+        }
+        if(nestedTerm.nested.path !== "donors") continue
 
         if(nestedPath === undefined) nestedPath = nestedTerm.nested.path
         else if(nestedPath && nestedPath !== nestedTerm.nested.path) nestedPath = null
