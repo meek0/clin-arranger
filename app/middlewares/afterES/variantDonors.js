@@ -1,4 +1,3 @@
-import logger from "../../../config/logger.js";
 import { splitNestedDonorsOptimizationQuery, indexNameVariants } from "../../../config/vars.js";
 import EsInstance from "../../../services/esClient.js";
 import {findSqonValueInQuery, DONORS_ANALYSIS_SERVICE_REQUEST_ID, DONORS_PATIENT_ID, DONORS_BIOINFO_ANALYSIS_CODE} from "../../utils.js"

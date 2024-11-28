@@ -1,7 +1,7 @@
 // import "regenerator-runtime/runtime";
 
 import ArrangerServer from "@ferlab/arranger-server";
-import {port, env} from "../config/vars.js";
+import {port, env, splitNestedDonorsOptimizationQuery} from "../config/vars.js";
 import logger from "../config/logger.js";
 import app from "./app.js";
 
@@ -25,3 +25,4 @@ app.use(arrangerRoutes);
 app.listen(port, () =>
     logger.info(`Clin-Arranger server started on port ${port} (${env})`)
 );
+logger.info(`Split donors query enabled: ${splitNestedDonorsOptimizationQuery}`)
