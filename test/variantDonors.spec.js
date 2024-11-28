@@ -2,7 +2,7 @@ import { expect } from "chai";
 import variantDonors from "../app/middlewares/afterES/variantDonors.js";
 
 describe("variantDonors", () => {
-  it(`Should extract inner_hits of donors`, () => {
+  it(`Should extract inner_hits of donors`, async () => {
     const hits ={
         total: {
             value: 10000,
@@ -61,10 +61,10 @@ describe("variantDonors", () => {
         ]
     };
        
-    expect(variantDonors(null, hits)).to.eql(expected)
+    expect(await variantDonors(null, hits)).to.eql(expected)
   });
 
-  it(`Should do nothing if no inner_hits`, () => {
+  it(`Should do nothing if no inner_hits`, async () => {
     const hits ={
         total: {
             value: 10000,
@@ -81,10 +81,10 @@ describe("variantDonors", () => {
             }
         ]
     };
-    expect(variantDonors(null, hits)).to.eql(hits)
+    expect(await variantDonors(null, hits)).to.eql(hits)
   });
 
-  it(`Should ignore and delete inner_hits if donors already exist`, () => {
+  it(`Should ignore and delete inner_hits if donors already exist`, async () => {
     const hits ={
         total: {
             value: 10000,
@@ -151,6 +151,6 @@ describe("variantDonors", () => {
         ]
     };
        
-    expect(variantDonors(null, hits)).to.eql(expected)
+    expect(await variantDonors(null, hits)).to.eql(expected)
   });
 });
