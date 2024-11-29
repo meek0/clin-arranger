@@ -61,7 +61,7 @@ describe("variantDonors", () => {
         ]
     };
        
-    expect(await variantDonors(null, hits)).to.eql(expected)
+    expect(await variantDonors({}, hits)).to.eql(expected)
   });
 
   it(`Should do nothing if no inner_hits`, async () => {
@@ -81,7 +81,7 @@ describe("variantDonors", () => {
             }
         ]
     };
-    expect(await variantDonors(null, hits)).to.eql(hits)
+    expect(await variantDonors({}, hits)).to.eql(hits)
   });
 
   it(`Should ignore and delete inner_hits if donors already exist`, async () => {
@@ -151,6 +151,6 @@ describe("variantDonors", () => {
         ]
     };
        
-    expect(await variantDonors(null, hits)).to.eql(expected)
+    expect(await variantDonors({}, hits)).to.eql(expected)
   });
 });
