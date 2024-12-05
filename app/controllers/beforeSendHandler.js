@@ -65,25 +65,29 @@ function parseResponseBody (arg) {
 
 // https://ferlab-crsj.atlassian.net/browse/CLIN-3589
 const detectNullArrays = (data) => {  
-    const analyses = data?.data?.Analyses
-    const sequencings = data?.data?.Sequencings
-    const edges = analyses?.hits?.edges || sequencings?.hits?.edges
-    if (edges) {
-        edges.forEach((edge) => {
-            const node = edge.node
-            const tasks = node?.tasks
-            const assignments = node?.assignments
-            const index = analyses ? "Analyses": "Sequencings"
-            logger.debug(`[${index}]`, {tasks, assignments})
-            if (tasks === null) {
-            console.warn(`[${index}] Missing tasks for: ${JSON.stringify(hit)}`)
-            }
-            if (index.includes('Analyses') && assignments === null) {
-            console.warn(`[${index}] Missing assignments for: ${JSON.stringify(hit)}`)
-            }
-        });
+    try {
+        const analyses = data?.data?.Analyses
+        const sequencings = data?.data?.Sequencings
+        const edges = analyses?.hits?.edges || sequencings?.hits?.edges
+        if (edges) {
+            edges.forEach((edge) => {
+                const node = edge.node
+                const tasks = node?.tasks
+                const assignments = node?.assignments
+                const index = analyses ? "Analyses": "Sequencings"
+                logger.debug(`[${index}]`, {tasks, assignments})
+                if (!Array.isArray(tasks)) {
+                    console.warn(`[${index}] Missing tasks for: ${JSON.stringify(hit)}`)
+                }
+                if (index.includes('Analyses') && !Array.isArray(assignments)) {
+                    console.warn(`[${index}] Missing assignments for: ${JSON.stringify(hit)}`)
+                }
+            });
+        }
+    } catch (e) {   
+        console.error(e)
     }
-  }
+}
   
 
 export default async function(req, res, next) {

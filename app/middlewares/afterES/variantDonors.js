@@ -24,20 +24,24 @@ const buildNestedDonorsQuery = (patient_id, analysis_id, bioinfo_analysis_code) 
 
 // https://ferlab-crsj.atlassian.net/browse/CLIN-3589
 const detectNullArrays = (hits) => {  
-  const index = hits?.hits?.[0]?._index
-  if (index?.includes('sequencings') || index?.includes('analyses')) {
-    hits.hits.forEach((hit) => {
-      const source = hit._source
-      const tasks = source?.tasks
-      const assignments = source?.assignments
-      logger.debug(`[${index}]`, {tasks, assignments})
-      if (tasks === null) {
-        console.warn(`[${index}] Missing tasks for: ${JSON.stringify(hit)}`)
-      }
-      if (index.includes('analysis') && assignments === null) {
-        console.warn(`[${index}] Missing assignments for: ${JSON.stringify(hit)}`)
-      }
-    });
+  try {
+    const index = hits?.hits?.[0]?._index
+    if (index?.includes('sequencings') || index?.includes('analyses')) {
+      hits.hits.forEach((hit) => {
+        const source = hit._source
+        const tasks = source?.tasks
+        const assignments = source?.assignments
+        logger.debug(`[${index}]`, {tasks, assignments})
+        if (!Array.isArray(tasks)) {
+          console.warn(`[${index}] Missing tasks for: ${JSON.stringify(hit)}`)
+        }
+        if (index.includes('analysis') && !Array.isArray(assignments)) {
+          console.warn(`[${index}] Missing assignments for: ${JSON.stringify(hit)}`)
+        }
+      });
+    }
+  } catch (e) {
+    console.error(e)
   }
 }
 
