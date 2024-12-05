@@ -22,10 +22,36 @@ const buildNestedDonorsQuery = (patient_id, analysis_id, bioinfo_analysis_code) 
     return must;
 }
 
+// https://ferlab-crsj.atlassian.net/browse/CLIN-3589
+const detectNullArrays = (hits) => {  
+  try {
+    const index = hits?.hits?.[0]?._index
+    if (index?.includes('sequencings') || index?.includes('analyses')) {
+      hits.hits.forEach((hit) => {
+        const source = hit._source
+        const tasks = source?.tasks
+        const assignments = source?.assignments
+        logger.debug(`[${index}]`, {tasks, assignments})
+        if (!Array.isArray(tasks)) {
+          console.warn(`[${index}] Missing tasks for: ${JSON.stringify(hit)}`)
+        }
+        if (index.includes('analysis') && !Array.isArray(assignments)) {
+          console.warn(`[${index}] Missing assignments for: ${JSON.stringify(hit)}`)
+        }
+      });
+    }
+  } catch (e) {
+    console.error(e)
+  }
+}
+
 // extract the inner_hits from ES response if available and copy its content where is should be normally:
 // - inner_hits.donors (is from beforeES/nestedDonors)
 // - (add more inner_hits bellow ...)
 export default async function (body, hits) {
+
+    detectNullArrays(hits)
+
     // Split donors query to optimize ES performance
     const patient_id = findSqonValueInQuery(body.query, DONORS_PATIENT_ID)
     const analysis_id = findSqonValueInQuery(body.query, DONORS_ANALYSIS_SERVICE_REQUEST_ID)
