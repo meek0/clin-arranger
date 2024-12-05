@@ -63,6 +63,29 @@ function parseResponseBody (arg) {
     return data;
 }
 
+// https://ferlab-crsj.atlassian.net/browse/CLIN-3589
+const detectNullArrays = (data) => {  
+    const analyses = data?.data?.Analyses
+    const sequencings = data?.data?.Sequencings
+    const edges = analyses?.hits?.edges || sequencings?.hits?.edges
+    if (edges) {
+        edges.forEach((edge) => {
+            const node = edge.node
+            const tasks = node?.tasks
+            const assignments = node?.assignments
+            const index = analyses ? "Analyses": "Sequencings"
+            logger.debug(`[${index}]`, {tasks, assignments})
+            if (tasks === null) {
+            console.warn(`[${index}] Missing tasks for: ${JSON.stringify(hit)}`)
+            }
+            if (index.includes('Analyses') && assignments === null) {
+            console.warn(`[${index}] Missing assignments for: ${JSON.stringify(hit)}`)
+            }
+        });
+    }
+  }
+  
+
 export default async function(req, res, next) {
     const start = Date.now();
     const sqon = req.body?.variables?.sqon;
@@ -73,12 +96,13 @@ export default async function(req, res, next) {
     const withFlags = req.body?.query?.includes('flags');
     const withNote = req.body?.query?.includes('note');
 
-    if (patientIds?.length > 0 || withFlags || withNote) {
-        // one way to modify body is to replace the res.send() function
-        const originalSend = res.send;
-        res.send = async function () { // function is mandatory, () => {} doesn't work here
+    
+    // one way to modify body is to replace the res.send() function
+    const originalSend = res.send;
+    res.send = async function () { // function is mandatory, () => {} doesn't work here
+        const data = parseResponseBody(arguments[0]);
+        if (patientIds?.length > 0 || withFlags || withNote) {
             // parse variants from response body
-            const data = parseResponseBody(arguments[0]);
             const variants = data?.data?.Variants?.hits?.edges || data?.data?.cnv?.hits?.edges;
             cleanupDonors(variants, patientIds, analysisIds, bioinfoCodes)
             if (withFlags || withNote) {
@@ -89,10 +113,11 @@ export default async function(req, res, next) {
             }
             // override response body with modified data
             arguments[0] = JSON.stringify(data);
-            originalSend.apply(res, arguments);
-            logger.info(`[${req.method}] ${res.statusCode} ${req.url} body length: ${arguments[0].length} bytes in ${Date.now() - start} ms`);
-            logger.info(stats());
-        };
-    }
+        }
+        detectNullArrays(data);
+        originalSend.apply(res, arguments);
+        logger.info(`[${req.method}] ${res.statusCode} ${req.url} body length: ${arguments[0].length} bytes in ${Date.now() - start} ms`);
+        logger.info(stats());
+    };
     next();
 }
