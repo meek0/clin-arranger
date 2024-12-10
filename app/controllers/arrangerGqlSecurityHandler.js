@@ -1,5 +1,6 @@
 import { parse } from "graphql";
 import { sendForbidden } from "../httpUtils.js";
+import { getPractitionerRolesByPractitionerId } from "../../services/fhirClient.js";
 import jwt_decode from "jwt-decode";
 import {
   isGenetician,
@@ -18,6 +19,7 @@ import {
   cnv,
   genes,
 } from "../../config/vars.js";
+import logger from "../../config/logger.js";
 
 const translationRsNameToGqlType = {
   ServiceRequest: [analyses, sequencings],
@@ -33,7 +35,7 @@ const translationRsNameToGqlType = {
 const containsAtLeastOneMutationOperation = (ast) =>
   ast.definitions.some((d) => d.operation === "mutation");
 
-export default (req, res, next) => {
+export default async function(req, res, next) {
   const decodedRpt = jwt_decode(req.headers.authorization);
 
   const ast = parse(req.body?.query);
@@ -66,12 +68,15 @@ export default (req, res, next) => {
     const sqonAlias = [...validationState.filtersVariableNames][0];
     const sqon = gqlQueryVariables[sqonAlias] ?? { content: [], op: "and" };
     const userSecurityTags = extractSecurityTags(decodedRpt);
+    const practitionerRoles = await getPractitionerRolesByPractitionerId(req);
+    const allSecurityTags = userSecurityTags.concat(practitionerRoles);
+    logger.info(`Added security tags: ${allSecurityTags}`);
     const secureSqon = {
       content: [
         {
           content: {
             field: "security_tags",
-            value: userSecurityTags,
+            value: allSecurityTags,
           },
           op: "in",
         },

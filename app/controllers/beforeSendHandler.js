@@ -77,10 +77,10 @@ const detectNullArrays = (data) => {
                 const index = analyses ? "Analyses": "Sequencings"
                 logger.debug(`[${index}]`, {tasks, assignments})
                 if (!Array.isArray(tasks)) {
-                    console.warn(`[${index}] Missing tasks for: ${JSON.stringify(hit)}`)
+                    console.warn(`[${index}] Missing tasks for: ${JSON.stringify(edge)}`)
                 }
                 if (index.includes('Analyses') && !Array.isArray(assignments)) {
-                    console.warn(`[${index}] Missing assignments for: ${JSON.stringify(hit)}`)
+                    console.warn(`[${index}] Missing assignments for: ${JSON.stringify(edge)}`)
                 }
             });
         }
