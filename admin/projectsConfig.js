@@ -217,6 +217,20 @@ const commonMutations = [
     },
   },
   {
+    field: "security_tags",
+    graphqlField: GRAPHQL_FIELD_ANALYSES,
+    extendedFieldMappingInput: {
+      isArray: true,
+    },
+  },
+  {
+    field: "security_tags",
+    graphqlField: GRAPHQL_FIELD_SEQUENCINGS,
+    extendedFieldMappingInput: {
+      isArray: true,
+    },
+  },
+  {
     field: "sequencing_requests",
     graphqlField: GRAPHQL_FIELD_ANALYSES,
     extendedFieldMappingInput: {
