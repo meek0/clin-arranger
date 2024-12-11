@@ -22,7 +22,7 @@ export async function getPractitionerRoles(req) {
         });
         const roles = response.data?.entry?.map(entry => entry.resource?.id) || [];
         logger.info(`Fetched PractitionerRoles for: ${practitionerId} => ${roles}`);
-    return roles;
+        return roles;
     } catch (e) {
         logger.error(`Failed to fetch PractitionerRoles: ${e}`);
         return [];
