@@ -7,7 +7,7 @@ const client = axios.create({
     baseURL: fhirUrl
 });
 
-export async function getPractitionerRolesByPractitionerId(req) {
+export async function getPractitionerRoles(req) {
     try {
         const authorization = req.headers.authorization
         const decodedRpt = jwt_decode(authorization);

@@ -1,6 +1,6 @@
 import { parse } from "graphql";
 import { sendForbidden } from "../httpUtils.js";
-import { getPractitionerRolesByPractitionerId } from "../../services/fhirClient.js";
+import { getPractitionerRoles } from "../../services/fhirClient.js";
 import jwt_decode from "jwt-decode";
 import {
   isGenetician,
@@ -68,7 +68,7 @@ export default async function(req, res, next) {
     const sqonAlias = [...validationState.filtersVariableNames][0];
     const sqon = gqlQueryVariables[sqonAlias] ?? { content: [], op: "and" };
     const userSecurityTags = extractSecurityTags(decodedRpt);
-    const practitionerRoles = await getPractitionerRolesByPractitionerId(req);
+    const practitionerRoles = await getPractitionerRoles(req);
     const allSecurityTags = userSecurityTags.concat(practitionerRoles);
     logger.info(`Added security tags: ${allSecurityTags}`);
     const secureSqon = {
