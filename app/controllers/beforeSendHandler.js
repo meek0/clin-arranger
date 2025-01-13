@@ -2,6 +2,7 @@ import {extractValuesFromSqonByField} from "../utils.js"
 import {stats} from "../stats.js"
 import logger from '../../config/logger.js'
 import { mapVariantToUniqueId, mapVariantPropertiesToVariants, getVariantsProperties } from '../../services/usersApiClient.js';
+import handleMaskPersons from './maskPersonsHandler.js'
 
 export const cleanupDonors = (variants, patientIds, analysisIds, bioinfoCodes) => {
     const start = Date.now();
@@ -99,13 +100,13 @@ export default async function(req, res, next) {
     const bioinfoCodes = extractValuesFromSqonByField(sqon, 'donors.bioinfo_analysis_code')
     const withFlags = req.body?.query?.includes('flags');
     const withNote = req.body?.query?.includes('note');
-
+    const withPerson = req.body?.query?.includes('person');
     
     // one way to modify body is to replace the res.send() function
     const originalSend = res.send;
     res.send = async function () { // function is mandatory, () => {} doesn't work here
         const data = parseResponseBody(arguments[0]);
-        if (patientIds?.length > 0 || withFlags || withNote) {
+        if (patientIds?.length > 0 || withFlags || withNote || withPerson) {
             // parse variants from response body
             const variants = data?.data?.Variants?.hits?.edges || data?.data?.cnv?.hits?.edges;
             cleanupDonors(variants, patientIds, analysisIds, bioinfoCodes)
@@ -114,6 +115,9 @@ export default async function(req, res, next) {
                 if (withFlags) searchedFields.push('flags');
                 if (withNote) searchedFields.push('note');
                 await fetchVariantProperties(req, variants, searchedFields)
+            }
+            if (withPerson) {
+                await handleMaskPersons(req, data);
             }
             // override response body with modified data
             arguments[0] = JSON.stringify(data);

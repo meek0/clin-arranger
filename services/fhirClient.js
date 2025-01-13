@@ -28,3 +28,23 @@ export async function getPractitionerRoles(req) {
         return [];
     }
 }
+
+export async function getPersonsByIDs(req, ids) {
+    try {
+        const authorization = req.headers.authorization
+        const response = await client.get('/Person', {
+            params: {
+                _id: ids.join(',')
+            },
+            headers: {
+                Authorization: authorization
+            }
+        });
+        const persons = response.data?.entry?.map(entry => entry.resource) || [];
+        logger.info(`Fetched Persons IDs: ${ids} => ${persons.length}`);
+        return persons;
+    } catch (e) {
+        logger.error(`Failed to fetch Persons: ${e}`);
+        return [];
+    }
+}
