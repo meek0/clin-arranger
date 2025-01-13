@@ -107,9 +107,6 @@ describe("maskPersons", () => {
                 },
                 {
                   node: {
-                    patient_relationship: "MTH",
-                    patient_disease_status: "NEG",
-                    task_runname: "runNameExample",
                     person: {
                       id: "3",
                       first_name: "Doe",
@@ -165,19 +162,19 @@ describe("maskPersons", () => {
                 },
               ],
             },
-            value: "***RAMQ***",
+            value: "AAAA11112335",
           },
         ],
         name: [
           {
-            family: "***FIRST_NAME***",
-            given: ["***LAST_NAME***"],
+            family: "Doe",
+            given: ["John"],
           },
         ],
       },
       {
         resourceType: "Person",
-        id: "4",
+        id: "5",
         identifier: [
           {
             type: {
@@ -187,13 +184,13 @@ describe("maskPersons", () => {
                 },
               ],
             },
-            value: "******",
+            value: "ABCF12345679",
           },
         ],
         name: [
           {
-            family: "******",
-            given: ["******"],
+            family: "Doe",
+            given: ["John"],
           },
         ],
       },
@@ -205,9 +202,9 @@ describe("maskPersons", () => {
           id: "4731",
           person: {
             id: "1",
-            first_name: "***FIRST_NAME***",
-            last_name: "***LAST_NAME***",
-            ramq: "***RAMQ***",
+            first_name: "Doe",
+            last_name: "John",
+            ramq: "AAAA11112335",
           },
           sequencing_requests: {
             hits: {
@@ -215,23 +212,20 @@ describe("maskPersons", () => {
                 {
                   node: {
                     person: {
-                      id: "2",
-                      first_name: "Doe",
-                      last_name: "John",
-                      ramq: "AAAA11112335",
+                      id: "*****",
+                      first_name: "*****",
+                      last_name: "*****",
+                      ramq: "*****",
                     },
                   },
                 },
                 {
                   node: {
-                    patient_relationship: "MTH",
-                    patient_disease_status: "NEG",
-                    task_runname: "runNameExample",
                     person: {
-                      id: "3",
-                      first_name: "Doe",
-                      last_name: "Jane",
-                      ramq: "ABCF12145659",
+                      id: "*****",
+                      first_name: "*****",
+                      last_name: "*****",
+                      ramq: "*****",
                     },
                   },
                 },
@@ -244,10 +238,10 @@ describe("maskPersons", () => {
         node: {
           id: "1420",
           person: {
-            id: "4",
-            first_name: "******",
-                      last_name: "******",
-                      ramq: "******",
+            id: "*****",
+            first_name: "*****",
+            last_name: "*****",
+            ramq: "*****",
           },
           sequencing_requests: {
             hits: {

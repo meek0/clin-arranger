@@ -2,6 +2,8 @@
 import logger from '../../config/logger.js'
 import { getPersonsByIDs } from '../../services/fhirClient.js';
 
+const RESTRICTED_FIELD = "*****"
+
 export const extractPersonIds = (nodes) => {
     const ids = [];
     const extractFromNode = (node) => {
@@ -25,9 +27,9 @@ const sanitizeFhirPersons = (fhirPersons) => {
         const name = person.name?.[0];
         persons.push({
             id: person.id,
-            first_name: name?.family,
-            last_name: name?.given?.[0],
-            ramq: person.identifier?.find(id => id.type?.coding?.find(coding => coding.code = 'JHN'))?.value
+            //first_name: name?.family,
+            //last_name: name?.given?.[0],
+            //ramq: person.identifier?.find(id => id.type?.coding?.find(coding => coding.code = 'JHN'))?.value
         });
     });
     return persons;
@@ -38,12 +40,12 @@ export const maskPersons = (nodes, fhirPersons) => {
     const maskPerson = (node) => {
         const personId = node?.node?.person?.id
         const matchPerson = persons.find(person => person.id === personId)
-        if (matchPerson) {
+        if (!matchPerson) { // user can't see that person info
             node.node.person = {
-                id: matchPerson.id,
-                first_name: matchPerson.first_name,
-                last_name: matchPerson.last_name,
-                ramq: matchPerson.ramq
+                id: RESTRICTED_FIELD,
+                first_name: RESTRICTED_FIELD,
+                last_name: RESTRICTED_FIELD,
+                ramq: RESTRICTED_FIELD
             }
         }
     }
