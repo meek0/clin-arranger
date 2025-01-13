@@ -64,33 +64,6 @@ function parseResponseBody (arg) {
     return data;
 }
 
-// https://ferlab-crsj.atlassian.net/browse/CLIN-3589
-const detectNullArrays = (data) => {  
-    try {
-        const analyses = data?.data?.Analyses
-        const sequencings = data?.data?.Sequencings
-        const edges = analyses?.hits?.edges || sequencings?.hits?.edges
-        if (edges) {
-            edges.forEach((edge) => {
-                const node = edge.node
-                const tasks = node?.tasks
-                const assignments = node?.assignments
-                const index = analyses ? "Analyses": "Sequencings"
-                logger.debug(`[${index}]`, {tasks, assignments})
-                if (!Array.isArray(tasks)) {
-                    console.warn(`[${index}] Missing tasks for: ${JSON.stringify(edge)}`)
-                }
-                if (index.includes('Analyses') && !Array.isArray(assignments)) {
-                    console.warn(`[${index}] Missing assignments for: ${JSON.stringify(edge)}`)
-                }
-            });
-        }
-    } catch (e) {   
-        console.error(e)
-    }
-}
-  
-
 export default async function(req, res, next) {
     const start = Date.now();
     const sqon = req.body?.variables?.sqon;
@@ -122,7 +95,6 @@ export default async function(req, res, next) {
             // override response body with modified data
             arguments[0] = JSON.stringify(data);
         }
-        detectNullArrays(data);
         originalSend.apply(res, arguments);
         logger.info(`[${req.method}] ${res.statusCode} ${req.url} body length: ${arguments[0].length} bytes in ${Date.now() - start} ms`);
         logger.info(stats());
