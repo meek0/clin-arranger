@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { translateParentalOrigin, makeReport } from '../app/reports/patientTranscription.js';
+import { translateParentalOrigin, translateGnomadGenomes, translateClinvarSig, makeReport } from '../app/reports/patientTranscription.js';
 
 describe('translateParentalOrigin', () => {
   it('Should be robust', () => {
@@ -9,6 +9,15 @@ describe('translateParentalOrigin', () => {
   it('Should return a translated parental origin', () => {
     expect(translateParentalOrigin('possible_denovo')).to.equals('Possiblement de novo');
   });
+  it('Should return an un translated clinvar sig', () => {
+    expect(translateClinvarSig('test')).to.equals('test');
+  });
+  it('Should return a translated clinvar sig', () => {
+    expect(translateClinvarSig('not_provided')).to.equals('Non fourni');
+  });
+  it('Should translate GnomAD', () => {
+    expect(translateGnomadGenomes({an: 10, af: 0.123, ac: 1230, hom: 20})).to.equals('1230\n10 (20 hom) 0.123');
+  });
 });
 
 describe('makeReport', () => {
@@ -16,7 +25,7 @@ describe('makeReport', () => {
   const mockVariant = {
     hgvsg: "chr11:g.198062C>G",
     clinvar: {
-      clin_sig: "clin sig",
+      clin_sig: "association_not_found",
       clinvar_idL: "bar",
       clinvar_id: 'clin id'
     },
@@ -32,6 +41,12 @@ describe('makeReport', () => {
     external_frequencies: {
       gnomad_genomes_3_1_1: {
         af: 0.162785,
+      },
+      gnomad_genomes_4: {
+        ac: 77907,
+        af: 0.5120,
+        an: 152054,
+        hom: 20535
       },
     },
     rsnumber: "rs11605246",
@@ -93,31 +108,31 @@ describe('makeReport', () => {
 
     assertColumn(sheet.columns[0],'genomeBuild','Génome référence (GRCh38)')
     assertColumn(sheet.columns[1],'status','Statut (origine parentale)')
-    assertColumn(sheet.columns[2],'fA','Fréquence allélique')
-    assertColumn(sheet.columns[3],'pSilico','Prédiction in silico')
+    assertColumn(sheet.columns[2],'fA','Fréquence allélique¹')
+    assertColumn(sheet.columns[3],'pSilico','Prédiction in silico²')
     assertColumn(sheet.columns[4],'clinVar','ClinVar')
-    assertColumn(sheet.columns[5],'omim','OMIM')
-    assertColumn(sheet.columns[6],'interpretation','Interprétation')
+    assertColumn(sheet.columns[5],'omim','OMIM³')
+    assertColumn(sheet.columns[6],'interpretation','Interprétation⁴')
     assertColumn(sheet.columns[7],'serviceRequestId','Numéro requête CQGC')
     assertColumn(sheet.columns[8],'sampleId','Numéro échantillon')
 
     // row #0 contains headers
 
-    assertCell(sheet, 1, 0, 'chr11:g.198062C>G\nrs11605246\nGène: BET1L\nprotein_coding/downstream_gene_variant\nNM_145651.3/ENST00000342878')
+    assertCell(sheet, 1, 0, 'chr11:g.198062C>G\nGène: BET1L\nprotein_coding/downstream_gene_variant\nNM_145651.3')
     assertCell(sheet, 1, 1, 'Heterozygote (Inconnu)\nCouverture de la variation 17/34')
-    assertCell(sheet, 1, 2, 0.162785)
-    assertCell(sheet, 1, 3, 0)
-    assertCell(sheet, 1, 4, 'clin sig, (ClinVar variation ID: clin id)')
-    assertCell(sheet, 1, 5, 'name , (MIM: id), (code)')
+    assertCell(sheet, 1, 2, '77907\n152054 (20535 hom) 0.512')
+    assertCell(sheet, 1, 3, 'No Data\n(0; Revel = 0; CADD (Phred) = 0)')
+    assertCell(sheet, 1, 4, 'Association non trouvée\n(ID: clin id)')
+    assertCell(sheet, 1, 5, 'name\n(MIM: id, code)')
     assertCell(sheet, 1, 6, '')
     assertCell(sheet, 1, 7, '762051')
     assertCell(sheet, 1, 8, 'SampleMother')
 
-    assertCell(sheet, 2, 0, 'chr11:g.198062C>G\nrs11605246\nGène: ODF3\nprotein_coding/downstream_gene_variant\nNM_001098787.2/ENST00000382762\nExon: 5/10')
+    assertCell(sheet, 2, 0, 'chr11:g.198062C>G\nGène: ODF3\nprotein_coding/downstream_gene_variant\nNM_001098787.2\nExon: 5/10')
     assertCell(sheet, 2, 1, 'Heterozygote (Inconnu)\nCouverture de la variation 17/34')
-    assertCell(sheet, 2, 2, 0.162785)
-    assertCell(sheet, 2, 3, 'Toléré')
-    assertCell(sheet, 2, 4, 'clin sig, (ClinVar variation ID: clin id)')
+    assertCell(sheet, 2, 2, '77907\n152054 (20535 hom) 0.512')
+    assertCell(sheet, 2, 3, 'No Data\n(Toléré; Revel = 0; CADD (Phred) = 0)')
+    assertCell(sheet, 2, 4, 'Association non trouvée\n(ID: clin id)')
     assertCell(sheet, 2, 5, '0')
     assertCell(sheet, 2, 6, '')
     assertCell(sheet, 2, 7, '762051')

@@ -19,6 +19,7 @@ const composeIfPossible = (strs = [], separator = "/") =>
 const mZygosity = {
   HOM: "Homozygote",
   HET: "Heterozygote",
+  HEM: "Hémizygote"
 };
 
 const parentalOrigins = {
@@ -31,10 +32,58 @@ const parentalOrigins = {
   'both': 'Père et Mère',
   'ambiguous': 'Indéterminé',
   'unknown': 'Inconnu',
-}
+};
+
+const clinvarSig = {
+  'Affects': 'Affecte',
+  'association': 'Association',
+  'association_not_found': 'Association non trouvée',
+  'Benign': 'Bénigne',
+  'confers_sensitivity': 'Confère une sensibilité',
+  'Conflicting_classifications_of_pathogenicity': 'Classifications conflictuelles',
+  'Conflicting_interpretations_of_pathogenicity': 'Interprétations conflictuelles',
+  'drug_response': 'Réponse au médicament',
+  'Likely_benign': 'Probablement bénigne',
+  'Likely_pathogenic': 'Probablement pathogénique',
+  'Likely_risk_allele': 'Allèle de risque probable',
+  'low_penetrance': 'Faible pénétrance',
+  'no_classification_for_the_single_variant': 'Pas de classification pour le variant unique',
+  'not_provided': 'Non fourni',
+  'other': 'Autre',
+  'Pathogenic': 'Pathogénique',
+  'protective': 'Protecteur',
+  'risk_factor': 'Facteur de risque',
+  'Uncertain_risk_allele': 'Allèle à risque incertain',
+  'Uncertain_significance': 'De signification incertaine',
+};
+
+const exomiserMaxAcgmClassification = {
+  'PATHOGENIC': 'Pathogénique',
+  'LIKELY_PATHOGENIC': 'Probablement pathogénique',
+  'UNCERTAIN_SIGNIFICANCE': 'Variant de signification incertaine',
+  'LIKELY_BENIGN': 'Probablement bénigne',
+  'BENIGN': 'Bénigne',
+  'POSSIBLY_PATHOGENIC_MODERATE': 'Variant de signification incertaine',
+  'POSSIBLY_PATHOGENIC_BENIGN': 'Variant de signification incertaine',
+  'POSSIBLY_PATHOGENIC_LOW': 'Variant de signification incertaine',
+  'POSSIBLY_BENIGN': 'Variant de signification incertaine',
+};
 
 const translateZygosityIfNeeded = (z) =>
-  ["HOM", "HET"].includes(z) ? mZygosity[z] : z;
+  ["HOM", "HET", "HEM"].includes(z) ? mZygosity[z] : z;
+
+const translateExomiserMaxAcgmClassification = (ex) => {
+  const val = ex ? exomiserMaxAcgmClassification[ex] : 'No Data';
+  return val || ex;
+};
+
+export const translateGnomadGenomes = (gnomad) =>
+  [gnomad?.ac || 0, `${gnomad?.an || 0} (${gnomad?.hom || 0.0} hom) ${gnomad?.af || 0}`].join("\n");
+
+export const translateClinvarSig = (sig) => {
+  const val = sig ? clinvarSig[sig] : 'Aucune donnée';
+  return val || sig;
+}
 
 export const translateParentalOrigin = (origin) => {
   const sanitizedOrigin = origin?.toLowerCase();
@@ -68,18 +117,12 @@ const makeRows = (data) => {
       index,
       genomeBuild: [
         data.hgvsg,
-        data.rsnumber,
         `Gène: ${geneSymbol}`,
         composeIfPossible([
           consequence.biotype,
-          consequence.consequences?.join(" , "),
+          consequence.consequences?.join(", "),
         ]),
-        composeIfPossible([
-          consequence.refseq_mrna_id?.join(" , "),
-          consequence.ensembl_transcript_id,
-        ]),
-        consequence.hgvsc,
-        consequence.hgvsp,
+        consequence.refseq_mrna_id?.join(", "),
         exonRatio ? `Exon: ${exonRatio}` : "",
       ]
         .filter((e) => !!e)
@@ -94,16 +137,19 @@ const makeRows = (data) => {
           donor.ad_total,
         ])}`,
       ].join("\n"),
-      fA: data?.external_frequencies?.gnomad_genomes_3_1_1?.af ?? 0,
-      pSilico: mSilico[consequence.predictions?.sift_pred] ?? 0,
+      fA: translateGnomadGenomes(data?.external_frequencies?.gnomad_genomes_4 ?? {}),
+      pSilico: [
+        translateExomiserMaxAcgmClassification(data.exomiser_max?.acmg_classification),
+        `(${mSilico[consequence.predictions?.sift_pred] ?? 0}; Revel = ${consequence.predictions?.revel_score ?? 0}; CADD (Phred) = ${consequence.predictions?.cadd_phred ?? 0})`,
+      ].join("\n"),
       clinVar: data.clinvar
-        ? `${data.clinvar.clin_sig}, (ClinVar variation ID: ${data.clinvar.clinvar_id})`
+        ? `${translateClinvarSig(data.clinvar.clin_sig)}\n(ID: ${data.clinvar.clinvar_id})`
         : "0",
       omim: gene?.omim?.length
         ? gene.omim
             .map(
               (omim) =>
-                `${omim.name} , (MIM: ${omim.omim_id}), (${omim.inheritance_code})`
+                `${omim.name}\n(MIM: ${omim.omim_id}, ${omim.inheritance_code})`
             )
             .join("\n")
         : "0",
@@ -122,11 +168,11 @@ export const makeReport = (data) => {
       width: 40,
     },
     { header: "Statut (origine parentale)", key: "status", width: 45 },
-    { header: "Fréquence allélique", key: "fA", width: 24 },
-    { header: "Prédiction in silico", key: "pSilico", width: 24 },
+    { header: "Fréquence allélique¹", key: "fA", width: 24 },
+    { header: "Prédiction in silico²", key: "pSilico", width: 24 },
     { header: "ClinVar", key: "clinVar", width: 24 },
-    { header: "OMIM", key: "omim", width: 55 },
-    { header: "Interprétation", key: "interpretation", width: 24 },
+    { header: "OMIM³", key: "omim", width: 55 },
+    { header: "Interprétation⁴", key: "interpretation", width: 24 },
     { header: "Numéro requête CQGC", key: "serviceRequestId", width: 24 },
     { header: "Numéro échantillon", key: "sampleId", width: 24 },
   ];
