@@ -212,7 +212,9 @@ const genomeBuildToRichtext = (genomeBuild) => {
 }
 
 export const translateGnomadGenomes = (gnomad) =>
-  [gnomad?.ac || 0, `${gnomad?.an || 0} (${gnomad?.hom || 0.0} hom) ${gnomad?.af || 0}`].join(" / ");
+  [
+    gnomad?.ac || 0,
+    `${gnomad?.an || 0} (${gnomad?.hom || 0.0} hom) ${Number.parseFloat(gnomad?.af || 0).toExponential(2)}`].join(" / ");
 
 export const translateClinvarSig = (sig) => {
   const val = sig ? clinvarSig[sig] : 'Aucune donnée';
