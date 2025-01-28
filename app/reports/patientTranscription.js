@@ -77,8 +77,22 @@ const translateExomiserMaxAcgmClassification = (ex) => {
   return val || ex;
 };
 
+const genomeBuildToRichtext = (genomeBuild) => {
+  const res = [];
+  genomeBuild.forEach((i, index) => {
+    if (typeof i === 'string' && i.startsWith('Gène: ')) {
+      res.push({text: 'Gène: '});
+      res.push({font: {italic: true}, text: `${i.split('Gène: ')[1]}\n`});
+    } else {
+      res.push({text: `${i}${index === genomeBuild.length - 1 ? '' : '\n'}`});
+    }
+  });
+
+  return res;
+}
+
 export const translateGnomadGenomes = (gnomad) =>
-  [gnomad?.ac || 0, `${gnomad?.an || 0} (${gnomad?.hom || 0.0} hom) ${gnomad?.af || 0}`].join("\n");
+  [gnomad?.ac || 0, gnomad?.an || 0, `(${gnomad?.hom || 0.0} hom)`, gnomad?.af || 0].join(" / ");
 
 export const translateClinvarSig = (sig) => {
   const val = sig ? clinvarSig[sig] : 'Aucune donnée';
@@ -115,27 +129,24 @@ const makeRows = (data) => {
     ]);
     return {
       index,
-      genomeBuild: [
-        data.hgvsg,
-        `Gène: ${geneSymbol}`,
-        composeIfPossible([
-          consequence.biotype,
-          consequence.consequences?.join(", "),
-        ]),
-        consequence.refseq_mrna_id?.join(", "),
-        exonRatio ? `Exon: ${exonRatio}` : "",
-      ]
-        .filter((e) => !!e)
-        .join("\n"),
+      genomeBuild: { richText:
+        genomeBuildToRichtext(
+          [
+            data.hgvsg,
+            `Gène: ${geneSymbol}`,
+            consequence.biotype,
+            consequence.consequences?.join(", "),
+            consequence.refseq_mrna_id?.join(", "),
+            consequence.coding_dna_change,
+            exonRatio ? `Couverture de la variation ${exonRatio}` : "",
+          ].filter((e) => !!e)
+        )
+      },
       status: [
         `${translateZygosityIfNeeded(donor.zygosity)} (${translateParentalOrigin(getOrElse(
           donor.parental_origin,
           "unknown"
         ))})`,
-        `Couverture de la variation ${composeIfPossible([
-          donor.ad_alt,
-          donor.ad_total,
-        ])}`,
       ].join("\n"),
       fA: translateGnomadGenomes(data?.external_frequencies?.gnomad_genomes_4 ?? {}),
       pSilico: [
@@ -163,7 +174,7 @@ const makeRows = (data) => {
 export const makeReport = (data) => {
   const columns = [
     {
-      header: `Génome référence (${data.donor.genome_build})`,
+      header: `Variation nucléotidique (${data.donor.genome_build})`,
       key: "genomeBuild",
       width: 40,
     },
