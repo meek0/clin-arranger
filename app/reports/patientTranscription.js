@@ -69,6 +69,121 @@ const exomiserMaxAcgmClassification = {
   'POSSIBLY_BENIGN': 'Variant de signification incertaine',
 };
 
+const consequenceBiotype = {
+  'IG_C_gene': 'IG C gene',
+  'IG_D_gene': 'IG D gene',
+  'IG_J_gene': 'IG J gene',
+  'IG_LV_gene': 'IG LV gene',
+  'IG_V_gene': 'IG V gene',
+  'TR_C_gene': 'TR C gene',
+  'TR_J_gene': 'TR J gene',
+  'TR_V_gene': 'TR V gene',
+  'TR_D_gene': 'TR D gene',
+  'IG_pseudogene': 'IG pseudogene',
+  'IG_C_pseudogene': 'IG C pseudogene',
+  'IG_J_pseudogene': 'IG J pseudogene',
+  'IG_V_pseudogene': 'IG V pseudogene',
+  'TR_V_pseudogene': 'TR V pseudogene',
+  'TR_J_pseudogene': 'TR J pseudogene',
+  'Mt_rRNA': 'Mt rRNA',
+  'Mt_tRNA': 'Mt tRNA',
+  'miRNA': 'miRNA',
+  'misc_RNA': 'misc RNA',
+  'rRNA': 'rRNA',
+  'scRNA': 'scRNA',
+  'snRNA': 'snRNA',
+  'snoRNA': 'snoRNA',
+  'ribozyme': 'ribozyme',
+  'sRNA': 'sRNA',
+  'scaRNA': 'scaRNA',
+  'Non-coding': 'Non coding',
+  'lncRNA': 'lncRNA',
+  'Mt_tRNA_pseudogene': 'Mt tRNA pseudogene',
+  'tRNA_pseudogene': 'tRNA pseudogene',
+  'snoRNA_pseudogene': 'snoRNA pseudogene',
+  'snRNA_pseudogene': 'snRNA pseudogene',
+  'scRNA_pseudogene': 'scRNA pseudogene',
+  'rRNA_pseudogene': 'rRNA pseudogene',
+  'misc_RNA_pseudogene': 'misc RNA pseudogene',
+  'miRNA_pseudogene': 'miRNA pseudogene',
+  'TEC': 'TEC',
+  'nonsense_mediated_decay': 'nonsense mediated decay',
+  'non_stop_decay': 'non stop decay',
+  'retained_intron': 'retained intron',
+  'protein_coding': 'protein coding',
+  'protein_coding_LoF': 'protein coding LoF',
+  'protein_coding_CDS_not_defined': 'protein coding CDS not defined',
+  'processed_transcript': 'processed transcript',
+  'non_coding': 'non coding',
+  'ambiguous_orf': 'ambiguous orf',
+  'sense_intronic': 'sense intronic',
+  'sense_overlapping': 'sense overlapping',
+  'antisense_RNA': 'antisense RNA',
+  'known_ncrna': 'known ncrna',
+  'pseudogene': 'pseudogene',
+  'processed_pseudogene': 'processed pseudogene',
+  'polymorphic_pseudogene': 'polymorphic pseudogene',
+  'retrotransposed': 'retrotransposed',
+  'transcribed_processed_pseudogene': 'transcribed processed pseudogene',
+  'transcribed_unprocessed_pseudogene': 'transcribed unprocessed pseudogene',
+  'transcribed_unitary_pseudogene': 'transcribed unitary pseudogene',
+  'translated_processed_pseudogene': 'translated processed pseudogene',
+  'translated_unprocessed_pseudogene': 'translated unprocessed pseudogene',
+  'unitary_pseudogene': 'unitary pseudogene',
+  'unprocessed_pseudogene': 'unprocessed pseudogene',
+  'artifact': 'artifact',
+  'lincRNA': 'lincRNA',
+  'macro_lncRNA': 'macro lncRNA',
+  '3prime_overlapping_ncRNA': '3prime overlapping ncRNA',
+  'disrupted_domain': 'disrupted domain',
+  'vault_RNA': 'vault RNA',
+  'bidirectional_promoter_lncRNA': 'bidirectional promoter lncRNA',
+};
+
+const consequencesConsequences = {
+  'transcript_ablation': 'Transcript Ablation',
+  'splice_acceptor_variant': 'Splice Acceptor',
+  'splice_donor_variant': 'Splice Donor',
+  'stop_gained': 'Stop Gained',
+  'frameshift_variant': 'Frameshift',
+  'stop_lost': 'Stop Lost',
+  'start_lost': 'Start Lost',
+  'transcript_amplification': 'Transcript Amplification',
+  'inframe_insertion': 'Inframe Insertion',
+  'inframe_deletion': 'Inframe Deletion',
+  'missense_variant': 'Missense',
+  'protein_altering_variant': 'Protein Altering',
+  'splice_region_variant': 'Splice Region',
+  'splice_donor_5th_base_variant': 'Splice Donor 5th Base',
+  'splice_donor_region_variant': 'Splice Donor Region',
+  'splice_polypyrimidine_tract_variant': 'Splice Polypyrimidine Tract',
+  'incomplete_terminal_codon_variant': 'Incomplete Terminal Codon',
+  'start_retained_variant': 'Start Retained',
+  'stop_retained_variant': 'Stop Retained',
+  'synonymous_variant': 'Synonymous',
+  'coding_sequence_variant': 'Coding Sequence',
+  'mature_miRNA_variant': 'Mature Mirna',
+  '5_prime_UTR_variant': '5 Prime Utr',
+  '3_prime_UTR_variant': '3 Prime Utr',
+  'non_coding_transcript_exon_variant': 'Non Coding Transcript Exon',
+  'intron_variant': 'Intron',
+  'NMD_transcript_variant': 'Nmd Transcript',
+  'non_coding_transcript_variant': 'Non Coding Transcript',
+  'upstream_gene_variant': 'Upstream Gene',
+  'downstream_gene_variant': 'Downstream Gene',
+  'TFBS_ablation': 'Tfbs Ablation',
+  'TFBS_amplification': 'Tfbs Amplification',
+  'TF_binding_site_variant': 'Tf Binding Site',
+  'regulatory_region_ablation': 'Regulatory Region Ablation',
+  'regulatory_region_amplification': 'Regulatory Region Amplification',
+  'feature_elongation': 'Feature Elongation',
+  'regulatory_region_variant': 'Regulatory Region',
+  'feature_truncation': 'Feature Truncation',
+  'intergenic_variant': 'Intergenic',
+};
+
+const translateClinvar = (c) => Array.isArray(c) ? c.map(item => translateClinvarSig(item)).join(', ') : translateClinvarSig(c);
+
 const translateZygosityIfNeeded = (z) =>
   ["HOM", "HET", "HEM"].includes(z) ? mZygosity[z] : z;
 
@@ -92,7 +207,7 @@ const genomeBuildToRichtext = (genomeBuild) => {
 }
 
 export const translateGnomadGenomes = (gnomad) =>
-  [gnomad?.ac || 0, gnomad?.an || 0, `(${gnomad?.hom || 0.0} hom)`, gnomad?.af || 0].join(" / ");
+  [gnomad?.ac || 0, `${gnomad?.an || 0} (${gnomad?.hom || 0.0} hom) ${gnomad?.af || 0}`].join(" / ");
 
 export const translateClinvarSig = (sig) => {
   const val = sig ? clinvarSig[sig] : 'Aucune donnée';
@@ -134,8 +249,8 @@ const makeRows = (data) => {
           [
             data.hgvsg,
             `Gène: ${geneSymbol}`,
-            consequence.biotype,
-            consequence.consequences?.join(", "),
+            consequence.biotype ? consequenceBiotype[consequence.biotype] : 'No Data',
+            consequence.consequences?.map(c => consequencesConsequences[c]).join(", "),
             consequence.refseq_mrna_id?.join(", "),
             consequence.coding_dna_change,
             exonRatio ? `Couverture de la variation ${exonRatio}` : "",
@@ -154,7 +269,7 @@ const makeRows = (data) => {
         `(${mSilico[consequence.predictions?.sift_pred] ?? 0}; Revel = ${consequence.predictions?.revel_score ?? 0}; CADD (Phred) = ${consequence.predictions?.cadd_phred ?? 0})`,
       ].join("\n"),
       clinVar: data.clinvar
-        ? `${translateClinvarSig(data.clinvar.clin_sig)}\n(ID: ${data.clinvar.clinvar_id})`
+        ? `${translateClinvar(data.clinvar.clin_sig)}\n(ID: ${data.clinvar.clinvar_id})`
         : "0",
       omim: gene?.omim?.length
         ? gene.omim
