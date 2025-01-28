@@ -16,7 +16,7 @@ describe('translateParentalOrigin', () => {
     expect(translateClinvarSig('not_provided')).to.equals('Non fourni');
   });
   it('Should translate GnomAD', () => {
-    expect(translateGnomadGenomes({an: 10, af: 0.123, ac: 1230, hom: 20})).to.equals('1230 / 10 / (20 hom) / 0.123');
+    expect(translateGnomadGenomes({an: 10, af: 0.123, ac: 1230, hom: 20})).to.equals('1230 / 10 (20 hom) 0.123');
   });
 });
 
@@ -118,9 +118,9 @@ describe('makeReport', () => {
 
     // row #0 contains headers
 
-    assertCell(sheet, 1, 0, 'chr11:g.198062C>G\nGène: BET1L\nprotein_coding\ndownstream_gene_variant\nNM_145651.3')
+    assertCell(sheet, 1, 0, 'chr11:g.198062C>G\nGène: BET1L\nprotein coding\nDownstream Gene\nNM_145651.3')
     assertCell(sheet, 1, 1, 'Heterozygote (Inconnu)')
-    assertCell(sheet, 1, 2, '77907 / 152054 / (20535 hom) / 0.512')
+    assertCell(sheet, 1, 2, '77907 / 152054 (20535 hom) 0.512')
     assertCell(sheet, 1, 3, 'No Data\n(0; Revel = 0; CADD (Phred) = 0)')
     assertCell(sheet, 1, 4, 'Association non trouvée\n(ID: clin id)')
     assertCell(sheet, 1, 5, 'name\n(MIM: id, code)')
@@ -128,9 +128,9 @@ describe('makeReport', () => {
     assertCell(sheet, 1, 7, '762051')
     assertCell(sheet, 1, 8, 'SampleMother')
 
-    assertCell(sheet, 2, 0, 'chr11:g.198062C>G\nGène: ODF3\nprotein_coding\ndownstream_gene_variant\nNM_001098787.2\nCouverture de la variation 5/10')
+    assertCell(sheet, 2, 0, 'chr11:g.198062C>G\nGène: ODF3\nprotein coding\nDownstream Gene\nNM_001098787.2\nCouverture de la variation 5/10')
     assertCell(sheet, 2, 1, 'Heterozygote (Inconnu)')
-    assertCell(sheet, 2, 2, '77907 / 152054 / (20535 hom) / 0.512')
+    assertCell(sheet, 2, 2, '77907 / 152054 (20535 hom) 0.512')
     assertCell(sheet, 2, 3, 'No Data\n(Toléré; Revel = 0; CADD (Phred) = 0)')
     assertCell(sheet, 2, 4, 'Association non trouvée\n(ID: clin id)')
     assertCell(sheet, 2, 5, '0')
