@@ -187,6 +187,11 @@ const translateClinvar = (c) => Array.isArray(c) ? c.map(item => translateClinva
 const translateZygosityIfNeeded = (z) =>
   ["HOM", "HET", "HEM"].includes(z) ? mZygosity[z] : z;
 
+const translateOmimInheritanceCode = (c) => {
+  const res = Array.isArray(c) ? c.join(', ') : c;
+  return res ? `, ${c}` : '';
+}
+
 const translateExomiserMaxAcgmClassification = (ex) => {
   const val = ex ? exomiserMaxAcgmClassification[ex] : 'No Data';
   return val || ex;
@@ -275,7 +280,7 @@ const makeRows = (data) => {
         ? gene.omim
             .map(
               (omim) =>
-                `${omim.name}\n(MIM: ${omim.omim_id}, ${omim.inheritance_code})`
+                `${omim.name}\n(MIM: ${omim.omim_id}${translateOmimInheritanceCode(omim.inheritance_code)})`
             )
             .join("\n")
         : "0",
