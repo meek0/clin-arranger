@@ -119,7 +119,7 @@ describe('makeReport', () => {
 
     // row #0 contains headers
 
-    assertCell(sheet, 1, 0, 'chr11:g.198062C>G\nGène: BET1L\nprotein coding\nDownstream Gene\nNM_145651.3\nENST00000342878.3:n.515+19962_515+19963del')
+    assertCell(sheet, 1, 0, 'chr11:g.198062C>G\nGène: BET1L\nprotein coding\nDownstream Gene\nNM_145651.3\nn.515+19962_515+19963del')
     assertCell(sheet, 1, 1, 'Heterozygote (Inconnu)')
     assertCell(sheet, 1, 2, '77907 / 152054 (20535 hom) 5.12e-1')
     assertCell(sheet, 1, 3, 'No Data\n(0; Revel = 0; CADD (Phred) = 0)')
