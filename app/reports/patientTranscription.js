@@ -259,7 +259,7 @@ const makeRows = (data) => {
             consequence.biotype ? consequenceBiotype[consequence.biotype] : 'No Data',
             consequence.consequences?.map(c => consequencesConsequences[c]).join(", "),
             consequence.refseq_mrna_id?.join(", "),
-            consequence.coding_dna_change,
+            consequence.hgvsc,
             exonRatio ? `Couverture de la variation ${exonRatio}` : "",
           ].filter((e) => !!e)
         )
