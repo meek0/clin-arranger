@@ -3,6 +3,8 @@ import logger from '../../config/logger.js'
 import { getPersonsByIDs } from '../../services/fhirClient.js';
 
 const RESTRICTED_FIELD = "*****"
+const ANALYSIS_INDEX = 'Analyses'
+const SEQUENCING_INDEX = 'Sequencings'
 
 export const extractPersonIds = (nodes) => {
     const ids = [];
@@ -57,7 +59,7 @@ export const maskPersons = (nodes, fhirPersons) => {
     });
 }
 
-export const removeFullyRestrictedNodes = (nodes) => {
+export const removeFullyRestrictedNodes = (nodes, removedCount = 0) => {
     let wasUpdated = false;
     nodes?.forEach((node) => {
         const isProbandRestricted = node?.node?.person?.id === RESTRICTED_FIELD;
@@ -73,25 +75,39 @@ export const removeFullyRestrictedNodes = (nodes) => {
         }
     });
     if (wasUpdated) {  // if we removed a node, we need to check again
-        removeFullyRestrictedNodes(nodes)
+        removedCount = removeFullyRestrictedNodes(nodes, ++removedCount)
     }
+    return removedCount;
 }
 
-export const updateTotal = (data, indexName) => {
-    const total = data?.data?.[indexName]?.hits?.edges?.length || -1
-    if (total >= 0) {
-        data.data[indexName].hits.total = total
+export const getTotalAndIndexName = (data) => {
+    const totalAnalysis = data?.data?.[ANALYSIS_INDEX]?.hits?.total
+    const totalSequencing = data?.data?.[SEQUENCING_INDEX]?.hits?.total
+    if (totalAnalysis) {
+        return { total: totalAnalysis, indexName: ANALYSIS_INDEX }
+    } else if (totalSequencing) {
+        return { total: totalSequencing, indexName: SEQUENCING_INDEX }
+    }
+    return { total: -1, indexName: null }
+}
+
+export const updateTotal = (data, indexName, newTotal) => {
+    if (newTotal >= 0) {
+        data.data[indexName].hits.total = newTotal
     }
 }
 
 export default async function handle(req, data) {
     const nodes = data?.data?.Analyses?.hits?.edges || data?.data?.Sequencings?.hits?.edges
-    const personIds = extractPersonIds(nodes)
-    logger.info(`[maskPersons] Person IDs: ${personIds}`)
-    const fhirPersons = await getPersonsByIDs(req, personIds)
-    // both functions are separated in case we only want to mask data without removing nodes
-    maskPersons(nodes, fhirPersons) // hide fields
-    removeFullyRestrictedNodes(nodes) // delete from response
-    updateTotal(data, 'Analyses')
-    updateTotal(data, 'Sequencings')
+    const {total, indexName} = getTotalAndIndexName(data)
+    if (indexName) {
+        const personIds = extractPersonIds(nodes)
+        logger.info(`[maskPersons][${indexName}] Person IDs: ${personIds}`)
+        const fhirPersons = await getPersonsByIDs(req, personIds)
+        // both functions are separated in case we only want to mask data without removing nodes
+        maskPersons(nodes, fhirPersons) // hide fields
+        const removedCount = removeFullyRestrictedNodes(nodes) // delete from response
+        const newTotal = total - removedCount
+        updateTotal(data, indexName, newTotal)
+    }
 }
