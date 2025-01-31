@@ -4,6 +4,7 @@ import {
   maskPersons,
   removeFullyRestrictedNodes,
   updateTotal,
+  getTotalAndIndexName,
 } from "../app/controllers/maskPersonsHandler.js";
 
 const data = [
@@ -277,8 +278,9 @@ describe("removeFullyRestrictedNodes", () => {
       },
     ];
     maskPersons(data, fhirPersons);
-    removeFullyRestrictedNodes(data);
+    const count = removeFullyRestrictedNodes(data);
     expect(data).to.eql(expected);
+    expect(count).to.eql(2);
   });
 });
 
@@ -286,7 +288,7 @@ describe("updateTotal", () => {
   it(`Should update total of Analysis and Sequencings`, () => {
     const analysis = {
       data: {
-        Analysis: {
+        Analyses: {
           hits: {
             edges: [
               {
@@ -321,9 +323,55 @@ describe("updateTotal", () => {
       },
     };
 
-    updateTotal(analysis, "Analysis");
-    updateTotal(sequencings, "Sequencings");
-    expect(analysis.data.Analysis.hits.total).to.eql(2);
+    updateTotal(analysis, "Analyses", 2);
+    updateTotal(sequencings, "Sequencings", 1);
+    expect(analysis.data.Analyses.hits.total).to.eql(2);
     expect(sequencings.data.Sequencings.hits.total).to.eql(1);
+  });
+});
+
+describe("getTotalAndIndexName", () => {
+  it(`Should find total and index name`, () => {
+    const analysis = {
+      data: {
+        Analyses: {
+          hits: {
+            edges: [
+              {
+                node: {
+                  id: "1",
+                },
+              },
+              {
+                node: {
+                  id: "2",
+                },
+              },
+            ],
+            total: 2,
+          },
+        },
+      },
+    };
+
+    const sequencings = {
+      data: {
+        Sequencings: {
+          hits: {
+            edges: [
+              {
+                node: {
+                  id: "1",
+                },
+              },
+            ],
+            total: 1,
+          },
+        },
+      },
+    };
+
+    expect(getTotalAndIndexName(analysis)).to.eql({total: 2, indexName: "Analyses"});
+    expect(getTotalAndIndexName(sequencings)).to.eql({total: 1, indexName: "Sequencings"});
   });
 });
