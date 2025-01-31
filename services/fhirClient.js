@@ -32,7 +32,7 @@ export async function getPractitionerRoles(req) {
 export async function getPersonsByIDs(req, ids) {
     try {
         const authorization = req.headers.authorization
-        const response = await client.get('/Person', {
+        const response = await client.get(`/Person?_count=${ids.length}`, { // FHIR limit 20 by default
             params: {
                 _id: ids.join(',')
             },
