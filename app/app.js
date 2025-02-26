@@ -8,6 +8,7 @@ import genomicSuggestionsHandler, {
   SUGGESTIONS_TYPES,
 } from "./controllers/genomicSuggestionsHandler.js";
 import {searchHPOAutocomplete, searchHPODescendants, searchHPOAncestors, countHPO} from "./controllers/hpoHandler.js";
+import {searchMONDOAutocomplete} from "./controllers/mondoHandler.js";
 import arrangerGqlSecurityHandler from "./controllers/arrangerGqlSecurityHandler.js";
 import arrangerRoutesHandler from "./controllers/arrangerRoutesHandler.js";
 import transcriptsReportHandler from "./controllers/transcriptsReportHandler.js";
@@ -71,6 +72,12 @@ app.get(
   "/hpo/autocomplete",
   keycloak.enforcer(HPO_READ_PERMISSION_ENFORCER),
   searchHPOAutocomplete
+);
+
+app.get(
+  "/mondo/autocomplete",
+  keycloak.enforcer(HPO_READ_PERMISSION_ENFORCER),
+  searchMONDOAutocomplete
 );
 
 app.get(
