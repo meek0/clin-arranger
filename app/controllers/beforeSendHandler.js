@@ -59,9 +59,13 @@ async function fetchVariantProperties (req, variants, searchedFields) {
 
 function parseResponseBody (arg) {
     const start = Date.now();
-    const data = JSON.parse(arg);
-    logger.info(`parseResponseBody: ${arg.length} bytes in ${Date.now() - start} ms`);
-    return data;
+    try{
+        const data = JSON.parse(arg);
+        logger.info(`parseResponseBody: ${arg.length} bytes in ${Date.now() - start} ms`);
+        return data;
+    } catch(e) {
+        logger.error('Failed to parse response body: ' + e);
+    }
 }
 
 export default async function(req, res, next) {
