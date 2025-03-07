@@ -2,6 +2,7 @@ import {extractValuesFromSqonByField} from "../utils.js"
 import {stats} from "../stats.js"
 import logger from '../../config/logger.js'
 import { mapVariantToUniqueId, mapVariantPropertiesToVariants, getVariantsProperties } from '../../services/usersApiClient.js';
+import radiantApiClient from '../../services/radiantApiClient.js';
 import handleMaskPersons from './maskPersonsHandler.js'
 
 export const cleanupDonors = (variants, patientIds, analysisIds, bioinfoCodes) => {
@@ -44,8 +45,15 @@ async function fetchVariantProperties (req, variants, searchedFields) {
                 const uniqueId = mapVariantToUniqueId(variant)
                 if(uniqueId) uniqueIds.push(uniqueId)
             }
+            let interpretations = []
             const variantProperties = await getVariantsProperties(req, uniqueIds)
-            mapVariantPropertiesToVariants(variants, variantProperties, searchedFields);
+            if (searchedFields.indexOf('interpretation') > -1) {
+                const analysisIds = uniqueIds.map(id => id.split('_')[1]);
+                const patientIds = uniqueIds.map(id => id.split('_')[2]);
+                interpretations = await radiantApiClient.searchInterpretationByAnalysisIds(req, analysisIds);
+                interpretations = interpretations.filter(i => patientIds.includes(i.metadata?.patient_id));
+            } 
+            mapVariantPropertiesToVariants(variants, variantProperties, interpretations, searchedFields);
         }
     } catch(e) {
         logger.error('Failed to fetch variant properties: ' + e);
@@ -78,12 +86,13 @@ export default async function(req, res, next) {
     const withFlags = req.body?.query?.includes('flags');
     const withNote = req.body?.query?.includes('note');
     const withPerson = req.body?.query?.includes('person');
+    const withInterpretation = req.body?.query?.includes('interpretation');
     
     // one way to modify body is to replace the res.send() function
     const originalSend = res.send;
     res.send = async function () { // function is mandatory, () => {} doesn't work here
         const data = parseResponseBody(arguments[0]);
-        if (patientIds?.length > 0 || withFlags || withNote || withPerson) {
+        if (patientIds?.length > 0 || withFlags || withNote || withPerson || withInterpretation) {
             // parse variants from response body
             const variants = data?.data?.Variants?.hits?.edges || data?.data?.cnv?.hits?.edges;
             cleanupDonors(variants, patientIds, analysisIds, bioinfoCodes)
@@ -91,6 +100,7 @@ export default async function(req, res, next) {
                 const searchedFields = [];
                 if (withFlags) searchedFields.push('flags');
                 if (withNote) searchedFields.push('note');
+                if (withInterpretation) searchedFields.push('interpretation')
                 await fetchVariantProperties(req, variants, searchedFields)
             }
             if (withPerson) {

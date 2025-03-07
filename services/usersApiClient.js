@@ -38,7 +38,7 @@ export function mapUniqueIdToHash(uniqueId) {
     return uniqueId.split('_')[0];
 }
 
-export function mapVariantPropertiesToVariants(variants, variantProperties, searchedFields) {
+export function mapVariantPropertiesToVariants(variants, variantProperties, interpretations, searchedFields) {
     const usableVariantProperties = Array.isArray(variantProperties) ? variantProperties : [];
     if (Array.isArray(variants)) {
         variants.forEach(variant => {
@@ -49,6 +49,11 @@ export function mapVariantPropertiesToVariants(variants, variantProperties, sear
             const lastFoundProperties = foundProperties[0] || PROPERTIES_NOT_FOUND;
             if (searchedFields.indexOf('flags') > -1) variant.node.flags = [...(lastFoundProperties.properties.flags || [])];
             if (searchedFields.indexOf('note') > -1) variant.node.note = lastFoundProperties.properties.note || null;
+            if (searchedFields.indexOf('interpretation') > -1) {
+                const hash = uniqueId.split('_')[0];
+                const interpretation = interpretations.find(i => i.metadata?.variant_hash === hash);
+                variant.node.interpretation = interpretation || null;
+            }
         });
     }
     return variants;

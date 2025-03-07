@@ -28,7 +28,8 @@ export const env = process.env.NODE_ENV,
   indexNameAnalyses = process.env.ANALYSES_INDEX_NAME,
   indexNameCoverageByGene = process.env.COVERAGE_BY_GENE_INDEX_NAME,
   usersApiUrl = process.env.USERS_API_URL,
-  fhirUrl = process.env.FHIR_URL;
+  fhirUrl = process.env.FHIR_URL,
+  radiantApiUrl = process.env.RADIANT_API_URL;
 
 export const rsServiceRequest = "ServiceRequest";
 export const rsSVariants = "Variants";

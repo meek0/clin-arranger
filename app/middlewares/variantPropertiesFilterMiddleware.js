@@ -1,4 +1,5 @@
 import usersApiClient, { mapUniqueIdToHash } from '../../services/usersApiClient.js';
+import radiantApiClient from '../../services/radiantApiClient.js';
 import {extractValuesFromSqonByField} from "../utils.js"
 
 const MISSING = '__missing__'
@@ -37,6 +38,16 @@ async function handleNote(req, analysisIds, patientIds, index, content) {
     }
 }
 
+async function handleInterpretation(req, analysisIds, patientIds, index, content) {
+    content.field = 'hash'
+    content.value = []
+    if (index) {
+        let interpretations = await radiantApiClient.searchInterpretationByAnalysisIds(req, analysisIds);
+        interpretations = interpretations.filter(i => patientIds.includes(i.metadata?.patient_id));
+        content.value = interpretations.map(i => i.metadata?.variant_hash)
+    }
+}
+
 async function handleContent(req, analysisIds, patientIds, index, content) {
     if (!content) return
     if (content.constructor === Array) {
@@ -48,6 +59,8 @@ async function handleContent(req, analysisIds, patientIds, index, content) {
             await handleFlags(req, analysisIds, patientIds, index, content)
         } else if (content.field === 'note') {
             await handleNote(req, analysisIds, patientIds, index, content)
+        } else if (content.field === 'interpretation') {
+            await handleInterpretation(req, analysisIds, patientIds, index, content)
         }
     }
 }
@@ -66,7 +79,7 @@ export async function handleRequest(req) {
     analysisIds.push(extractValuesFromSqonByField(sqon, 'analysis_service_request_id'))
 
     const index = query?.includes('Cnv') ? 'cnv' : query?.includes('Variant') ? 'snv' : null
-    await handleContent(req, analysisIds, patientIds, index, sqon?.content)
+    await handleContent(req, analysisIds.flat(), patientIds.flat(), index, sqon?.content)
 }
 
 export default async function(req, _, next) {
