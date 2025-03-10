@@ -52,7 +52,7 @@ export function mapVariantPropertiesToVariants(variants, variantProperties, inte
             if (searchedFields.indexOf('interpretation') > -1) {
                 const hash = uniqueId.split('_')[0];
                 const interpretation = interpretations.find(i => i.metadata?.variant_hash === hash);
-                variant.node.interpretation = interpretation || null;
+                variant.node.interpretation = interpretation;
             }
         });
     }

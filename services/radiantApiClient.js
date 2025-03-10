@@ -6,9 +6,9 @@ const radiantApiClient = axios.create({
     baseURL: radiantApiUrl
 });
 
-radiantApiClient.searchInterpretationByTypeAndAnalysisIds = async function(req, type, analysisId) {
+radiantApiClient.searchInterpretationByTypeAndAnalysisIds = async function(req, type, analysisId = []) {
     try {
-        const ids = Array.from(new Set(analysisId || [])).join(',')
+        const ids = Array.from(new Set(analysisId)).join(',')
         const authorization = req.headers.authorization
         const response = await radiantApiClient.get(`/interpretations/${type}`, {
             params: {
