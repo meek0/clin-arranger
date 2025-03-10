@@ -1,6 +1,7 @@
 import {expect} from "chai";
 import sinon from "sinon";
 import usersApiClient from '../services/usersApiClient.js';
+import radiantApiClient from "../services/radiantApiClient.js";
 import {handleRequest} from "../app/middlewares/variantPropertiesFilterMiddleware.js";
 
 describe("handleRequestWithFlags", () => {
@@ -258,6 +259,101 @@ describe("handleRequestWithFlags", () => {
             if (flags.includes('foo')) return ['hash1_snv', 'hash2_snv', 'hash4_cnv'];
             else if (flags.includes('bar')) return ['hash3_snv'];
             else fail('unexpected flags: ' + flags);
+        })
+
+        const req = {body: {query: 'Variant', variables: variables}}
+
+        await handleRequest(req)
+        expect(req.body.variables).to.eql(expected);
+    });
+    it(`Should handle an interpretation request for Variants`, async () => {
+        const variables = {
+            "sqon": {
+                "content": [
+                {
+                    "content": {
+                        "field": "interpretation",
+                        "value": []
+                    },
+                },
+                {
+                    "content": {
+                        "field": "analysis_service_request_id",
+                        "value": [
+                            "SR01"
+                        ]
+                    },
+                },
+                {
+                    "content": {
+                        "field": "patient_id",
+                        "value": [
+                            "P01"
+                        ]
+                    },
+                },
+                ],
+            }
+        }
+        const expected = {
+            "sqon": {
+                "content": [
+                {
+                    "content": {
+                        "field": "hash",
+                        "value": [
+                            'hash1', 'hash3'
+                        ]
+                    },
+                },
+                {
+                    "content": {
+                        "field": "analysis_service_request_id",
+                        "value": [
+                            "SR01"
+                        ]
+                    },
+                },
+                {
+                    "content": {
+                        "field": "patient_id",
+                        "value": [
+                            "P01"
+                        ]
+                    },
+                },
+                ],
+            }
+        }
+
+        const interpretations = [
+            {
+                metadata: {
+                    patient_id: "P01",
+                    analysis_id: "SR01",
+                    variant_hash: "hash1"
+                }
+            },
+            {
+                metadata: {
+                    patient_id: "P02",
+                    analysis_id: "SR01",
+                    variant_hash: "hash2"
+                }
+            },
+            {
+                metadata: {
+                    patient_id: "P01",
+                    analysis_id: "SR01",
+                    variant_hash: "hash3"
+                }
+            },
+        ]
+
+        sinon.restore();
+        sinon.stub(radiantApiClient, 'searchInterpretationByAnalysisIds').callsFake(async function (_, analysisId) {
+            if (analysisId.includes('SR01')) return interpretations;
+            else fail('unexpected analysisId: ' + analysisId);
         })
 
         const req = {body: {query: 'Variant', variables: variables}}

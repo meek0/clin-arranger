@@ -87,6 +87,17 @@ const variantProperties = [
     },
 ];
 
+const interpretations = [
+    {
+        id: 1,
+        metadata: {
+            patient_id: "P00002",
+            analysis_id: "2910852",
+            variant_hash: "3bbdfd2a87aa27b708420347et6a09063630fa9d",
+        }
+    }
+];
+
 describe("mapVariantToUniqueId", () => {
     it("should map SNV to correct unique_id", () => {
         expect(mapVariantToUniqueId(snvBody.data.Variants.hits.edges[0])).to.eql("3bbdfd2a87aa27b708420347et6a09063630fa9d_2910852_P00002_snv");
@@ -122,12 +133,20 @@ describe("mapVariantPropertiesToVariants", () => {
                             }
                         ]
                     }
+                },
+                interpretation: {
+                    id: 1,
+                    metadata: {
+                        patient_id: "P00002",
+                        analysis_id: "2910852",
+                        variant_hash: "3bbdfd2a87aa27b708420347et6a09063630fa9d",
+                    }
                 }
             }
         }
     ];
 
     it("should add latest variant properties flag to variant", () => {
-        expect(mapVariantPropertiesToVariants(snvBody.data.Variants.hits.edges, variantProperties, ['flags'])).to.eql(expected);
+        expect(mapVariantPropertiesToVariants(snvBody.data.Variants.hits.edges, variantProperties, interpretations, ['flags', 'interpretation'])).to.eql(expected);
     });
 });
