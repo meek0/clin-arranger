@@ -21,7 +21,11 @@
             "name": "clin-arranger-local",
             "type": "node",
             "request": "launch",
-            "program": "${workspaceFolder}/app/index.js"
+            "program": "${workspaceFolder}/app/index.js",
+            "env": {
+                "NODE_ENV": "development"
+            },
+            "console": "integratedTerminal",
         }
     ]
 }

@@ -1,10 +1,10 @@
 import ExcelJS from "exceljs";
 
-const COMMON_FONT_SIZE = 12;
+const COMMON_FONT_SIZE = 9;
 
 const COMMON_CELL_FONT_STYLE = Object.freeze({
   size: COMMON_FONT_SIZE,
-  name: "Calibri",
+  name: "Arial",
 });
 
 const COMMON_CELL_BORDER_STYLE = Object.freeze({
@@ -20,6 +20,7 @@ export const isHeader = (n) => n === ROW_NUMBER_OF_HEADER;
 export default function Report(sheetColumns, rows) {
   let eachRowCb = null;
   let eachCellCb = null;
+  let autoFilter = false;
   return {
     eachRowExtra: function (cb) {
       eachRowCb = cb;
@@ -27,6 +28,10 @@ export default function Report(sheetColumns, rows) {
     },
     eachCellExtra: function (cb) {
       eachCellCb = cb;
+      return this;
+    },
+    withAutoFilter: function (af) {
+      autoFilter = af;
       return this;
     },
     build: function () {
@@ -46,7 +51,7 @@ export default function Report(sheetColumns, rows) {
             font: { ...COMMON_CELL_FONT_STYLE, bold: isHeaderRow },
           };
           cell.alignment = {
-            vertical: "bottom",
+            vertical: "top",
             horizontal: "left",
             wrapText: true,
           };
@@ -58,6 +63,13 @@ export default function Report(sheetColumns, rows) {
           }
         });
       });
+      if(autoFilter){
+        const lastColumnLetter = String.fromCharCode(65 + sheetColumns.length - 1);
+        sheet.autoFilter = {
+          from: 'A1',
+          to: `${lastColumnLetter}1`
+        };
+      }
       return [workbook, sheet];
     },
   };
