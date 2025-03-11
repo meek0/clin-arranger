@@ -2,9 +2,8 @@ import logger from "../../config/logger.js";
 import { isHeader } from "./reportUtils.js";
 import Report from "./index.js";
 
-const HEADER_ROW_HEIGHT_PX = 25;
+const HEADER_ROW_HEIGHT_PX = 30;
 const ROW_HEIGHT_PX = 150;
-const CELL_NUMBER_OF_ALL_FREQ = 3;
 
 const mSilico = {
   D: "Délétère",
@@ -33,6 +32,14 @@ const parentalOrigins = {
   'ambiguous': 'Indéterminé',
   'unknown': 'Inconnu',
 };
+
+const isMotherInParentalOrigin = (op) =>{
+  return op == "possible_mother" || op == "mother" || op ==  "both" ? true : false;
+}
+
+const isFatherInParentalOrigin = (op) =>{
+  return op == "possible_father" || op == "father" || op ==  "both" ? true : false;
+}
 
 const clinvarSig = {
   'Affects': 'Affecte',
@@ -202,7 +209,12 @@ const genomeBuildToRichtext = (genomeBuild) => {
   genomeBuild.forEach((i, index) => {
     if (typeof i === 'string' && i.startsWith('Gène: ')) {
       res.push({text: 'Gène: '});
-      res.push({font: {italic: true}, text: `${i.split('Gène: ')[1]}\n`});
+      res.push({font: {italic: true, bold: true}, text: `${i.split('Gène: ')[1]}\n`});
+    } else if (typeof i === 'string' && i.startsWith('NM_')) {
+      const nmParts = i.split(',');
+      nmParts.forEach(part => {
+        res.push({text: `${part.trim()}\n`});
+      });
     } else {
       res.push({text: `${i}${index === genomeBuild.length - 1 ? '' : '\n'}`});
     }
@@ -228,6 +240,20 @@ export const translateParentalOrigin = (origin) => {
     logger.warn(`Missing parental origin translation for: ${origin}`)
   }
   return translatedOrigin || parentalOrigins['unknown']
+}
+
+export const formatZygosityAndParentalOrigins = (donor) =>{
+  const res = [];
+  res.push(`Zygosité Cas-index : ${translateZygosityIfNeeded(donor.zygosity)}`);
+  res.push(`Origine Parentale : ${translateParentalOrigin(getOrElse(
+          donor.parental_origin,
+          "unknown"
+        ))}`);
+  if( isMotherInParentalOrigin(donor.parental_origin)=== true)
+    res.push(`Zygosité maternelle : ${translateZygosityIfNeeded(getOrElse(donor.mother_zygosity), "unknown")}`);
+  if(isFatherInParentalOrigin(donor.parental_origin) === true)
+    res.push(`Zygosité paternelle : ${translateZygosityIfNeeded(getOrElse(donor.father_zygosity), "unknown")}`);
+  return res;
 }
 
 /**
@@ -260,16 +286,11 @@ const makeRows = (data) => {
             consequence.consequences?.map(c => consequencesConsequences[c]).join(", "),
             consequence.refseq_mrna_id?.join(", "),
             consequence.hgvsc?.split(':')[1],
-            exonRatio ? `Couverture de la variation ${exonRatio}` : "",
+            exonRatio ? `Exon : ${exonRatio}` : "",
           ].filter((e) => !!e)
         )
       },
-      status: [
-        `${translateZygosityIfNeeded(donor.zygosity)} (${translateParentalOrigin(getOrElse(
-          donor.parental_origin,
-          "unknown"
-        ))})`,
-      ].join("\n"),
+      status: formatZygosityAndParentalOrigins(donor).join("\n"),
       fA: translateGnomadGenomes(data?.external_frequencies?.gnomad_genomes_4 ?? {}),
       pSilico: [
         translateExomiserMaxAcgmClassification(data.exomiser_max?.acmg_classification),
@@ -277,7 +298,7 @@ const makeRows = (data) => {
       ].join("\n"),
       clinVar: data.clinvar
         ? `${translateClinvar(data.clinvar.clin_sig)}\n(ID: ${data.clinvar.clinvar_id})`
-        : "0",
+        : "Non répertorié",
       omim: gene?.omim?.length
         ? gene.omim
             .map(
@@ -285,7 +306,12 @@ const makeRows = (data) => {
                 `${omim.name}\n(MIM: ${omim.omim_id}${translateOmimInheritanceCode(omim.inheritance_code)})`
             )
             .join("\n")
-        : "0",
+        : "Non répertorié",
+      mane: [
+        consequence.mane_select ? "MANE Select\n" : "",
+        consequence.mane_plus ? "MANE Plus\n" : "",
+        consequence.canonical ? "Ensembl Canonical" : "",
+      ].join(""),
       interpretation: "",
       serviceRequestId: donor.service_request_id,
       sampleId: donor.sample_id,
@@ -298,17 +324,19 @@ export const makeReport = (data) => {
     {
       header: `Variation nucléotidique (${data.donor.genome_build})`,
       key: "genomeBuild",
-      width: 40,
+      width: 20,
     },
-    { header: "Statut (origine parentale)", key: "status", width: 45 },
-    { header: "Fréquence allélique¹", key: "fA", width: 24 },
-    { header: "Prédiction in silico²", key: "pSilico", width: 24 },
-    { header: "ClinVar", key: "clinVar", width: 24 },
-    { header: "OMIM³", key: "omim", width: 55 },
+    { header: "Zygosité et origine parentale", key: "status", width: 15 },
+    { header: "Fréquence allélique¹", key: "fA", width: 15 },
+    { header: "Prédiction in silico²", key: "pSilico", width: 10 },
+    { header: "ClinVar", key: "clinVar", width: 10 },
+    { header: "OMIM³", key: "omim", width: 15 },
+    { header: "MANE", key: "mane", width: 15 },
     { header: "Interprétation⁴", key: "interpretation", width: 24 },
-    { header: "Numéro requête CQGC", key: "serviceRequestId", width: 24 },
-    { header: "Numéro échantillon", key: "sampleId", width: 24 },
+    { header: "Numéro requête CQGC", key: "serviceRequestId", width: 10 },
+    { header: "Numéro échantillon", key: "sampleId", width: 10 },
   ];
+
 
   const rows = makeRows(data);
   return new Report(columns, rows)
@@ -317,12 +345,12 @@ export const makeReport = (data) => {
       row.height = isHeaderRow ? HEADER_ROW_HEIGHT_PX : ROW_HEIGHT_PX;
     })
     .eachCellExtra((cell, cellNumber, isHeaderRow) => {
-      const isCCellExceptHeader =
-        !isHeaderRow && cellNumber === CELL_NUMBER_OF_ALL_FREQ;
       cell.alignment = {
         ...cell.alignment,
-        horizontal: isCCellExceptHeader ? "right" : "left",
+        horizontal: !isHeaderRow && cell._column._number == 1 ? "left" : "center",
       };
     })
+    .withAutoFilter(true)
     .build();
 };
+
