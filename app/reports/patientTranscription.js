@@ -2,8 +2,11 @@ import logger from "../../config/logger.js";
 import { isHeader } from "./reportUtils.js";
 import Report from "./index.js";
 
-const HEADER_ROW_HEIGHT_PX = 30;
+const HEIGHT_PX_TO_EXCEL_RATIO = 0.75;
+const HEADER_ROW_HEIGHT_PX = 40* HEIGHT_PX_TO_EXCEL_RATIO;
 const ROW_HEIGHT_PX = 150;
+const WIDTH_PX_TO_EXCEL_RATIO = 1.085;
+
 
 const mSilico = {
   D: "Délétère",
@@ -324,17 +327,17 @@ export const makeReport = (data) => {
     {
       header: `Variation nucléotidique (${data.donor.genome_build})`,
       key: "genomeBuild",
-      width: 20,
+      width: 20 * WIDTH_PX_TO_EXCEL_RATIO,
     },
-    { header: "Zygosité et origine parentale", key: "status", width: 15 },
-    { header: "Fréquence allélique¹", key: "fA", width: 15 },
-    { header: "Prédiction in silico²", key: "pSilico", width: 10 },
-    { header: "ClinVar", key: "clinVar", width: 10 },
-    { header: "OMIM³", key: "omim", width: 15 },
-    { header: "MANE", key: "mane", width: 15 },
-    { header: "Interprétation⁴", key: "interpretation", width: 24 },
-    { header: "Numéro requête CQGC", key: "serviceRequestId", width: 10 },
-    { header: "Numéro échantillon", key: "sampleId", width: 10 },
+    { header: "Zygosité et origine parentale", key: "status", width: 15 * WIDTH_PX_TO_EXCEL_RATIO},
+    { header: "Fréquence allélique¹", key: "fA", width: 15 * WIDTH_PX_TO_EXCEL_RATIO},
+    { header: "Prédiction in silico²", key: "pSilico", width: 10 * WIDTH_PX_TO_EXCEL_RATIO},
+    { header: "ClinVar", key: "clinVar", width: 10 * WIDTH_PX_TO_EXCEL_RATIO},
+    { header: "OMIM³", key: "omim", width: 15 * WIDTH_PX_TO_EXCEL_RATIO},
+    { header: "MANE", key: "mane", width: 15 * WIDTH_PX_TO_EXCEL_RATIO},
+    { header: "Interprétation⁴", key: "interpretation", width: 24 * WIDTH_PX_TO_EXCEL_RATIO},
+    { header: "Numéro requête CQGC", key: "serviceRequestId", width: 10 * WIDTH_PX_TO_EXCEL_RATIO},
+    { header: "Numéro échantillon", key: "sampleId", width: 10 * WIDTH_PX_TO_EXCEL_RATIO},
   ];
 
 
