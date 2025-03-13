@@ -20,7 +20,7 @@ const composeIfPossible = (strs = [], separator = "/") =>
 
 const mZygosity = {
   HOM: "Homozygote",
-  HET: "Heterozygote",
+  HET: "Hétérozygote",
   HEM: "Hémizygote"
 };
 
@@ -211,8 +211,8 @@ const genomeBuildToRichtext = (genomeBuild) => {
   const res = [];
   genomeBuild.forEach((i, index) => {
     if (typeof i === 'string' && i.startsWith('Gène: ')) {
-      res.push({text: 'Gène: '});
-      res.push({font: {italic: true, bold: true}, text: `${i.split('Gène: ')[1]}\n`});
+      res.push({text: 'Gène :'});
+      res.push({font: {italic: true, bold: true}, text: `${i.split('Gène:')[1]}\n`});
     } else if (typeof i === 'string' && i.startsWith('NM_')) {
       const nmParts = i.split(',');
       nmParts.forEach(part => {
@@ -247,15 +247,20 @@ export const translateParentalOrigin = (origin) => {
 
 export const formatZygosityAndParentalOrigins = (donor) =>{
   const res = [];
-  res.push(`Zygosité Cas-index : ${translateZygosityIfNeeded(donor.zygosity)}`);
-  res.push(`Origine Parentale : ${translateParentalOrigin(getOrElse(
-          donor.parental_origin,
-          "unknown"
-        ))}`);
-  if( isMotherInParentalOrigin(donor.parental_origin)=== true)
-    res.push(`Zygosité maternelle : ${translateZygosityIfNeeded(getOrElse(donor.mother_zygosity), "unknown")}`);
-  if(isFatherInParentalOrigin(donor.parental_origin) === true)
-    res.push(`Zygosité paternelle : ${translateZygosityIfNeeded(getOrElse(donor.father_zygosity), "unknown")}`);
+  if(donor.is_proband)
+  {
+    res.push(`Zygosité Cas-index : ${translateZygosityIfNeeded(donor.zygosity)}`);
+    res.push(`Origine Parentale : ${translateParentalOrigin(getOrElse(
+            donor.parental_origin,
+            "unknown"
+          ))}`);
+    if( isMotherInParentalOrigin(donor.parental_origin)=== true)
+      res.push(`Zygosité maternelle : ${translateZygosityIfNeeded(getOrElse(donor.mother_zygosity), "unknown")}`);
+    if(isFatherInParentalOrigin(donor.parental_origin) === true)
+      res.push(`Zygosité paternelle : ${translateZygosityIfNeeded(getOrElse(donor.father_zygosity), "unknown")}`);
+  }
+  else
+    res.push(`Zygosité : ${translateZygosityIfNeeded(donor.zygosity)}`);
   return res;
 }
 
@@ -300,13 +305,13 @@ const makeRows = (data) => {
         `(${mSilico[consequence.predictions?.sift_pred] ?? 0}; Revel = ${consequence.predictions?.revel_score ?? 0}; CADD (Phred) = ${consequence.predictions?.cadd_phred ?? 0})`,
       ].join("\n"),
       clinVar: data.clinvar
-        ? `${translateClinvar(data.clinvar.clin_sig)}\n(ID: ${data.clinvar.clinvar_id})`
+        ? `${translateClinvar(data.clinvar.clin_sig)}\n(ID : ${data.clinvar.clinvar_id})`
         : "Non répertorié",
       omim: gene?.omim?.length
         ? gene.omim
             .map(
               (omim) =>
-                `${omim.name}\n(MIM: ${omim.omim_id}${translateOmimInheritanceCode(omim.inheritance_code)})`
+                `${omim.name}\n(MIM : ${omim.omim_id}${translateOmimInheritanceCode(omim.inheritance_code)})`
             )
             .join("\n")
         : "Non répertorié",
