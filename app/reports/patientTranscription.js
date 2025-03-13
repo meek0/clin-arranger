@@ -211,8 +211,8 @@ const genomeBuildToRichtext = (genomeBuild) => {
   const res = [];
   genomeBuild.forEach((i, index) => {
     if (typeof i === 'string' && i.startsWith('Gène: ')) {
-      res.push({text: 'Gène: '});
-      res.push({font: {italic: true, bold: true}, text: `${i.split('Gène : ')[1]}\n`});
+      res.push({text: 'Gène :'});
+      res.push({font: {italic: true, bold: true}, text: `${i.split('Gène:')[1]}\n`});
     } else if (typeof i === 'string' && i.startsWith('NM_')) {
       const nmParts = i.split(',');
       nmParts.forEach(part => {
@@ -247,15 +247,20 @@ export const translateParentalOrigin = (origin) => {
 
 export const formatZygosityAndParentalOrigins = (donor) =>{
   const res = [];
-  res.push(`Zygosité Cas-index : ${translateZygosityIfNeeded(donor.zygosity)}`);
-  res.push(`Origine Parentale : ${translateParentalOrigin(getOrElse(
-          donor.parental_origin,
-          "unknown"
-        ))}`);
-  if( isMotherInParentalOrigin(donor.parental_origin)=== true)
-    res.push(`Zygosité maternelle : ${translateZygosityIfNeeded(getOrElse(donor.mother_zygosity), "unknown")}`);
-  if(isFatherInParentalOrigin(donor.parental_origin) === true)
-    res.push(`Zygosité paternelle : ${translateZygosityIfNeeded(getOrElse(donor.father_zygosity), "unknown")}`);
+  if(donor.is_proband)
+  {
+    res.push(`Zygosité Cas-index : ${translateZygosityIfNeeded(donor.zygosity)}`);
+    res.push(`Origine Parentale : ${translateParentalOrigin(getOrElse(
+            donor.parental_origin,
+            "unknown"
+          ))}`);
+    if( isMotherInParentalOrigin(donor.parental_origin)=== true)
+      res.push(`Zygosité maternelle : ${translateZygosityIfNeeded(getOrElse(donor.mother_zygosity), "unknown")}`);
+    if(isFatherInParentalOrigin(donor.parental_origin) === true)
+      res.push(`Zygosité paternelle : ${translateZygosityIfNeeded(getOrElse(donor.father_zygosity), "unknown")}`);
+  }
+  else
+    res.push(`Zygosité : ${translateZygosityIfNeeded(donor.zygosity)}`);
   return res;
 }
 

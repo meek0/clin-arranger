@@ -37,6 +37,7 @@ describe('makeReport', () => {
       zygosity: "HET",
       parental_origin: "unknown",
       genome_build: 'GRCh38',
+      is_proband: true
     },
     external_frequencies: {
       gnomad_genomes_3_1_1: {
@@ -122,22 +123,22 @@ describe('makeReport', () => {
 
     // row #0 contains headers
 
-    assertCell(sheet, 1, 0, 'chr11:g.198062C>G\nGène: BET1L\nprotein coding\nDownstream Gene\nNM_145651.3\nNM_123456\nn.515+19962_515+19963del')
-    assertCell(sheet, 1, 1, 'Zygosité Cas-index : Heterozygote\nOrigine Parentale : Inconnu')
+    assertCell(sheet, 1, 0, 'chr11:g.198062C>G\nGène : BET1L\nprotein coding\nDownstream Gene\nNM_145651.3\nNM_123456\nn.515+19962_515+19963del')
+    assertCell(sheet, 1, 1, 'Zygosité Cas-index : Hétérozygote\nOrigine Parentale : Inconnu')
     assertCell(sheet, 1, 2, '77907 / 152054 (20535 hom) 5.12e-1')
     assertCell(sheet, 1, 3, 'No Data\n(0; Revel = 0; CADD (Phred) = 0)')
-    assertCell(sheet, 1, 4, 'Association non trouvée\n(ID: clin id)')
-    assertCell(sheet, 1, 5, 'name\n(MIM: id, code)')
+    assertCell(sheet, 1, 4, 'Association non trouvée\n(ID : clin id)')
+    assertCell(sheet, 1, 5, 'name\n(MIM : id, code)')
     assertCell(sheet, 1, 6, 'MANE Select\n')
     assertCell(sheet, 1, 7, '')
     assertCell(sheet, 1, 8, '762051')
     assertCell(sheet, 1, 9, 'SampleMother')
 
-    assertCell(sheet, 2, 0, 'chr11:g.198062C>G\nGène: ODF3\nprotein coding\nDownstream Gene\nNM_001098787.2\nExon : 5/10')
-    assertCell(sheet, 2, 1, 'Zygosité Cas-index : Heterozygote\nOrigine Parentale : Inconnu')
+    assertCell(sheet, 2, 0, 'chr11:g.198062C>G\nGène : ODF3\nprotein coding\nDownstream Gene\nNM_001098787.2\nExon : 5/10')
+    assertCell(sheet, 2, 1, 'Zygosité Cas-index : Hétérozygote\nOrigine Parentale : Inconnu')
     assertCell(sheet, 2, 2, '77907 / 152054 (20535 hom) 5.12e-1')
     assertCell(sheet, 2, 3, 'No Data\n(Toléré; Revel = 0; CADD (Phred) = 0)')
-    assertCell(sheet, 2, 4, 'Association non trouvée\n(ID: clin id)')
+    assertCell(sheet, 2, 4, 'Association non trouvée\n(ID : clin id)')
     assertCell(sheet, 2, 5, 'Non répertorié')
     assertCell(sheet, 2, 6, 'MANE Plus\n')
     assertCell(sheet, 2, 7, '')
@@ -196,6 +197,7 @@ describe('FormatZygosityAndParentalOrigins', () => {
       parental_origin: 'unknown',
       mother_zygosity: 'HET',
       father_zygosity: 'HEM',
+      is_proband: true,
     };
 
     const result = formatZygosityAndParentalOrigins(donor);
@@ -209,12 +211,13 @@ describe('FormatZygosityAndParentalOrigins', () => {
       parental_origin: 'mother',
       mother_zygosity: 'HET',
       father_zygosity: 'HEM',
+      is_proband: true,
     };
 
     const result = formatZygosityAndParentalOrigins(donor);
     expect(result[0]).to.equal('Zygosité Cas-index : Homozygote');
     expect(result[1]).to.equal('Origine Parentale : Mère');
-    expect(result[2]).to.equal('Zygosité maternelle : Heterozygote');
+    expect(result[2]).to.equal('Zygosité maternelle : Hétérozygote');
   });
 
   it('should handle father parental origin', () => {
@@ -223,6 +226,7 @@ describe('FormatZygosityAndParentalOrigins', () => {
       parental_origin: 'father',
       mother_zygosity: 'HET',
       father_zygosity: 'HEM',
+      is_proband: true,
     };
 
     const result = formatZygosityAndParentalOrigins(donor);
@@ -237,12 +241,27 @@ describe('FormatZygosityAndParentalOrigins', () => {
       parental_origin: 'both',
       mother_zygosity: 'HET',
       father_zygosity: 'HEM',
+      is_proband: true,
     };
 
     const result = formatZygosityAndParentalOrigins(donor);
     expect(result[0]).to.equal('Zygosité Cas-index : Homozygote');
     expect(result[1]).to.equal('Origine Parentale : Père et Mère');
-    expect(result[2]).to.equal('Zygosité maternelle : Heterozygote');
+    expect(result[2]).to.equal('Zygosité maternelle : Hétérozygote');
     expect(result[3]).to.equal('Zygosité paternelle : Hémizygote');
+  });
+
+  it('should handle not proband', () => {
+    const donor = {
+      zygosity: 'HOM',
+      parental_origin: 'both',
+      mother_zygosity: 'HET',
+      father_zygosity: 'HEM',
+      is_proband: false,
+    };
+
+    const result = formatZygosityAndParentalOrigins(donor);
+    expect(result[0]).to.equal('Zygosité : Homozygote');
+    expect(result.length).to.equal(1);
   });
 });
