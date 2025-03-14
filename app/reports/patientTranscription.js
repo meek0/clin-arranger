@@ -264,7 +264,7 @@ export const translateZygosityAndParentalOrigins = (donor) =>{
   if(donor.is_proband)
   {
     res.push(`Zygosité Cas-index : ${translateZygosityIfNeeded(donor.zygosity)}`);
-    res.push(`Origine Parentale : ${translateParentalOrigin(getOrElse(
+    res.push(`Origine parentale : ${translateParentalOrigin(getOrElse(
             donor.parental_origin,
             "unknown"
           ))}`);
