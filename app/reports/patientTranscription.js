@@ -3,7 +3,6 @@ import { isHeader } from "./reportUtils.js";
 import Report from "./index.js";
 
 const HEIGHT_PX_TO_EXCEL_RATIO = 0.75;
-const HEADER_ROW_HEIGHT_PX = 40* HEIGHT_PX_TO_EXCEL_RATIO;
 const ROW_HEIGHT_PX = 150;
 const WIDTH_PX_TO_EXCEL_RATIO = 1.085;
 
@@ -192,6 +191,13 @@ const consequencesConsequences = {
   'intergenic_variant': 'Intergenic',
 };
 
+const cmcTier = {
+  "1": "Tier 1",
+  "2": "Tier 2",
+  "3": "Tier 3",
+  "Other": "Autre",
+}
+
 const translateClinvar = (c) => Array.isArray(c) ? c.map(item => translateClinvarSig(item)).join(', ') : translateClinvarSig(c);
 
 const translateZygosityIfNeeded = (z) =>
@@ -226,10 +232,14 @@ const genomeBuildToRichtext = (genomeBuild) => {
   return res;
 }
 
-export const translateGnomadGenomes = (gnomad) =>
+export const translateGermlineGnomadGenomes = (gnomad) =>
   [
     gnomad?.ac || 0,
     `${gnomad?.an || 0} (${gnomad?.hom || 0.0} hom) ${Number.parseFloat(gnomad?.af || 0).toExponential(2)}`].join(" / ");
+
+export const translateSomaticGnomadGenomes = (gnomad) => {
+  return gnomad?.af && gnomad?.ac ? `${Number.parseFloat(gnomad?.af).toExponential(2)}\n(nb allèles : ${gnomad?.ac})` : "Non répertoriée"
+}
 
 export const translateClinvarSig = (sig) => {
   const val = sig ? clinvarSig[sig] : 'Aucune donnée';
@@ -245,7 +255,11 @@ export const translateParentalOrigin = (origin) => {
   return translatedOrigin || parentalOrigins['unknown']
 }
 
-export const formatZygosityAndParentalOrigins = (donor) =>{
+export const translateCosmic = (cmc) =>
+  cmc?.cosmic_id && cmc?.sample_mutated ? `${cmc.sample_mutated}\n(${cmc.cosmic_id })` : `Non répertoriée`
+
+
+export const translateZygosityAndParentalOrigins = (donor) =>{
   const res = [];
   if(donor.is_proband)
   {
@@ -274,7 +288,7 @@ export const formatZygosityAndParentalOrigins = (donor) =>{
  * rsnumber: string
  * }} data - variant
  */
-const makeRows = (data) => {
+const germlineMakeRows = (data) => {
   const donor = data.donor || {};
   return (data.consequences || []).map((consequence, index) => {
     const geneSymbol = consequence.symbol;
@@ -298,8 +312,8 @@ const makeRows = (data) => {
           ].filter((e) => !!e)
         )
       },
-      status: formatZygosityAndParentalOrigins(donor).join("\n"),
-      fA: translateGnomadGenomes(data?.external_frequencies?.gnomad_genomes_4 ?? {}),
+      status: translateZygosityAndParentalOrigins(donor).join("\n"),
+      fA: translateGermlineGnomadGenomes(data?.external_frequencies?.gnomad_genomes_4 ?? {}),
       pSilico: [
         translateExomiserMaxAcgmClassification(data.exomiser_max?.acmg_classification),
         `(${mSilico[consequence.predictions?.sift_pred] ?? 0}; Revel = ${consequence.predictions?.revel_score ?? 0}; CADD (Phred) = ${consequence.predictions?.cadd_phred ?? 0})`,
@@ -327,30 +341,108 @@ const makeRows = (data) => {
   });
 };
 
-export const makeReport = (data) => {
-  const columns = [
+export const germlineMakeColumnsAndRows = (data) =>
+  {
+    const columns = [
+      {
+        header: `Variation nucléotidique (${data.donor.genome_build})`,
+        key: "genomeBuild",
+        width: 20 * WIDTH_PX_TO_EXCEL_RATIO,
+      },
+      { header: "Zygosité et origine parentale", key: "status", width: 15 * WIDTH_PX_TO_EXCEL_RATIO},
+      { header: "Fréquence allélique¹", key: "fA", width: 15 * WIDTH_PX_TO_EXCEL_RATIO},
+      { header: "Prédiction in silico²", key: "pSilico", width: 10 * WIDTH_PX_TO_EXCEL_RATIO},
+      { header: "ClinVar", key: "clinVar", width: 10 * WIDTH_PX_TO_EXCEL_RATIO},
+      { header: "OMIM³", key: "omim", width: 15 * WIDTH_PX_TO_EXCEL_RATIO},
+      { header: "MANE", key: "mane", width: 15 * WIDTH_PX_TO_EXCEL_RATIO},
+      { header: "Interprétation⁴", key: "interpretation", width: 24 * WIDTH_PX_TO_EXCEL_RATIO},
+      { header: "Numéro requête CQGC", key: "serviceRequestId", width: 10 * WIDTH_PX_TO_EXCEL_RATIO},
+      { header: "Numéro échantillon", key: "sampleId", width: 10 * WIDTH_PX_TO_EXCEL_RATIO},
+    ];
+
+    const rows = germlineMakeRows(data);
+    return { columns, rows };
+  }
+
+/**
+ * @param {{
+ * donor,
+ * consequences,
+ * genes: Object[],
+ * cmc: Object[],
+ * external_frequencies: Object[],
+ * hgvsg: string,
+ * rsnumber: string
+ * }} data - variant
+ */
+const somaticMakeRows = (data) => {
+  const donor = data.donor || {};
+  return (data.consequences || []).map((consequence, index) => {
+    const geneSymbol = consequence.symbol;
+    const gene = data.genes.find((g) => g.symbol === geneSymbol);
+    const exonRatio = composeIfPossible([
+      consequence.exon?.rank,
+      consequence.exon?.total,
+    ]);
+    return {
+      index,
+      genomeBuild: { richText:
+        genomeBuildToRichtext(
+          [
+            data.hgvsg,
+            `Gène: ${geneSymbol}`,
+            consequence.biotype ? consequenceBiotype[consequence.biotype] : 'No Data',
+            consequence.consequences?.map(c => consequencesConsequences[c]).join(", "),
+            consequence.refseq_mrna_id?.join(", "),
+            consequence.hgvsc?.split(':')[1],
+            exonRatio ? `Exon : ${exonRatio}` : "",
+          ].filter((e) => !!e)
+        )
+      },
+      ad:`${(donor.ad_ratio ?? 0).toFixed(2)*100}%\n${data.donor.ad_alt}/${data.donor.ad_total}`,
+      origine: data.donor.all_analyses.includes("TN") ? "Somatique" : "Non déterminée",
+      fA: translateSomaticGnomadGenomes(data?.external_frequencies?.gnomad_genomes_4 ?? {}),
+      cosmic: translateCosmic(data.cmc),
+      impactFunc: "Gain de fonction/Perte de fonction/Délétère/Inconnu",
+      interpretation: data.cmc?.tier ? cmcTier[data.cmc.tier] : 'Non répertorié',
+      mane: consequence.mane_select ? "Oui" : "Non",
+      serviceRequestId: donor.service_request_id,
+      sampleId: donor.sample_id,
+    };
+  });
+};
+
+  export const somaticMakeColumnsAndRows = (data) =>
     {
-      header: `Variation nucléotidique (${data.donor.genome_build})`,
-      key: "genomeBuild",
-      width: 20 * WIDTH_PX_TO_EXCEL_RATIO,
-    },
-    { header: "Zygosité et origine parentale", key: "status", width: 15 * WIDTH_PX_TO_EXCEL_RATIO},
-    { header: "Fréquence allélique¹", key: "fA", width: 15 * WIDTH_PX_TO_EXCEL_RATIO},
-    { header: "Prédiction in silico²", key: "pSilico", width: 10 * WIDTH_PX_TO_EXCEL_RATIO},
-    { header: "ClinVar", key: "clinVar", width: 10 * WIDTH_PX_TO_EXCEL_RATIO},
-    { header: "OMIM³", key: "omim", width: 15 * WIDTH_PX_TO_EXCEL_RATIO},
-    { header: "MANE", key: "mane", width: 15 * WIDTH_PX_TO_EXCEL_RATIO},
-    { header: "Interprétation⁴", key: "interpretation", width: 24 * WIDTH_PX_TO_EXCEL_RATIO},
-    { header: "Numéro requête CQGC", key: "serviceRequestId", width: 10 * WIDTH_PX_TO_EXCEL_RATIO},
-    { header: "Numéro échantillon", key: "sampleId", width: 10 * WIDTH_PX_TO_EXCEL_RATIO},
-  ];
+      const columns = [
+        {
+          header: `Variation nucléotidique (${data.donor.genome_build})`,
+          key: "genomeBuild",
+          width: 17 * WIDTH_PX_TO_EXCEL_RATIO,
+        },
+        { header: "Fréquence allélique du variant [VAF] (lectures variant / total)", key: "ad", width: 10 * WIDTH_PX_TO_EXCEL_RATIO},
+        { header: "Origine du variant*", key: "origine", width: 10 * WIDTH_PX_TO_EXCEL_RATIO},
+        { header: "Fréquence allélique population¹", key: "fA", width: 10 * WIDTH_PX_TO_EXCEL_RATIO},
+        { header: "Nombre de cas rapportés (COSMIC)²", key: "cosmic", width: 15 * WIDTH_PX_TO_EXCEL_RATIO},
+        { header: "Impact fonctionnel", key: "impactFunc", width: 10 * WIDTH_PX_TO_EXCEL_RATIO},
+        { header: "Niveau de signification clinique⁵", key: "interpretation", width: 10 * WIDTH_PX_TO_EXCEL_RATIO},
+        { header: "Transcrit MANE Select", key: "mane", width: 10 * WIDTH_PX_TO_EXCEL_RATIO},
+        { header: "Numéro requête CQGC", key: "serviceRequestId", width: 10 * WIDTH_PX_TO_EXCEL_RATIO},
+        { header: "Numéro échantillon", key: "sampleId", width: 10 * WIDTH_PX_TO_EXCEL_RATIO},
+      ];
 
+      const rows = somaticMakeRows(data);
+      return { columns, rows };
+    }
 
-  const rows = makeRows(data);
+export const makeReport = (data) => {
+  const { columns, rows } = data.donor.variant_type == "germline" ? germlineMakeColumnsAndRows(data) :  somaticMakeColumnsAndRows(data);
+  const headerRowHeightPx = (data.donor.variant_type == "germline" ? 40 : 85) * HEIGHT_PX_TO_EXCEL_RATIO
+
   return new Report(columns, rows)
     .eachRowExtra((row, rowNumber) => {
       const isHeaderRow = isHeader(rowNumber);
-      row.height = isHeaderRow ? HEADER_ROW_HEIGHT_PX : ROW_HEIGHT_PX;
+      row.height = isHeaderRow ? headerRowHeightPx : ROW_HEIGHT_PX;
     })
     .eachCellExtra((cell, cellNumber, isHeaderRow) => {
       cell.alignment = {
