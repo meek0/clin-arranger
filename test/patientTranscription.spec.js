@@ -285,7 +285,7 @@ describe('makeReport', () => {
 
     // row #0 contains headers
     assertCell(sheet, 1, 0, 'chr11:g.198062C>G\nGène : BET1L\nprotein coding\nDownstream Gene\nNM_145651.3\nNM_123456\nn.515+19962_515+19963del')
-    assertCell(sheet, 1, 1, '75%\n17/34')
+    assertCell(sheet, 1, 1, '75%\n(17/34)')
     assertCell(sheet, 1, 2, 'Somatique')
     assertCell(sheet, 1, 3, '5.12e-1\n(nb allèles : 77907)')
     assertCell(sheet, 1, 4, '99\n(ID)')
@@ -296,7 +296,7 @@ describe('makeReport', () => {
     assertCell(sheet, 1, 9, 'SampleMother')
 
     assertCell(sheet, 2, 0, 'chr11:g.198062C>G\nGène : ODF3\nprotein coding\nDownstream Gene\nNM_001098787.2\nExon : 5/10')
-    assertCell(sheet, 2, 1, '75%\n17/34')
+    assertCell(sheet, 2, 1, '75%\n(17/34)')
     assertCell(sheet, 2, 2, 'Somatique')
     assertCell(sheet, 2, 3, '5.12e-1\n(nb allèles : 77907)')
     assertCell(sheet, 2, 4, '99\n(ID)')
