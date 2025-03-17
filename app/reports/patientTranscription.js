@@ -399,7 +399,7 @@ const somaticMakeRows = (data) => {
           ].filter((e) => !!e)
         )
       },
-      ad:`${(donor.ad_ratio ?? 0).toFixed(2)*100}%\n${data.donor.ad_alt}/${data.donor.ad_total}`,
+      ad:`${(donor.ad_ratio ?? 0).toFixed(2)*100}%\n(${data.donor.ad_alt}/${data.donor.ad_total})`,
       origine: data.donor.all_analyses.includes("TN") ? "Somatique" : "Non déterminée",
       fA: translateSomaticGnomadGenomes(data?.external_frequencies?.gnomad_genomes_4 ?? {}),
       cosmic: translateCosmic(data.cmc),
