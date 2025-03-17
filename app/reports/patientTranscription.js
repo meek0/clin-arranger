@@ -423,7 +423,7 @@ const germlineMakeRows = (data) => {
       serviceRequestId: donor.service_request_id,
       sampleId: donor.sample_id,
       citations:
-        data.interpretation?.pubmed.length &&
+        data.interpretation?.pubmed?.length &&
         consequence.ensembl_transcript_id == data.interpretation?.transcript_id
           ? data.interpretation.pubmed
               .map((pubmed) => pubmed.citation)
@@ -520,7 +520,7 @@ const somaticMakeRows = (data) => {
           ? translatePMID(data.interpretation?.pubmed)
           : "",
       citations:
-        data.interpretation?.pubmed.length &&
+        data.interpretation?.pubmed?.length &&
         consequence.ensembl_transcript_id == data.interpretation?.transcript_id
           ? data.interpretation.pubmed
               .map((pubmed) => pubmed.citation)
@@ -558,6 +558,9 @@ const somaticMakeRows = (data) => {
     }
 
 export const makeReport = (data) => {
+  if(!data || !data?.donor || !data.donor.variant_type)
+    throw new Error(`Invalid data`);
+
   const { columns, rows } = data.donor.variant_type == variantType.Germline ? germlineMakeColumnsAndRows(data) :  somaticMakeColumnsAndRows(data);
   const headerRowHeightPx = (data.donor.variant_type == variantType.Germline ? 40 : 85) * HEIGHT_PX_TO_EXCEL_RATIO
 

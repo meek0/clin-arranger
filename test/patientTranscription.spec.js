@@ -361,16 +361,22 @@ describe('makeReport', () => {
     ],
   };
 
+  const assertColumn = (column, key, header) => {
+    expect(column.key).to.equals(key);
+    expect(column.header).to.equals(header);
+  }
+
+  const assertCell = (sheet, row, column, value) => {
+    expect(sheet._rows[row]._cells[column].text).to.equals(value);
+  }
+
+  it('Should be robust', () => {
+
+    expect(() => makeReport({})).to.throw('Invalid data');
+    expect(() => makeReport({donor: {},})).to.throw('Invalid data');
+  })
+
   it('Should transform germline variant into xlsx', () => {
-
-    const assertColumn = (column, key, header) => {
-      expect(column.key).to.equals(key);
-      expect(column.header).to.equals(header);
-    }
-
-    const assertCell = (sheet, row, column, value) => {
-      expect(sheet._rows[row]._cells[column].text).to.equals(value);
-    }
 
     const [workbook, sheet] = makeReport(mockGermlineVariant);
 
@@ -417,15 +423,6 @@ describe('makeReport', () => {
 
 
   it('Should transform somatic variant into xlsx', () => {
-
-    const assertColumn = (column, key, header) => {
-      expect(column.key).to.equals(key);
-      expect(column.header).to.equals(header);
-    }
-
-    const assertCell = (sheet, row, column, value) => {
-      expect(sheet._rows[row]._cells[column].text).to.equals(value);
-    }
 
     const [workbook, sheet] = makeReport(mockSomaticVariant);
 
