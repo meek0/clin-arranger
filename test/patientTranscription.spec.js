@@ -7,6 +7,9 @@ import {
   translateZygosityAndParentalOrigins,
   translateSomaticGnomadGenomes,
   translateCosmic,
+  translateOmimPMID,
+  translateSomaticInterpretation,
+  translateSomaticOngogenecity,
 } from "../app/reports/patientTranscription.js";
 
 describe('translateParentalOrigin', () => {
@@ -56,6 +59,126 @@ describe('translateCosmic', () => {
   });
 });
 
+describe('translateOmimPMID', () => {
+  it('should return "Non répertorié" when pubmed and gene.omim are empty', () => {
+    const gene = {};
+    const pubmed = [];
+    const result = translateOmimPMID(gene, pubmed);
+    expect(result).to.equal("Non répertorié");
+  });
+
+  it('should return formatted OMIM data when gene.omim is provided', () => {
+    const gene = {
+      omim: [
+        {
+          name: 'Gene1',
+          omim_id: '123456',
+          inheritance_code: 'AD'
+        },
+        {
+          name: 'Gene2',
+          omim_id: '789012',
+          inheritance_code: 'AR'
+        }
+      ]
+    };
+    const pubmed = [];
+    const result = translateOmimPMID(gene, pubmed);
+    expect(result).to.equal(
+      'Gene1\n(MIM : 123456, AD)\nGene2\n(MIM : 789012, AR)'
+    );
+  });
+
+  it('should return formatted PubMed data when pubmed is provided', () => {
+    const gene = {};
+    const pubmed = [
+      { citation_id: '987654' },
+      { citation_id: '321098' }
+    ];
+    const result = translateOmimPMID(gene, pubmed);
+    expect(result).to.equal(
+      'PMID : 987654\nPMID : 321098'
+    );
+  });
+
+  it('should return formatted OMIM and PubMed data when both are provided', () => {
+    const gene = {
+      omim: [
+        {
+          name: 'Gene1',
+          omim_id: '123456',
+          inheritance_code: 'AD'
+        }
+      ]
+    };
+    const pubmed = [
+      { citation_id: '987654' }
+    ];
+    const result = translateOmimPMID(gene, pubmed);
+    expect(result).to.equal(
+      'Gene1\n(MIM : 123456, AD)\nPMID : 987654'
+    );
+  });
+});
+
+describe('translateSomaticInterpretation', () => {
+  it('should return the correct clinical utility when interpretation and consequence match', () => {
+    const interpretation = { clinical_utility: 'category_ia', transcript_id: 'ENST00000367770' };
+    const consequence = { ensembl_transcript_id: 'ENST00000367770' };
+
+    const result = translateSomaticInterpretation(interpretation, consequence);
+    expect(result).to.equal('Tier IA');
+  });
+
+  it('should return the correct CMC tier when data.cmc.tier is present', () => {
+    const interpretation = null;
+    const consequence = {};
+    const data = { cmc: { tier: '1' } };
+
+    const result = translateSomaticInterpretation(interpretation, consequence,data.cmc);
+    expect(result).to.equal('COSMIC : Tier 1');
+  });
+
+  it('should return "Non répertorié" when no matching conditions are met', () => {
+    const interpretation = null;
+    const consequence = {};
+    const data = {};
+
+    const result = translateSomaticInterpretation(interpretation, consequence);
+    expect(result).to.equal('Non répertorié');
+  });
+});
+
+describe('translateSomaticOngogenecity', () => {
+  it('should return the correct translation for oncogenicity when transcript IDs match', () => {
+    const interpretation = { oncogenicity: 'oncogenic', transcript_id: 'ENST00000367770' };
+    const consequence = { ensembl_transcript_id: 'ENST00000367770' };
+    const result = translateSomaticOngogenecity(interpretation, consequence);
+    expect(result).to.equal('Oncogénique');
+  });
+
+  it('should return an empty string when transcript IDs do not match', () => {
+    const interpretation = { oncogenicity: 'oncogenic', transcript_id: 'ENST00000367770' };
+    const consequence = { ensembl_transcript_id: 'ENST00000412345' };
+    const result = translateSomaticOngogenecity(interpretation, consequence);
+    expect(result).to.equal('');
+  });
+
+  it('should return an empty string when oncogenicity is not defined', () => {
+    const interpretation = { transcript_id: 'ENST00000367770' };
+    const consequence = { ensembl_transcript_id: 'ENST00000367770' };
+    const result = translateSomaticOngogenecity(interpretation, consequence);
+    expect(result).to.equal('');
+  });
+
+  it('should return the correct translation for "likely_benign"', () => {
+    const interpretation = { oncogenicity: 'likely_benign', transcript_id: 'ENST00000367770' };
+    const consequence = { ensembl_transcript_id: 'ENST00000367770' };
+    const result = translateSomaticOngogenecity(interpretation, consequence);
+    expect(result).to.equal('Probablement bénigne');
+  });
+});
+
 describe('makeReport', () => {
 
   const mockGermlineVariant = {
@@ -63,7 +186,7 @@ describe('makeReport', () => {
     clinvar: {
       clin_sig: "association_not_found",
       clinvar_idL: "bar",
-      clinvar_id: 'clin id'
+      clinvar_id: "clin id",
     },
     donor: {
       ad_alt: 17,
@@ -72,9 +195,25 @@ describe('makeReport', () => {
       sample_id: "SampleMother",
       zygosity: "HET",
       parental_origin: "unknown",
-      genome_build: 'GRCh38',
+      genome_build: "GRCh38",
       is_proband: true,
-      variant_type: "germline"
+      variant_type: "germline",
+    },
+    interpretation: {
+      transcript_id: "ENST00000342878",
+      classification: "LA6668-3",
+      pubmed: [
+        {
+          citation_id: "12354",
+          citation:
+            "Tomlinson E, Davis SS. Increased uptake of an anionic drug by mucous membrane, upon formation of ion-association species with quaternary ammonium salts [proceedings]. J Pharm Pharmacol. 1976 Dec;28 Suppl:75P. PMID: 12354.",
+        },
+        {
+          citation_id: "6654",
+          citation:
+            "Jøorgensen A, Staehr P. On the biological half-life of amitroptyline. J Pharm Pharmacol. 1976 Jan;28(1):62-4. doi: 10.1111/j.2042-7158.1976.tb04026.x. PMID: 6654.",
+        },
+      ],
     },
     external_frequencies: {
       gnomad_genomes_3_1_1: {
@@ -82,9 +221,9 @@ describe('makeReport', () => {
       },
       gnomad_genomes_4: {
         ac: 77907,
-        af: 0.5120,
+        af: 0.512,
         an: 152054,
-        hom: 20535
+        hom: 20535,
       },
     },
     rsnumber: "rs11605246",
@@ -106,27 +245,27 @@ describe('makeReport', () => {
     ],
     consequences: [
       {
-        symbol: 'BET1L',
-        hgvsc: 'ENST00000342878.3:n.515+19962_515+19963del',
+        symbol: "BET1L",
+        hgvsc: "ENST00000342878.3:n.515+19962_515+19963del",
         ensembl_transcript_id: "ENST00000342878",
         consequences: ["downstream_gene_variant"],
         biotype: "protein_coding",
-        refseq_mrna_id: ["NM_145651.3","NM_123456"],
-        mane_select: 'true',
+        refseq_mrna_id: ["NM_145651.3", "NM_123456"],
+        mane_select: "true",
       },
       {
         exon: {
           rank: 5,
           total: 10,
         },
-        symbol: 'ODF3',
+        symbol: "ODF3",
         ensembl_transcript_id: "ENST00000382762",
         consequences: ["downstream_gene_variant"],
         biotype: "protein_coding",
         refseq_mrna_id: ["NM_001098787.2"],
-        mane_plus: 'true',
+        mane_plus: "true",
         predictions: {
-          sift_pred: 'T',
+          sift_pred: "T",
         },
       },
     ],
@@ -176,6 +315,23 @@ describe('makeReport', () => {
         an: 152054,
         hom: 20535
       },
+    },
+    interpretation: {
+      transcript_id: "ENST00000342878",
+      clinical_utility: "category_ib",
+      oncogenicity: "likely_oncogenic",
+      pubmed: [
+        {
+          citation_id: "12354",
+          citation:
+            "Tomlinson E, Davis SS. Increased uptake of an anionic drug by mucous membrane, upon formation of ion-association species with quaternary ammonium salts [proceedings]. J Pharm Pharmacol. 1976 Dec;28 Suppl:75P. PMID: 12354.",
+        },
+        {
+          citation_id: "6654",
+          citation:
+            "Jøorgensen A, Staehr P. On the biological half-life of amitroptyline. J Pharm Pharmacol. 1976 Jan;28(1):62-4. doi: 10.1111/j.2042-7158.1976.tb04026.x. PMID: 6654.",
+        },
+      ],
     },
     consequences: [
       {
@@ -230,6 +386,7 @@ describe('makeReport', () => {
     assertColumn(sheet.columns[7],'interpretation','Interprétation⁴')
     assertColumn(sheet.columns[8],'serviceRequestId','Numéro requête CQGC')
     assertColumn(sheet.columns[9],'sampleId','Numéro échantillon')
+    assertColumn(sheet.columns[10],'citations','Citations')
 
     // row #0 contains headers
 
@@ -238,11 +395,12 @@ describe('makeReport', () => {
     assertCell(sheet, 1, 2, '77907 / 152054 (20535 hom) 5.12e-1')
     assertCell(sheet, 1, 3, 'No Data\n(0; Revel = 0; CADD (Phred) = 0)')
     assertCell(sheet, 1, 4, 'Association non trouvée\n(ID : clin id)')
-    assertCell(sheet, 1, 5, 'name\n(MIM : id, code)')
+    assertCell(sheet, 1, 5, 'name\n(MIM : id, code)\nPMID : 12354\nPMID : 6654')
     assertCell(sheet, 1, 6, 'MANE Select\n')
-    assertCell(sheet, 1, 7, '')
+    assertCell(sheet, 1, 7, 'Pathogénique')
     assertCell(sheet, 1, 8, '762051')
     assertCell(sheet, 1, 9, 'SampleMother')
+    assertCell(sheet, 1, 10, 'Tomlinson E, Davis SS. Increased uptake of an anionic drug by mucous membrane, upon formation of ion-association species with quaternary ammonium salts [proceedings]. J Pharm Pharmacol. 1976 Dec;28 Suppl:75P. PMID: 12354.\nJøorgensen A, Staehr P. On the biological half-life of amitroptyline. J Pharm Pharmacol. 1976 Jan;28(1):62-4. doi: 10.1111/j.2042-7158.1976.tb04026.x. PMID: 6654.')
 
     assertCell(sheet, 2, 0, 'chr11:g.198062C>G\nGène : ODF3\nprotein coding\nDownstream Gene\nNM_001098787.2\nExon : 5/10')
     assertCell(sheet, 2, 1, 'Zygosité Cas-index : Hétérozygote\nOrigine parentale : Inconnu')
@@ -254,6 +412,7 @@ describe('makeReport', () => {
     assertCell(sheet, 2, 7, '')
     assertCell(sheet, 2, 8, '762051')
     assertCell(sheet, 2, 9, 'SampleMother')
+    assertCell(sheet, 2, 10, '')
   });
 
 
@@ -279,9 +438,12 @@ describe('makeReport', () => {
     assertColumn(sheet.columns[4],'cosmic','Nombre de cas rapportés (COSMIC)²')
     assertColumn(sheet.columns[5],'impactFunc','Impact fonctionnel')
     assertColumn(sheet.columns[6],'interpretation','Niveau de signification clinique⁵')
-    assertColumn(sheet.columns[7],'mane','Transcrit MANE Select')
-    assertColumn(sheet.columns[8],'serviceRequestId','Numéro requête CQGC')
-    assertColumn(sheet.columns[9],'sampleId','Numéro échantillon')
+    assertColumn(sheet.columns[7],'oncogenicity','Oncogénicité')
+    assertColumn(sheet.columns[8],'mane','Transcrit MANE Select')
+    assertColumn(sheet.columns[9],'serviceRequestId','Numéro requête CQGC')
+    assertColumn(sheet.columns[10],'sampleId','Numéro échantillon')
+    assertColumn(sheet.columns[11],'pmId','PubMed')
+    assertColumn(sheet.columns[12],'citations','Citations')
 
     // row #0 contains headers
     assertCell(sheet, 1, 0, 'chr11:g.198062C>G\nGène : BET1L\nprotein coding\nDownstream Gene\nNM_145651.3\nNM_123456\nn.515+19962_515+19963del')
@@ -290,10 +452,13 @@ describe('makeReport', () => {
     assertCell(sheet, 1, 3, '5.12e-1\n(nb allèles : 77907)')
     assertCell(sheet, 1, 4, '99\n(ID)')
     assertCell(sheet, 1, 5, 'Gain de fonction/Perte de fonction/Délétère/Inconnu')
-    assertCell(sheet, 1, 6, 'Tier 3')
-    assertCell(sheet, 1, 7, 'Oui')
-    assertCell(sheet, 1, 8, '762051')
-    assertCell(sheet, 1, 9, 'SampleMother')
+    assertCell(sheet, 1, 6, 'Tier IB')
+    assertCell(sheet, 1, 7, 'Probablement oncogénique')
+    assertCell(sheet, 1, 8, 'Oui')
+    assertCell(sheet, 1, 9, '762051')
+    assertCell(sheet, 1, 10, 'SampleMother')
+    assertCell(sheet, 1, 11, 'PMID : 12354\nPMID : 6654')
+    assertCell(sheet, 1, 12, 'Tomlinson E, Davis SS. Increased uptake of an anionic drug by mucous membrane, upon formation of ion-association species with quaternary ammonium salts [proceedings]. J Pharm Pharmacol. 1976 Dec;28 Suppl:75P. PMID: 12354.\nJøorgensen A, Staehr P. On the biological half-life of amitroptyline. J Pharm Pharmacol. 1976 Jan;28(1):62-4. doi: 10.1111/j.2042-7158.1976.tb04026.x. PMID: 6654.')
 
     assertCell(sheet, 2, 0, 'chr11:g.198062C>G\nGène : ODF3\nprotein coding\nDownstream Gene\nNM_001098787.2\nExon : 5/10')
     assertCell(sheet, 2, 1, '75%\n(17/34)')
@@ -301,10 +466,13 @@ describe('makeReport', () => {
     assertCell(sheet, 2, 3, '5.12e-1\n(nb allèles : 77907)')
     assertCell(sheet, 2, 4, '99\n(ID)')
     assertCell(sheet, 2, 5, 'Gain de fonction/Perte de fonction/Délétère/Inconnu')
-    assertCell(sheet, 2, 6, 'Tier 3')
-    assertCell(sheet, 2, 7, 'Non')
-    assertCell(sheet, 2, 8, '762051')
-    assertCell(sheet, 2, 9, 'SampleMother')
+    assertCell(sheet, 2, 6, 'COSMIC : Tier 3')
+    assertCell(sheet, 2, 7, '')
+    assertCell(sheet, 2, 8, 'Non')
+    assertCell(sheet, 2, 9, '762051')
+    assertCell(sheet, 2, 10, 'SampleMother')
+    assertCell(sheet, 2, 11, '')
+    assertCell(sheet, 2, 12, '')
   });
 
   it('All cells should have same font name and size', () => {
@@ -322,10 +490,16 @@ describe('makeReport', () => {
     });
   });
 
-  it('Should have auto filter for all column', () => {
+  it('Germline report should have auto filter for all column', () => {
     const [workbook, sheet] = makeReport(mockGermlineVariant);
     expect(sheet.autoFilter.from).to.equals("A1");
-    expect(sheet.autoFilter.to).to.equals("J1");
+    expect(sheet.autoFilter.to).to.equals("K1");
+  });
+
+  it('Somatic report should have auto filter for all column', () => {
+    const [workbook, sheet] = makeReport(mockSomaticVariant);
+    expect(sheet.autoFilter.from).to.equals("A1");
+    expect(sheet.autoFilter.to).to.equals("M1");
   });
 
   it('Should have centered header horizontal alignment', () => {
@@ -335,15 +509,13 @@ describe('makeReport', () => {
     });
   });
 
-  it('Should first column left horizontal alignment', () => {
+  it('First column should have left horizontal alignment', () => {
     const [workbook, sheet] = makeReport(mockGermlineVariant);
     sheet.eachRow((row) => {
       row.eachCell((cell) => {
         if(row._number != 1) {
           if(cell._column._number == 1)
             expect(cell.alignment.horizontal).to.equals("left");
-          else
-            expect(cell.alignment.horizontal).to.equals("center");
         }
       });
     });

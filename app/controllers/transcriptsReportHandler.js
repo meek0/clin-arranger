@@ -1,4 +1,5 @@
 import EsInstance from "../../services/esClient.js";
+import radiantApiClient from '../../services/radiantApiClient.js';
 import { indexNameVariants } from "../../config/vars.js";
 import { makeReport } from "../reports/patientTranscription.js";
 import { sendBadRequest } from "../httpUtils.js";
@@ -62,7 +63,15 @@ export default async (req, res) => {
 
   const data = response?.body?.hits?.hits?.[0]?._source || [];
   const donor = data.donors?.find((d) => d.patient_id === patientId) || {};
-  const [workbook, sheet] = makeReport({ ...data, donor });
+  const transcriptId = data.consequences?.find(({ picked }) => !!picked)?.ensembl_transcript_id;
+  const interpretation = await radiantApiClient.fetchInterpretation(
+    req,
+    donor.variant_type,
+    donor.service_request_id,
+    data.locus,
+    transcriptId
+  );
+  const [workbook, sheet] = makeReport({ ...data, donor, interpretation });
   const fileName = `${[
     patientId,
     donor.service_request_id,

@@ -41,4 +41,28 @@ radiantApiClient.searchInterpretationByAnalysisIds = async function(req, analysi
     return interpretationsGermline.concat(interpretationsSomatic);
 }
 
+radiantApiClient.fetchInterpretation = async function (
+  req,
+  type,
+  sequencing_id,
+  locus_id,
+  transcript_id
+) {
+  try {
+    const authorization = req.headers.authorization;
+    const response = await radiantApiClient.get(
+      `/interpretations/${type}/${sequencing_id}/${locus_id}/${transcript_id}`,
+      {
+        headers: {
+          Authorization: authorization,
+        },
+      }
+    );
+    return response.data || "";
+  } catch (e) {
+    logger.error(`Failed to fetch interpretation: ${e}`);
+    return "";
+  }
+};
+
 export default radiantApiClient;

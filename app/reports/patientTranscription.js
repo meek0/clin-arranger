@@ -23,6 +23,11 @@ const mZygosity = {
   HEM: "Hémizygote"
 };
 
+const variantType = {
+  Germline: 'germline',
+  Somatic: 'somatic'
+};
+
 const parentalOrigins = {
   'possible_denovo': 'Possiblement de novo',
   'possible_mother': 'Possiblement mère',
@@ -198,6 +203,30 @@ const cmcTier = {
   "Other": "Autre",
 }
 
+const germlineClassification = {
+  "LA6668-3": "Pathogénique",
+  "LA26332-9": "Probablement pathogénique",
+  "LA26333-7": "Variant de signification incertaine",
+  "LA26334-5": "Probablement bénigne",
+  "LA6675-8": "Bénigne",
+};
+
+const somaticClinicalUtility = {
+  "category_ia": "Tier IA",
+  "category_ib": "Tier IB",
+  "category_iic": "Tier IIC",
+  "category_iid": "Tier IID",
+  "category_iii": "Tier III",
+}
+
+const somaticOncogenecity = {
+  "uncertain_significance": "Variant de signification incertaine",
+  "likely_oncogenic": "Probablement oncogénique",
+  "likely_benign": "Probablement bénigne",
+  "oncogenic": "Oncogénique",
+  "benign": "Bénigne"
+}
+
 const translateClinvar = (c) => Array.isArray(c) ? c.map(item => translateClinvarSig(item)).join(', ') : translateClinvarSig(c);
 
 const translateZygosityIfNeeded = (z) =>
@@ -278,6 +307,46 @@ export const translateZygosityAndParentalOrigins = (donor) =>{
   return res;
 }
 
+export const translatePMID= (pubmed) =>
+{
+  return pubmed?.length
+  ? pubmed.map((pm) => `PMID : ${pm.citation_id}`).join("\n")
+  : "";
+}
+
+export const translateOmimPMID = (gene, pubmed) => {
+  if (!pubmed?.length && !gene?.omim?.length) return "Non répertorié";
+  let result = gene?.omim?.length
+    ? gene.omim
+        .map(
+          (omim) =>
+            `${omim.name}\n(MIM : ${omim.omim_id}${translateOmimInheritanceCode(
+              omim.inheritance_code
+            )})`
+        )
+        .join("\n")
+    : "";
+  result += pubmed?.length && pubmed && gene?.omim?.length ? "\n" : "";
+  result += translatePMID(pubmed)
+  return result;
+}
+
+export const translateSomaticInterpretation = (interpretation, consequence, cmc) => {
+  return interpretation?.clinical_utility &&
+    consequence.ensembl_transcript_id == interpretation?.transcript_id
+    ? somaticClinicalUtility[interpretation.clinical_utility]
+    : cmc?.tier
+    ? `COSMIC : ${cmcTier[cmc.tier]}`
+    : "Non répertorié";
+}
+
+export const translateSomaticOngogenecity = (interpretation, consequence) => {
+  return interpretation?.oncogenicity &&
+    consequence.ensembl_transcript_id == interpretation?.transcript_id
+    ? somaticOncogenecity[interpretation.oncogenicity]
+    : "";
+}
+
 /**
  * @param {{
  * donor,
@@ -299,44 +368,67 @@ const germlineMakeRows = (data) => {
     ]);
     return {
       index,
-      genomeBuild: { richText:
-        genomeBuildToRichtext(
+      genomeBuild: {
+        richText: genomeBuildToRichtext(
           [
             data.hgvsg,
             `Gène: ${geneSymbol}`,
-            consequence.biotype ? consequenceBiotype[consequence.biotype] : 'No Data',
-            consequence.consequences?.map(c => consequencesConsequences[c]).join(", "),
+            consequence.biotype
+              ? consequenceBiotype[consequence.biotype]
+              : "No Data",
+            consequence.consequences
+              ?.map((c) => consequencesConsequences[c])
+              .join(", "),
             consequence.refseq_mrna_id?.join(", "),
-            consequence.hgvsc?.split(':')[1],
+            consequence.hgvsc?.split(":")[1],
             exonRatio ? `Exon : ${exonRatio}` : "",
           ].filter((e) => !!e)
-        )
+        ),
       },
       status: translateZygosityAndParentalOrigins(donor).join("\n"),
-      fA: translateGermlineGnomadGenomes(data?.external_frequencies?.gnomad_genomes_4 ?? {}),
+      fA: translateGermlineGnomadGenomes(
+        data?.external_frequencies?.gnomad_genomes_4 ?? {}
+      ),
       pSilico: [
-        translateExomiserMaxAcgmClassification(data.exomiser_max?.acmg_classification),
-        `(${mSilico[consequence.predictions?.sift_pred] ?? 0}; Revel = ${consequence.predictions?.revel_score ?? 0}; CADD (Phred) = ${consequence.predictions?.cadd_phred ?? 0})`,
+        translateExomiserMaxAcgmClassification(
+          data.exomiser_max?.acmg_classification
+        ),
+        `(${mSilico[consequence.predictions?.sift_pred] ?? 0}; Revel = ${
+          consequence.predictions?.revel_score ?? 0
+        }; CADD (Phred) = ${consequence.predictions?.cadd_phred ?? 0})`,
       ].join("\n"),
       clinVar: data.clinvar
-        ? `${translateClinvar(data.clinvar.clin_sig)}\n(ID : ${data.clinvar.clinvar_id})`
+        ? `${translateClinvar(data.clinvar.clin_sig)}\n(ID : ${
+            data.clinvar.clinvar_id
+          })`
         : "Non répertorié",
-      omim: gene?.omim?.length
-        ? gene.omim
-            .map(
-              (omim) =>
-                `${omim.name}\n(MIM : ${omim.omim_id}${translateOmimInheritanceCode(omim.inheritance_code)})`
-            )
-            .join("\n")
-        : "Non répertorié",
+      omim: translateOmimPMID(
+        gene,
+        data.interpretation?.pubmed &&
+          consequence.ensembl_transcript_id ==
+            data.interpretation?.transcript_id
+          ? data.interpretation?.pubmed
+          : undefined
+      ),
       mane: [
         consequence.mane_select ? "MANE Select\n" : "",
         consequence.mane_plus ? "MANE Plus\n" : "",
         consequence.canonical ? "Ensembl Canonical" : "",
       ].join(""),
-      interpretation: "",
+      interpretation:
+        data.interpretation?.classification &&
+        consequence.ensembl_transcript_id == data.interpretation?.transcript_id
+          ? germlineClassification[data.interpretation.classification]
+          : "",
       serviceRequestId: donor.service_request_id,
       sampleId: donor.sample_id,
+      citations:
+        data.interpretation?.pubmed.length &&
+        consequence.ensembl_transcript_id == data.interpretation?.transcript_id
+          ? data.interpretation.pubmed
+              .map((pubmed) => pubmed.citation)
+              .join("\n")
+          : "",
     };
   });
 };
@@ -348,6 +440,7 @@ export const germlineMakeColumnsAndRows = (data) =>
         header: `Variation nucléotidique (${data.donor.genome_build})`,
         key: "genomeBuild",
         width: 20 * WIDTH_PX_TO_EXCEL_RATIO,
+        cellHAlignment: "left",
       },
       { header: "Zygosité et origine parentale", key: "status", width: 15 * WIDTH_PX_TO_EXCEL_RATIO},
       { header: "Fréquence allélique¹", key: "fA", width: 15 * WIDTH_PX_TO_EXCEL_RATIO},
@@ -355,9 +448,10 @@ export const germlineMakeColumnsAndRows = (data) =>
       { header: "ClinVar", key: "clinVar", width: 10 * WIDTH_PX_TO_EXCEL_RATIO},
       { header: "OMIM³", key: "omim", width: 15 * WIDTH_PX_TO_EXCEL_RATIO},
       { header: "MANE", key: "mane", width: 15 * WIDTH_PX_TO_EXCEL_RATIO},
-      { header: "Interprétation⁴", key: "interpretation", width: 24 * WIDTH_PX_TO_EXCEL_RATIO},
+      { header: "Interprétation⁴", key: "interpretation", width: 15 * WIDTH_PX_TO_EXCEL_RATIO},
       { header: "Numéro requête CQGC", key: "serviceRequestId", width: 10 * WIDTH_PX_TO_EXCEL_RATIO},
       { header: "Numéro échantillon", key: "sampleId", width: 10 * WIDTH_PX_TO_EXCEL_RATIO},
+      { header: "Citations", key: "citations", width: 100 * WIDTH_PX_TO_EXCEL_RATIO, cellHAlignment: "left"},
     ];
 
     const rows = germlineMakeRows(data);
@@ -386,28 +480,52 @@ const somaticMakeRows = (data) => {
     ]);
     return {
       index,
-      genomeBuild: { richText:
-        genomeBuildToRichtext(
+      genomeBuild: {
+        richText: genomeBuildToRichtext(
           [
             data.hgvsg,
             `Gène: ${geneSymbol}`,
-            consequence.biotype ? consequenceBiotype[consequence.biotype] : 'No Data',
-            consequence.consequences?.map(c => consequencesConsequences[c]).join(", "),
+            consequence.biotype
+              ? consequenceBiotype[consequence.biotype]
+              : "No Data",
+            consequence.consequences
+              ?.map((c) => consequencesConsequences[c])
+              .join(", "),
             consequence.refseq_mrna_id?.join(", "),
-            consequence.hgvsc?.split(':')[1],
+            consequence.hgvsc?.split(":")[1],
             exonRatio ? `Exon : ${exonRatio}` : "",
           ].filter((e) => !!e)
-        )
+        ),
       },
       ad:`${(donor.ad_ratio ?? 0).toFixed(2)*100}%\n(${data.donor.ad_alt}/${data.donor.ad_total})`,
       origine: data.donor.all_analyses.includes("TN") ? "Somatique" : "Non déterminée",
       fA: translateSomaticGnomadGenomes(data?.external_frequencies?.gnomad_genomes_4 ?? {}),
       cosmic: translateCosmic(data.cmc),
       impactFunc: "Gain de fonction/Perte de fonction/Délétère/Inconnu",
-      interpretation: data.cmc?.tier ? cmcTier[data.cmc.tier] : 'Non répertorié',
+      interpretation: translateSomaticInterpretation(
+        data?.interpretation,
+        consequence,
+        data.cmc
+      ),
+      oncogenicity: translateSomaticOngogenecity(
+        data?.interpretation,
+        consequence
+      ),
       mane: consequence.mane_select ? "Oui" : "Non",
       serviceRequestId: donor.service_request_id,
       sampleId: donor.sample_id,
+      pmId:
+        data.interpretation?.pubmed &&
+        consequence.ensembl_transcript_id == data.interpretation?.transcript_id
+          ? translatePMID(data.interpretation?.pubmed)
+          : "",
+      citations:
+        data.interpretation?.pubmed.length &&
+        consequence.ensembl_transcript_id == data.interpretation?.transcript_id
+          ? data.interpretation.pubmed
+              .map((pubmed) => pubmed.citation)
+              .join("\n")
+          : "",
     };
   });
 };
@@ -419,6 +537,7 @@ const somaticMakeRows = (data) => {
           header: `Variation nucléotidique (${data.donor.genome_build})`,
           key: "genomeBuild",
           width: 17 * WIDTH_PX_TO_EXCEL_RATIO,
+          cellHAlignment: "left",
         },
         { header: "Fréquence allélique du variant [VAF] (lectures variant / total)", key: "ad", width: 10 * WIDTH_PX_TO_EXCEL_RATIO},
         { header: "Origine du variant*", key: "origine", width: 10 * WIDTH_PX_TO_EXCEL_RATIO},
@@ -426,9 +545,12 @@ const somaticMakeRows = (data) => {
         { header: "Nombre de cas rapportés (COSMIC)²", key: "cosmic", width: 15 * WIDTH_PX_TO_EXCEL_RATIO},
         { header: "Impact fonctionnel", key: "impactFunc", width: 10 * WIDTH_PX_TO_EXCEL_RATIO},
         { header: "Niveau de signification clinique⁵", key: "interpretation", width: 10 * WIDTH_PX_TO_EXCEL_RATIO},
+        { header: "Oncogénicité", key: "oncogenicity", width: 10 * WIDTH_PX_TO_EXCEL_RATIO},
         { header: "Transcrit MANE Select", key: "mane", width: 10 * WIDTH_PX_TO_EXCEL_RATIO},
         { header: "Numéro requête CQGC", key: "serviceRequestId", width: 10 * WIDTH_PX_TO_EXCEL_RATIO},
         { header: "Numéro échantillon", key: "sampleId", width: 10 * WIDTH_PX_TO_EXCEL_RATIO},
+        { header: "PubMed", key: "pmId", width: 22 * WIDTH_PX_TO_EXCEL_RATIO},
+        { header: "Citations", key: "citations", width: 100 * WIDTH_PX_TO_EXCEL_RATIO, cellHAlignment: "left"},
       ];
 
       const rows = somaticMakeRows(data);
@@ -436,8 +558,8 @@ const somaticMakeRows = (data) => {
     }
 
 export const makeReport = (data) => {
-  const { columns, rows } = data.donor.variant_type == "germline" ? germlineMakeColumnsAndRows(data) :  somaticMakeColumnsAndRows(data);
-  const headerRowHeightPx = (data.donor.variant_type == "germline" ? 40 : 85) * HEIGHT_PX_TO_EXCEL_RATIO
+  const { columns, rows } = data.donor.variant_type == variantType.Germline ? germlineMakeColumnsAndRows(data) :  somaticMakeColumnsAndRows(data);
+  const headerRowHeightPx = (data.donor.variant_type == variantType.Germline ? 40 : 85) * HEIGHT_PX_TO_EXCEL_RATIO
 
   return new Report(columns, rows)
     .eachRowExtra((row, rowNumber) => {
@@ -447,10 +569,11 @@ export const makeReport = (data) => {
     .eachCellExtra((cell, cellNumber, isHeaderRow) => {
       cell.alignment = {
         ...cell.alignment,
-        horizontal: !isHeaderRow && cell._column._number == 1 ? "left" : "center",
+        horizontal: !isHeaderRow && columns[cell._column._number - 1]?.cellHAlignment ? columns[cell._column._number - 1].cellHAlignment : "center",
       };
     })
     .withAutoFilter(true)
     .build();
 };
+
 
