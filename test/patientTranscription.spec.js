@@ -387,7 +387,7 @@ describe('makeReport', () => {
     assertColumn(sheet.columns[2],'fA','Fréquence allélique¹')
     assertColumn(sheet.columns[3],'pSilico','Prédiction in silico²')
     assertColumn(sheet.columns[4],'clinVar','ClinVar')
-    assertColumn(sheet.columns[5],'omim','OMIM³')
+    assertColumn(sheet.columns[5],'omim','OMIM et PMID³')
     assertColumn(sheet.columns[6],'mane','MANE')
     assertColumn(sheet.columns[7],'interpretation','Interprétation⁴')
     assertColumn(sheet.columns[8],'serviceRequestId','Numéro requête CQGC')
