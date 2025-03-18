@@ -549,7 +549,7 @@ const somaticMakeRows = (data) => {
         { header: "Transcrit MANE Select", key: "mane", width: 10 * WIDTH_PX_TO_EXCEL_RATIO},
         { header: "Numéro requête CQGC", key: "serviceRequestId", width: 10 * WIDTH_PX_TO_EXCEL_RATIO},
         { header: "Numéro échantillon", key: "sampleId", width: 10 * WIDTH_PX_TO_EXCEL_RATIO},
-        { header: "PubMed", key: "pmId", width: 22 * WIDTH_PX_TO_EXCEL_RATIO},
+        { header: "Publication PubMed", key: "pmId", width: 22 * WIDTH_PX_TO_EXCEL_RATIO},
         { header: "Citations", key: "citations", width: 100 * WIDTH_PX_TO_EXCEL_RATIO, cellHAlignment: "left"},
       ];
 

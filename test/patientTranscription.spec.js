@@ -439,7 +439,7 @@ describe('makeReport', () => {
     assertColumn(sheet.columns[8],'mane','Transcrit MANE Select')
     assertColumn(sheet.columns[9],'serviceRequestId','Numéro requête CQGC')
     assertColumn(sheet.columns[10],'sampleId','Numéro échantillon')
-    assertColumn(sheet.columns[11],'pmId','PubMed')
+    assertColumn(sheet.columns[11],'pmId','Publication PubMed')
     assertColumn(sheet.columns[12],'citations','Citations')
 
     // row #0 contains headers
