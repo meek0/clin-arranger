@@ -446,7 +446,7 @@ export const germlineMakeColumnsAndRows = (data) =>
       { header: "Fréquence allélique¹", key: "fA", width: 15 * WIDTH_PX_TO_EXCEL_RATIO},
       { header: "Prédiction in silico²", key: "pSilico", width: 10 * WIDTH_PX_TO_EXCEL_RATIO},
       { header: "ClinVar", key: "clinVar", width: 10 * WIDTH_PX_TO_EXCEL_RATIO},
-      { header: "OMIM³", key: "omim", width: 15 * WIDTH_PX_TO_EXCEL_RATIO},
+      { header: "OMIM et PMID³", key: "omim", width: 15 * WIDTH_PX_TO_EXCEL_RATIO},
       { header: "MANE", key: "mane", width: 15 * WIDTH_PX_TO_EXCEL_RATIO},
       { header: "Interprétation⁴", key: "interpretation", width: 15 * WIDTH_PX_TO_EXCEL_RATIO},
       { header: "Numéro requête CQGC", key: "serviceRequestId", width: 10 * WIDTH_PX_TO_EXCEL_RATIO},
