@@ -219,7 +219,7 @@ describe('makeReport', () => {
       gnomad_genomes_3_1_1: {
         af: 0.162785,
       },
-      gnomad_genomes_4: {
+      gnomad_joint_4: {
         ac: 77907,
         af: 0.512,
         an: 152054,
@@ -309,7 +309,7 @@ describe('makeReport', () => {
       },
     ],
     external_frequencies: {
-      gnomad_genomes_4: {
+      gnomad_joint_4: {
         ac: 77907,
         af: 0.5120,
         an: 152054,
