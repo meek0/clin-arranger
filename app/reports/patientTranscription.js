@@ -1,6 +1,7 @@
 import logger from "../../config/logger.js";
 import { isHeader } from "./reportUtils.js";
-import Report from "./index.js";
+import {replaceExcelWorksheetIllegalChars, Report } from "./index.js";
+
 
 const HEIGHT_PX_TO_EXCEL_RATIO = 0.75;
 const ROW_HEIGHT_PX = 150;
@@ -257,7 +258,6 @@ const genomeBuildToRichtext = (genomeBuild) => {
       res.push({text: `${i}${index === genomeBuild.length - 1 ? '' : '\n'}`});
     }
   });
-
   return res;
 }
 
@@ -286,7 +286,6 @@ export const translateParentalOrigin = (origin) => {
 
 export const translateCosmic = (cmc) =>
   cmc?.cosmic_id && cmc?.sample_mutated ? `${cmc.sample_mutated}\n(${cmc.cosmic_id })` : `Non répertoriée`
-
 
 export const translateZygosityAndParentalOrigins = (donor) =>{
   const res = [];
@@ -530,8 +529,7 @@ const somaticMakeRows = (data) => {
   });
 };
 
-  export const somaticMakeColumnsAndRows = (data) =>
-    {
+export const somaticMakeColumnsAndRows = (data) => {
       const columns = [
         {
           header: `Variation nucléotidique (${data.donor.genome_build})`,
@@ -555,28 +553,62 @@ const somaticMakeRows = (data) => {
 
       const rows = somaticMakeRows(data);
       return { columns, rows };
-    }
+}
 
-export const makeReport = (data) => {
-  if(!data || !data?.donor || !data.donor.variant_type)
+export const makeColumnsAndRows = (data, workSheetName) => {
+  if (!data || !data?.donor || !data.donor.variant_type)
     throw new Error(`Invalid data`);
+  const { columns, rows } =
+    data.donor.variant_type == variantType.Germline
+      ? germlineMakeColumnsAndRows(data)
+      : somaticMakeColumnsAndRows(data);
+  const sheetColumns = [{ [workSheetName]: columns }];
+  const sheetRows = [{ [workSheetName]: rows }];
+  return { sheetColumns, sheetRows };
+};
 
-  const { columns, rows } = data.donor.variant_type == variantType.Germline ? germlineMakeColumnsAndRows(data) :  somaticMakeColumnsAndRows(data);
-  const headerRowHeightPx = (data.donor.variant_type == variantType.Germline ? 40 : 85) * HEIGHT_PX_TO_EXCEL_RATIO
+export const getWorksheetName = (data) => {
+  if (!data?.hgvsg) throw new Error(`Invalid data`);
+  return replaceExcelWorksheetIllegalChars(data.hgvsg);
+};
 
-  return new Report(columns, rows)
+export const getHeaderRowHeightPx = (data) => {
+  return (
+    (data?.donor?.variant_type == variantType.Germline ? 40 : 85) *
+    HEIGHT_PX_TO_EXCEL_RATIO
+  );
+};
+
+export const makeReport = (
+  worksheets,
+  sheetColumns,
+  sheetRows,
+  headerRowHeightPx
+) => {
+  return new Report(worksheets, sheetColumns, sheetRows)
     .eachRowExtra((row, rowNumber) => {
       const isHeaderRow = isHeader(rowNumber);
       row.height = isHeaderRow ? headerRowHeightPx : ROW_HEIGHT_PX;
     })
-    .eachCellExtra((cell, cellNumber, isHeaderRow) => {
+    .eachCellExtra((cell, cellNumber, isHeaderRow, cellHAlignment) => {
       cell.alignment = {
         ...cell.alignment,
-        horizontal: !isHeaderRow && columns[cell._column._number - 1]?.cellHAlignment ? columns[cell._column._number - 1].cellHAlignment : "center",
+        horizontal: !isHeaderRow && cellHAlignment ? cellHAlignment : "center",
       };
     })
     .withAutoFilter(true)
     .build();
 };
 
-
+export const makeSingleVariantReport = (data) => {
+  if (!data) throw new Error(`Invalid data`);
+  const workSheetName = getWorksheetName(data);
+  const { sheetColumns, sheetRows } = makeColumnsAndRows(data, workSheetName);
+  const headerRowHeightPx = getHeaderRowHeightPx(data);
+  return makeReport(
+    [workSheetName],
+    sheetColumns,
+    sheetRows,
+    headerRowHeightPx
+  );
+};

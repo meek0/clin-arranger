@@ -3,7 +3,7 @@ import {
   translateParentalOrigin,
   translateGermlineGnomadGenomes,
   translateClinvarSig,
-  makeReport,
+  makeSingleVariantReport,
   translateZygosityAndParentalOrigins,
   translateSomaticGnomadGenomes,
   translateCosmic,
@@ -372,15 +372,17 @@ describe('makeReport', () => {
 
   it('Should be robust', () => {
 
-    expect(() => makeReport({})).to.throw('Invalid data');
-    expect(() => makeReport({donor: {},})).to.throw('Invalid data');
+    expect(() => makeSingleVariantReport({})).to.throw('Invalid data');
+    expect(() => makeSingleVariantReport({donor: {},})).to.throw('Invalid data');
   })
 
   it('Should transform germline variant into xlsx', () => {
 
-    const [workbook, sheet] = makeReport(mockGermlineVariant);
+    const workbook = makeSingleVariantReport(mockGermlineVariant);
+    expect(workbook.worksheets.length).to.equal(1);
 
-    expect(workbook.worksheets[0].name).to.equals(sheet.name);
+    const sheet = workbook.worksheets[0];
+    expect(workbook.worksheets[0].name).to.equals('chr11_g.198062C>G');
 
     assertColumn(sheet.columns[0],'genomeBuild','Variation nucléotidique (GRCh38)')
     assertColumn(sheet.columns[1],'status','Zygosité et origine parentale')
@@ -424,9 +426,11 @@ describe('makeReport', () => {
 
   it('Should transform somatic variant into xlsx', () => {
 
-    const [workbook, sheet] = makeReport(mockSomaticVariant);
+    const workbook = makeSingleVariantReport(mockSomaticVariant);
+    expect(workbook.worksheets.length).to.equal(1);
 
-    expect(workbook.worksheets[0].name).to.equals(sheet.name);
+    const sheet = workbook.worksheets[0];
+    expect(workbook.worksheets[0].name).to.equals('chr11_g.198062C>G');
 
     assertColumn(sheet.columns[0],'genomeBuild','Variation nucléotidique (GRCh38)')
     assertColumn(sheet.columns[1],'ad','Fréquence allélique du variant [VAF] (lectures variant / total)')
@@ -477,7 +481,8 @@ describe('makeReport', () => {
       name: 'Arial',
       size: 9
     };
-    const [workbook, sheet] = makeReport(mockGermlineVariant);
+    const workbook = makeSingleVariantReport(mockGermlineVariant);
+    const sheet = workbook.worksheets[0];
 
     sheet.eachRow((row) => {
       row.eachCell((cell) => {
@@ -488,26 +493,30 @@ describe('makeReport', () => {
   });
 
   it('Germline report should have auto filter for all column', () => {
-    const [workbook, sheet] = makeReport(mockGermlineVariant);
+    const workbook = makeSingleVariantReport(mockGermlineVariant);
+    const sheet = workbook.worksheets[0];
     expect(sheet.autoFilter.from).to.equals("A1");
     expect(sheet.autoFilter.to).to.equals("K1");
   });
 
   it('Somatic report should have auto filter for all column', () => {
-    const [workbook, sheet] = makeReport(mockSomaticVariant);
+    const workbook = makeSingleVariantReport(mockSomaticVariant);
+    const sheet = workbook.worksheets[0];
     expect(sheet.autoFilter.from).to.equals("A1");
     expect(sheet.autoFilter.to).to.equals("M1");
   });
 
   it('Should have centered header horizontal alignment', () => {
-    const [workbook, sheet] = makeReport(mockGermlineVariant);
+    const workbook = makeSingleVariantReport(mockGermlineVariant);
+    const sheet = workbook.worksheets[0];
     sheet.getRow(1).eachCell((cell) => {
       expect(cell.alignment.horizontal).to.equals("center");
     });
   });
 
   it('First column should have left horizontal alignment', () => {
-    const [workbook, sheet] = makeReport(mockGermlineVariant);
+    const workbook = makeSingleVariantReport(mockGermlineVariant);
+    const sheet = workbook.worksheets[0];
     sheet.eachRow((row) => {
       row.eachCell((cell) => {
         if(row._number != 1) {

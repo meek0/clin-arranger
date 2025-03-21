@@ -11,7 +11,7 @@ import {searchHPOAutocomplete, searchHPODescendants, searchHPOAncestors, countHP
 import {searchMONDOAutocomplete} from "./controllers/mondoHandler.js";
 import arrangerGqlSecurityHandler from "./controllers/arrangerGqlSecurityHandler.js";
 import arrangerRoutesHandler from "./controllers/arrangerRoutesHandler.js";
-import transcriptsReportHandler from "./controllers/transcriptsReportHandler.js";
+import { singleVariantReport, multiVariantReport } from "./controllers/transcriptsReportHandler.js";
 import { sendForbidden } from "./httpUtils.js";
 import { VARIANTS_READ_PERMISSION_ENFORCER, HPO_READ_PERMISSION_ENFORCER } from "./permissionsUtils.js";
 import beforeSendHandler from "./controllers/beforeSendHandler.js"
@@ -53,7 +53,16 @@ app.get(
   cors({
     exposedHeaders: ["Content-Disposition"],
   }),
-  transcriptsReportHandler
+  singleVariantReport
+);
+
+app.get(
+  "/report/transcripts/:patientId/",
+  keycloak.enforcer(VARIANTS_READ_PERMISSION_ENFORCER),
+  cors({
+    exposedHeaders: ["Content-Disposition"],
+  }),
+  multiVariantReport
 );
 
 app.get(
