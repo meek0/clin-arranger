@@ -386,7 +386,7 @@ const germlineMakeRows = (data) => {
       },
       status: translateZygosityAndParentalOrigins(donor).join("\n"),
       fA: translateGermlineGnomadGenomes(
-        data?.external_frequencies?.gnomad_genomes_4 ?? {}
+        data?.external_frequencies?.gnomad_joint_4 ?? {}
       ),
       pSilico: [
         translateExomiserMaxAcgmClassification(
@@ -498,7 +498,7 @@ const somaticMakeRows = (data) => {
       },
       ad:`${(donor.ad_ratio *100).toFixed()}%\n(${data.donor.ad_alt}/${data.donor.ad_total})`,
       origine: data.donor.all_analyses.includes("TN") ? "Somatique" : "Non déterminée",
-      fA: translateSomaticGnomadGenomes(data?.external_frequencies?.gnomad_genomes_4 ?? {}),
+      fA: translateSomaticGnomadGenomes(data?.external_frequencies?.gnomad_joint_4 ?? {}),
       cosmic: translateCosmic(data.cmc),
       impactFunc: "Gain de fonction/Perte de fonction/Délétère/Inconnu",
       interpretation: translateSomaticInterpretation(
