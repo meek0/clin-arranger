@@ -342,7 +342,6 @@ describe('makeReport', () => {
         biotype: "protein_coding",
         refseq_mrna_id: ["NM_145651.3","NM_123456"],
         mane_select: 'true',
-        aa_change: "AASuperchange"
       },
       {
         exon: {
@@ -448,7 +447,7 @@ describe('makeReport', () => {
     assertColumn(sheet.columns[12],'citations','Citations')
 
     // row #0 contains headers
-    assertCell(sheet, 1, 0, 'chr11:g.198062C>G\nGène : BET1L\nNM_145651.3\nNM_123456\nn.515+19962_515+19963del\nAASuperchange')
+    assertCell(sheet, 1, 0, 'chr11:g.198062C>G\nGène : BET1L\nprotein coding\nDownstream Gene\nNM_145651.3\nNM_123456\nn.515+19962_515+19963del')
     assertCell(sheet, 1, 1, '7%\n(17/34)')
     assertCell(sheet, 1, 2, 'Somatique')
     assertCell(sheet, 1, 3, '5.12e-1\n(nb allèles : 77907)')
@@ -462,7 +461,7 @@ describe('makeReport', () => {
     assertCell(sheet, 1, 11, 'PMID : 12354\nPMID : 6654')
     assertCell(sheet, 1, 12, 'Tomlinson E, Davis SS. Increased uptake of an anionic drug by mucous membrane, upon formation of ion-association species with quaternary ammonium salts [proceedings]. J Pharm Pharmacol. 1976 Dec;28 Suppl:75P. PMID: 12354.\nJøorgensen A, Staehr P. On the biological half-life of amitroptyline. J Pharm Pharmacol. 1976 Jan;28(1):62-4. doi: 10.1111/j.2042-7158.1976.tb04026.x. PMID: 6654.')
 
-    assertCell(sheet, 2, 0, 'chr11:g.198062C>G\nGène : ODF3\nNM_001098787.2\nExon : 5/10')
+    assertCell(sheet, 2, 0, 'chr11:g.198062C>G\nGène : ODF3\nprotein coding\nDownstream Gene\nNM_001098787.2\nExon : 5/10')
     assertCell(sheet, 2, 1, '7%\n(17/34)')
     assertCell(sheet, 2, 2, 'Somatique')
     assertCell(sheet, 2, 3, '5.12e-1\n(nb allèles : 77907)')
