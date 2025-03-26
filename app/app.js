@@ -56,7 +56,7 @@ app.get(
   singleVariantReport
 );
 
-app.get(
+app.post(
   "/report/transcripts/:patientId/",
   keycloak.enforcer(VARIANTS_READ_PERMISSION_ENFORCER),
   cors({
