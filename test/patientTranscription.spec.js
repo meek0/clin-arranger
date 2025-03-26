@@ -36,6 +36,8 @@ describe('translateGnomadGenomes', () => {
 
   it('Should translate Somatic GnomAD', () => {
     expect(translateSomaticGnomadGenomes({an: 10, af: 0.123, ac: 1230, hom: 20})).to.equals('1.23e-1\n(nb allèles : 1230)');
+    expect(translateSomaticGnomadGenomes({an: 10, af: 0, ac: 1230, hom: 20})).to.equals('0.00e+0\n(nb allèles : 1230)');
+    expect(translateSomaticGnomadGenomes({an: 10, af: 0.123, ac: 0, hom: 20})).to.equals('1.23e-1\n(nb allèles : 0)');
   });
 
   it('Should translate null GnomAD', () => {

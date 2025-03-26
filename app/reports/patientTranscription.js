@@ -267,7 +267,7 @@ export const translateGermlineGnomadGenomes = (gnomad) =>
     `${gnomad?.an || 0} (${gnomad?.hom || 0.0} hom) ${Number.parseFloat(gnomad?.af || 0).toExponential(2)}`].join(" / ");
 
 export const translateSomaticGnomadGenomes = (gnomad) => {
-  return gnomad?.af && gnomad?.ac ? `${Number.parseFloat(gnomad?.af).toExponential(2)}\n(nb allèles : ${gnomad?.ac})` : "Non répertoriée"
+  return gnomad?.af != null && gnomad?.ac != null ? `${Number.parseFloat(gnomad?.af).toExponential(2)}\n(nb allèles : ${gnomad?.ac})` : "Non répertoriée"
 }
 
 export const translateClinvarSig = (sig) => {
