@@ -18,6 +18,10 @@ import beforeSendHandler from "./controllers/beforeSendHandler.js"
 import booleanFilterMiddleware from './middlewares/booleanFilterMiddleware.js'
 import variantPropertiesFilterMiddleware from './middlewares/variantPropertiesFilterMiddleware.js'
 import logger from "../config/logger.js";
+import * as beforeES from './middlewares/beforeES/index.js'
+import * as afterES from './middlewares/afterES/index.js'
+import * as beforeAggrES from './middlewares/beforeAggrES/index.js'
+import ArrangerServer from "@ferlab/arranger-server";
 
 const app = express();
 
@@ -120,6 +124,19 @@ app.post("*", keycloak.protect(), arrangerGqlSecurityHandler);
 app.use(beforeSendHandler)
 app.use(booleanFilterMiddleware)
 app.use(variantPropertiesFilterMiddleware)
+
+const arrangerRoutes = await ArrangerServer.default({
+    esHost: process.env.ES_HOST,
+    esUser: process.env.ES_USER,
+    esPass: process.env.ES_PASS,
+    middlewares: {
+        preES: Object.values(beforeES),
+        postES: Object.values(afterES),
+        preAggrES: Object.values(beforeAggrES),
+    }
+})
+
+app.use(arrangerRoutes);
 
 app.use((error, req, res, next) => {
   logger.error(error.message)
