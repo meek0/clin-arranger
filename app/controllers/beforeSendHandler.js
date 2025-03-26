@@ -3,7 +3,8 @@ import {stats} from "../stats.js"
 import logger from '../../config/logger.js'
 import { mapVariantToUniqueId, mapVariantPropertiesToVariants, getVariantsProperties } from '../../services/usersApiClient.js';
 import radiantApiClient from '../../services/radiantApiClient.js';
-import handleMaskPersons from './maskPersonsHandler.js'
+import handleMaskPersons from './maskPersonsHandler.js';
+import util from 'node:util';
 
 export const cleanupDonors = (variants, patientIds, analysisIds, bioinfoCodes) => {
     const start = Date.now();
@@ -92,6 +93,21 @@ export default async function(req, res, next) {
     const originalSend = res.send;
     res.send = async function () { // function is mandatory, () => {} doesn't work here
         const data = parseResponseBody(arguments[0]);
+        if(data?.errors){
+            let serverError = false;
+            for(const error of data.errors){
+                logger.error({
+                    ...error,
+                    extensions: {
+                        ...error.extensions,
+                        exception: util.inspect(error.extensions?.exception, {depth: 4})
+                    }
+                });
+                serverError = serverError || error.extensions?.code === "INTERNAL_SERVER_ERROR";
+            }
+            res.status(serverError ? 500 : 400);
+            return originalSend.apply(res, arguments);
+        }
         if (patientIds?.length > 0 || withFlags || withNote || withPerson || withInterpretation) {
             // parse variants from response body
             const variants = data?.data?.Variants?.hits?.edges || data?.data?.cnv?.hits?.edges;
