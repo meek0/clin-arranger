@@ -14,6 +14,8 @@ import {
   setSpreadSheetHeaders,
 } from "../reports/reportUtils.js";
 
+const MAX_VARIANTS_REPORT = 100;
+
 // Just a rough validation - the param should only be used by ES.
 const illegalCharacters = [..."[!@#$%^&=[{|;'”|,/?]+"];
 const validateVariantInput = (vId) =>
@@ -100,7 +102,7 @@ export async function multiVariantReport(req, res, next) {
   try {
     const patientId = req.params.patientId;
 
-    if (!req.body || !req.body?.variantIds?.length)
+    if (!req.body || !req.body?.variantIds?.length || req.body.variantIds.length > MAX_VARIANTS_REPORT)
       return sendBadRequest(res);
 
     for (const variantId of req.body.variantIds) {
@@ -121,6 +123,7 @@ export async function multiVariantReport(req, res, next) {
     const response = await client.search({
       index: indexNameVariants,
       body: {
+        size: req.body.variantIds.length,
         query: {
           bool: {
             must: [

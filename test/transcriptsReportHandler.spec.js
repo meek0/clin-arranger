@@ -48,4 +48,14 @@ describe('multiVariantReport', () => {
         await multiVariantReport(req, res);
         expect(res.statusCode).to.equal(400);
       });
+
+      it("should return bad request if variantIds has more than 100 elements", async () => {
+        const variantIds = [];
+        for (let i = 1; i <= 101; i++) {
+          variantIds.push(i);
+        }
+        req.body = { variantIds: [] };
+        await multiVariantReport(req, res);
+        expect(res.statusCode).to.equal(400);
+      });
   });
