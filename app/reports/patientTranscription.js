@@ -484,14 +484,9 @@ const somaticMakeRows = (data) => {
           [
             data.hgvsg,
             `Gène: ${geneSymbol}`,
-            consequence.biotype
-              ? consequenceBiotype[consequence.biotype]
-              : "No Data",
-            consequence.consequences
-              ?.map((c) => consequencesConsequences[c])
-              .join(", "),
             consequence.refseq_mrna_id?.join(", "),
             consequence.hgvsc?.split(":")[1],
+            consequence.aa_change ? consequence.aa_change : "",
             exonRatio ? `Exon : ${exonRatio}` : "",
           ].filter((e) => !!e)
         ),
