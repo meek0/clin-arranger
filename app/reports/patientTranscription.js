@@ -375,9 +375,6 @@ const germlineMakeRows = (data) => {
             consequence.biotype
               ? consequenceBiotype[consequence.biotype]
               : "No Data",
-            consequence.consequences
-              ?.map((c) => consequencesConsequences[c])
-              .join(", "),
             consequence.refseq_mrna_id?.join(", "),
             consequence.hgvsc?.split(":")[1],
             exonRatio ? `Exon : ${exonRatio}` : "",
