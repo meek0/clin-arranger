@@ -106,8 +106,8 @@ export default async function(req, res, next) {
                     }
                 });
                 serverError = serverError || error.extensions?.code === "INTERNAL_SERVER_ERROR";
-                wasGraphqlCallOnErrorOnce |= serverError;
             }
+            wasGraphqlCallOnErrorOnce |= serverError;
             res.status(serverError ? 500 : 400);
             return originalSend.apply(res, arguments);
         }
