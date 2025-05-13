@@ -6,6 +6,8 @@ import radiantApiClient from '../../services/radiantApiClient.js';
 import handleMaskPersons from './maskPersonsHandler.js';
 import util from 'node:util';
 
+export let wasGraphqlCallOnErrorOnce = false;
+
 export const cleanupDonors = (variants, patientIds, analysisIds, bioinfoCodes) => {
     const start = Date.now();
     if (patientIds?.length && variants?.length) {
@@ -105,6 +107,7 @@ export default async function(req, res, next) {
                 });
                 serverError = serverError || error.extensions?.code === "INTERNAL_SERVER_ERROR";
             }
+            wasGraphqlCallOnErrorOnce |= serverError;
             res.status(serverError ? 500 : 400);
             return originalSend.apply(res, arguments);
         }

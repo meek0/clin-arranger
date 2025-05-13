@@ -14,7 +14,7 @@ import arrangerRoutesHandler from "./controllers/arrangerRoutesHandler.js";
 import { singleVariantReport, multiVariantReport } from "./controllers/transcriptsReportHandler.js";
 import { sendForbidden } from "./httpUtils.js";
 import { VARIANTS_READ_PERMISSION_ENFORCER, HPO_READ_PERMISSION_ENFORCER } from "./permissionsUtils.js";
-import beforeSendHandler from "./controllers/beforeSendHandler.js"
+import beforeSendHandler, {wasGraphqlCallOnErrorOnce} from "./controllers/beforeSendHandler.js"
 import booleanFilterMiddleware from './middlewares/booleanFilterMiddleware.js'
 import variantPropertiesFilterMiddleware from './middlewares/variantPropertiesFilterMiddleware.js'
 import logger from "../config/logger.js";
@@ -46,8 +46,10 @@ keycloak.accessDenied = (_, res) => sendForbidden(res)
 app.use(keycloak.middleware());
 
 app.get("/health", async (req, res) => {
-  res.status(200).send({
-    status: "UP",
+  const statusCode = wasGraphqlCallOnErrorOnce ? 500 : 200;
+  const status = statusCode === 200 ? "UP" : "UNSTABLE";
+  res.status(statusCode).send({
+    status,
   });
 });
 
