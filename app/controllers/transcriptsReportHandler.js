@@ -33,7 +33,7 @@ export async function singleVariantReport(req, res) {
     return sendBadRequest(res);
   }
 
-  const patientId = req.params.patientId;
+  const serviceRequestId = req.params.serviceRequestId;
 
   const client = EsInstance.getInstance();
 
@@ -56,7 +56,7 @@ export async function singleVariantReport(req, res) {
                     must: [
                       {
                         terms: {
-                          "donors.patient_id": [patientId],
+                          "donors.service_request_id": [serviceRequestId],
                         },
                       },
                     ],
@@ -71,7 +71,7 @@ export async function singleVariantReport(req, res) {
   });
 
   const data = response?.body?.hits?.hits?.[0]?._source || [];
-  const donor = data.donors?.find((d) => d.patient_id === patientId) || {};
+  const donor = data.donors?.find((d) => d.service_request_id === serviceRequestId) || {};
   const transcriptId = data.consequences?.find(({ picked }) => !!picked)?.ensembl_transcript_id;
   const interpretation = await radiantApiClient.fetchInterpretation(
     req,
@@ -82,7 +82,7 @@ export async function singleVariantReport(req, res) {
   );
   const workbook = makeSingleVariantReport({ ...data, donor, interpretation });
   const fileName = `${[
-    patientId,
+    donor.patient_id,
     donor.service_request_id,
     data.rsnumber,
     makeFilenameDatePart(new Date()),
@@ -100,7 +100,7 @@ export async function singleVariantReport(req, res) {
 // !Assumes req passed through patientSecurityHandler!
 export async function multiVariantReport(req, res, next) {
   try {
-    const patientId = req.params.patientId;
+    const serviceRequestId = req.params.serviceRequestId;
 
     if (!req.body || !req.body?.variantIds?.length || req.body.variantIds.length > MAX_VARIANTS_REPORT)
       return sendBadRequest(res);
@@ -141,7 +141,7 @@ export async function multiVariantReport(req, res, next) {
                       must: [
                         {
                           terms: {
-                            "donors.patient_id": [patientId],
+                            "donors.service_request_id": [serviceRequestId],
                           },
                         },
                       ],
@@ -164,7 +164,7 @@ export async function multiVariantReport(req, res, next) {
 
     for (const hits of response?.body?.hits?.hits) {
       const data = hits._source || [];
-      const donor = data.donors?.find((d) => d.patient_id === patientId) || {};
+      const donor = data.donors?.find((d) => d.service_request_id === serviceRequestId) || {};
       const transcriptId = data.consequences?.find(({ picked }) => !!picked)?.ensembl_transcript_id;
       const interpretation = await radiantApiClient.fetchInterpretation(
         req,
@@ -181,9 +181,10 @@ export async function multiVariantReport(req, res, next) {
     }
     const headerRowHeightPx = getHeaderRowHeightPx(response?.body?.hits?.hits?.[0]?._source);
     const workbook = makeReport(workSheetNames, workSheetsColumns, workSheetsRows, headerRowHeightPx);
+    const found = response?.body?.hits?.hits?.[0]?._source?.donors?.find((d) => d.service_request_id === serviceRequestId);
     const fileName = `${[
-      patientId,
-      response?.body?.hits?.hits?.[0]?._source?.donors?.find((d) => d.patient_id === patientId)?.service_request_id || "",
+      found?.patient_id || "",
+      found?.service_request_id || "",
       makeFilenameDatePart(new Date()),
     ]
       .filter((e) => !!e)

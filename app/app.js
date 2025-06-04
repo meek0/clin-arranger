@@ -54,7 +54,7 @@ app.get("/health", async (req, res) => {
 });
 
 app.get(
-  "/report/transcripts/:patientId/:variantId",
+  "/report/transcripts/:serviceRequestId/:variantId",
   keycloak.enforcer(VARIANTS_READ_PERMISSION_ENFORCER),
   cors({
     exposedHeaders: ["Content-Disposition"],
@@ -63,7 +63,7 @@ app.get(
 );
 
 app.post(
-  "/report/transcripts/:patientId/",
+  "/report/transcripts/:serviceRequestId/",
   keycloak.enforcer(VARIANTS_READ_PERMISSION_ENFORCER),
   cors({
     exposedHeaders: ["Content-Disposition"],
